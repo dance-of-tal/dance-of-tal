@@ -13,17 +13,29 @@ function getAuthFilePath() {
     return path.join(dotGlobalDir, "auth.json");
 }
 
-export async function saveAuthToken(token: string) {
+export async function saveAuthToken(token: string, username: string) {
     const authFile = getAuthFilePath();
     const dir = path.dirname(authFile);
     await fs.mkdir(dir, { recursive: true });
-    await fs.writeFile(authFile, JSON.stringify({ token }, null, 2), "utf-8");
+    await fs.writeFile(authFile, JSON.stringify({ token, username }, null, 2), "utf-8");
 }
 
 export async function getAuthToken(): Promise<string | null> {
     try {
         const raw = await fs.readFile(getAuthFilePath(), "utf-8");
         return JSON.parse(raw).token;
+    } catch {
+        return null;
+    }
+}
+
+/** Returns { token, username } or null if not logged in. */
+export async function getAuthUser(): Promise<{ token: string; username: string } | null> {
+    try {
+        const raw = await fs.readFile(getAuthFilePath(), "utf-8");
+        const parsed = JSON.parse(raw);
+        if (!parsed.token || !parsed.username) return null;
+        return { token: parsed.token, username: parsed.username };
     } catch {
         return null;
     }
@@ -98,8 +110,6 @@ export const loginCmd = new Command("login")
             console.log("\nWaiting for authorization...");
             const token = await pollForToken(codeData.device_code, codeData.interval || 5);
 
-            // 3. Authenticated successfully
-            await saveAuthToken(token);
 
             // Attempt to fetch their username just to verify and greet them
             const userReq = await fetch("https://api.github.com/user", {
@@ -110,6 +120,17 @@ export const loginCmd = new Command("login")
             });
 
             const userData: any = await userReq.json();
+
+            if (!userReq.ok) {
+                throw new Error(`Failed to fetch GitHub user info: ${userData.message || userReq.statusText}`);
+            }
+
+            if (!userData || !userData.login) {
+                throw new Error("Invalid GitHub user data received.");
+            }
+
+            // 3. Authenticated successfully — save token AND username
+            await saveAuthToken(token, userData.login);
 
             console.log(ui.success(`\nAuthentication successful! You are logged in as @${userData.login}.`));
             console.log(ui.dim("You can now publish your V2 Tals, Dances, and Combos."));

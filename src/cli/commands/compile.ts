@@ -4,17 +4,17 @@ import { getCombo } from "../../lib/registry.js";
 
 export const compileCmd = new Command("compile")
     .description("Compile and validate a locked combo for Type-Safety")
-    .requiredOption("--name <comboName>", "The name of the locked combo")
-    .action(async (options) => {
+    .argument("<comboName>", "The name of the locked combo")
+    .action(async (comboName) => {
         console.log(ui.title("Compiling V2 Combo"));
 
         try {
-            const combo = await getCombo(process.cwd(), options.name);
+            const combo = await getCombo(process.cwd(), comboName);
             if (!combo) {
-                throw new Error(`Combo '${options.name}' not found in registry.`);
+                throw new Error(`Combo '${comboName}' not found in registry.`);
             }
 
-            console.log(ui.dim(`Found combo: ${options.name}`));
+            console.log(ui.dim(`Found combo: ${comboName}`));
             console.log(ui.dim(`  Tal:   ${combo.tal}`));
             console.log(ui.dim(`  Dance: ${combo.dance}`));
             if (combo.act) {
@@ -23,20 +23,13 @@ export const compileCmd = new Command("compile")
 
             console.log(ui.success("\nType-Safety validation running..."));
 
-            // Phase 2 Engine validation will go here
-            // For now, we simulate success if the URNs exist
-
-            if (!combo.tal.startsWith("tal/")) {
-                throw new Error(`Invalid Tal URN: ${combo.tal}. Must start with 'tal/'`);
-            }
-            if (!combo.dance.startsWith("dance/")) {
-                throw new Error(`Invalid Dance URN: ${combo.dance}. Must start with 'dance/'`);
-            }
-            if (combo.act && !combo.act.startsWith("act/")) {
-                throw new Error(`Invalid Act URN: ${combo.act}. Must start with 'act/'`);
-            }
-
-            console.log(ui.success("✔ Compilation sequence completed without errors."));
+            import("../../lib/engine.js").then(async ({ validateComboFiles }) => {
+                await validateComboFiles(process.cwd(), combo);
+                console.log(ui.success("✔ Compilation sequence completed without errors."));
+            }).catch(err => {
+                console.error(ui.error(`Compilation Failed: ${err.message}`));
+                process.exit(1);
+            });
 
         } catch (err: any) {
             console.error(ui.error(`Compilation Failed: ${err.message}`));

@@ -1,54 +1,73 @@
-import fs from "fs";
 import path from "path";
 import { ui } from "../utils/ui.js";
+import { getDotDir, getCombo } from "../../lib/registry.js";
+import fs from "fs/promises";
+import { existsSync, readdirSync } from "fs";
 
-function getDotDir() {
-    const dotDir = path.join(process.cwd(), ".dance-of-tal");
-    if (!fs.existsSync(dotDir)) {
-        throw new Error("Project not initialized. Please run 'dot init' first.");
+const CONFIG_FILE = "combo.config.json";
+
+/**
+ * Reads the active combo config.
+ * Config file: .dance-of-tal/combo.config.json
+ */
+async function readConfig(dotDir: string): Promise<Record<string, any>> {
+    const configPath = path.join(dotDir, CONFIG_FILE);
+    try {
+        const raw = await fs.readFile(configPath, "utf-8");
+        return JSON.parse(raw);
+    } catch {
+        return {};
     }
-    return dotDir;
 }
 
-export async function runSwitch(vibeName: string) {
-    const dotDir = getDotDir();
-    const vibesDir = path.join(dotDir, "vibes");
+async function writeConfig(dotDir: string, config: Record<string, any>): Promise<void> {
+    const configPath = path.join(dotDir, CONFIG_FILE);
+    await fs.writeFile(configPath, JSON.stringify(config, null, 2), "utf-8");
+}
 
-    if (!fs.existsSync(vibesDir)) {
-        throw new Error("No vibes installed yet. Run 'dot install tal/@monarchjuno/strategy-chief' first.");
+/** Detects the current IDE stage from environment heuristics. */
+function detectStage(): string {
+    if (process.env.WINDSURF) return "windsurf";
+    if (process.env.TERM_PROGRAM === "vscode") return "cursor";
+    return "generic";
+}
+
+export async function runSwitch(comboName: string) {
+    const cwd = process.cwd();
+    const dotDir = getDotDir(cwd);
+
+    if (!existsSync(dotDir)) {
+        throw new Error("Project not initialized. Please run 'dot init' first.");
     }
 
-    const files = fs.readdirSync(vibesDir);
-    const targetFile = files.find(f => f === `${vibeName}.json`);
-
-    if (!targetFile) {
-        throw new Error(`Vibe '${vibeName}' not found in installed vibes.`);
-    }
-
-    const configPath = path.join(dotDir, "vibe.config.json");
-    let config: any = {};
-    if (fs.existsSync(configPath)) {
-        try {
-            config = JSON.parse(fs.readFileSync(configPath, "utf-8"));
-        } catch { }
-    }
-
-    config.activeVibe = vibeName;
-
-    // Future: probe active stage (e.g. VSCode vs Windsurf), for now hardcode generic if null
-    if (!config.activeStage) {
-        // Basic heuristic: check environment variables.
-        if (process.env.WINDSURF) {
-            config.activeStage = "windsurf";
-        } else if (process.env.TERM_PROGRAM === "vscode") {
-            config.activeStage = "cursor"; // Simplification for now, Cursor uses VSCode roots
-        } else {
-            config.activeStage = "generic";
+    // Verify the combo exists using the same getCombo() path as lock/compile
+    // Path: .dance-of-tal/combo/<name>.json
+    const combo = await getCombo(cwd, comboName);
+    if (!combo) {
+        // List available combos to help the user
+        const comboDir = path.join(dotDir, "combo");
+        let available = "(none)";
+        if (existsSync(comboDir)) {
+            const files = readdirSync(comboDir)
+                .filter((f) => f.endsWith(".json"))
+                .map((f) => f.replace(/\.json$/, ""));
+            if (files.length > 0) available = files.join(", ");
         }
+        throw new Error(
+            `Combo '${comboName}' not found.\n  Available: ${available}\n  Run 'dot lock' to create one.`
+        );
     }
 
-    fs.writeFileSync(configPath, JSON.stringify(config, null, 2));
+    const config = await readConfig(dotDir);
+    config.activeCombo = comboName;
+    if (!config.activeStage) {
+        config.activeStage = detectStage();
+    }
+    await writeConfig(dotDir, config);
 
-    console.log(ui.success(`\nProject Vibe switched to: ${vibeName}`));
-    console.log(ui.dim(`Stage set to: ${config.activeStage}`));
+    console.log(ui.success(`\nActive combo switched to: ${comboName}`));
+    console.log(ui.dim(`  tal:   ${combo.tal}`));
+    console.log(ui.dim(`  dance: ${Array.isArray(combo.dance) ? combo.dance.join(", ") : combo.dance}`));
+    if (combo.act) console.log(ui.dim(`  act:   ${combo.act}`));
+    console.log(ui.dim(`  stage: ${config.activeStage}`));
 }

@@ -6,14 +6,14 @@ import fs from "fs/promises";
 
 export const runCmd = new Command("run")
     .description("Execute a combo directly from the CLI and print output (CLI Execution Mode)")
-    .requiredOption("--combo <comboName>", "The name of the locked combo to run")
+    .argument("<comboName>", "The name of the locked combo to run")
     .option("--input <filePath>", "Path to a file to use as the input task context")
     .option("--task <string>", "Direct string input for the task context")
-    .action(async (options) => {
+    .action(async (comboName, options) => {
         try {
-            const combo = await getCombo(process.cwd(), options.combo);
+            const combo = await getCombo(process.cwd(), comboName);
             if (!combo) {
-                throw new Error(`Combo '${options.combo}' not found in registry.`);
+                throw new Error(`Combo '${comboName}' not found in registry.`);
             }
 
             let taskContext = "";

@@ -1,70 +1,111 @@
 import { Combo } from "./registry.js";
 import { Tal, Dance } from "../data/types.js";
-
-// Mocking the catalog imports for now to represent V2 type retrieval
-// In a real implementation this would fetch from `.dance-of-tal/registry/` or a predefined global catalog
+import { assetFilePath } from "./registry.js";
+import fs from "fs/promises";
 
 export interface CompiledContext {
     systemPrompt: string;
     schema?: Record<string, any>;
 }
 
+/** Normalises dance field to always be an array. */
+export function normaliseCombo(combo: Combo): { tal: string; dances: string[]; act?: string } {
+    return {
+        tal: combo.tal,
+        dances: Array.isArray(combo.dance) ? combo.dance : [combo.dance],
+        act: combo.act,
+    };
+}
+
 /**
- * Validates a combo to ensure the URN types are correct and compatible
+ * Loads a locally installed asset by URN.
+ * Path: .dance-of-tal/<category>/@<author>/<name>.json
  */
-export function validateCombo(combo: Combo): void {
-    if (!combo.tal.startsWith("tal/")) {
-        throw new Error(`Invalid Tal URN: ${combo.tal}. Must start with 'tal/'`);
-    }
-    if (!combo.dance.startsWith("dance/")) {
-        throw new Error(`Invalid Dance URN: ${combo.dance}. Must start with 'dance/'`);
-    }
-    if (combo.act && !combo.act.startsWith("act/")) {
-        throw new Error(`Invalid Act URN: ${combo.act}. Must start with 'act/'`);
+async function loadAsset(cwd: string, urn: string): Promise<any> {
+    const filePath = assetFilePath(cwd, urn);
+    try {
+        const raw = await fs.readFile(filePath, "utf-8");
+        return JSON.parse(raw);
+    } catch (err: any) {
+        if (err.code === "ENOENT") {
+            throw new Error(
+                `Asset not found: ${urn}\n  Expected at: ${filePath}\n  Run 'dot install ${urn}' first.`
+            );
+        }
+        throw err;
     }
 }
 
 /**
- * Compiles a Tal logic structure and a Dance presentation format into a unified executable Prompt Payload.
- * Represents the heart of the "Context Provider Mode".
+ * Validates that all URNs in a Combo follow the strict 3-part format.
  */
-export async function compileContext(combo: Combo, taskContext: string): Promise<CompiledContext> {
-    // Validate type safety first
-    validateCombo(combo);
-
-    // Example mocked extraction (In production, read from registry):
-    const mockTal: Tal = {
-        type: combo.tal,
-        slug: combo.tal.replace("tal/", ""),
-        name: "Mock Tal Profile",
-        description: "Sample Tal loaded dynamically",
-        category: "system",
-        tags: [],
-        featuredScore: 0,
-        createdAt: new Date().toISOString(),
-        thinking: "Analyze systematically according to strict logic trees."
-    };
-
-    const mockDance: Dance = {
-        type: combo.dance,
-        slug: combo.dance.replace("dance/", ""),
-        name: "Mock Dance Profile",
-        description: "Sample Dance styling",
-        category: "json",
-        rules: "Output strictly according to the provided JSON Schema.",
-        schema: {
-            type: "object",
-            properties: {
-                output: { type: "string" }
-            },
-            required: ["output"]
+export function validateCombo(combo: Combo): void {
+    const validateUrn = (urn: string, prefix: string) => {
+        const parts = urn.split("/");
+        if (parts.length !== 3 || parts[0] !== prefix || !parts[1].startsWith("@") || !parts[2]) {
+            throw new Error(`Invalid URN: '${urn}'. Expected: ${prefix}/@<author>/<name>`);
         }
     };
 
-    const systemPrompt = `[BEHAVIOR MODE: ${mockTal.type}]\n${mockTal.thinking}\n\n[OUTPUT FORMATTING: ${mockDance.type}]\n${mockDance.rules}\n\n[CURRENT TASK]\n${taskContext}`;
+    const { tal, dances } = normaliseCombo(combo);
+    validateUrn(tal, "tal");
+    for (const d of dances) validateUrn(d, "dance");
+    if (combo.act) validateUrn(combo.act, "act");
+}
 
-    return {
-        systemPrompt,
-        schema: mockDance.schema
-    };
+/**
+ * Validates that all combo assets exist on disk.
+ */
+export async function validateComboFiles(cwd: string, combo: Combo): Promise<void> {
+    validateCombo(combo);
+    const { tal, dances } = normaliseCombo(combo);
+    await loadAsset(cwd, tal);
+    for (const d of dances) await loadAsset(cwd, d);
+    if (combo.act) await loadAsset(cwd, combo.act);
+}
+
+/**
+ * Compiles a Tal + one-or-more Dances into an executable prompt payload.
+ *
+ * Dance layering:
+ *  - rules   → concatenated in order (first = base, last = most specific)
+ *  - schema  → deep-merged in order (later keys override earlier ones)
+ */
+export async function compileContext(combo: Combo, taskContext: string): Promise<CompiledContext> {
+    validateCombo(combo);
+    const { tal: talUrn, dances } = normaliseCombo(combo);
+    const cwd = process.cwd();
+
+    const tal: Tal = await loadAsset(cwd, talUrn);
+    const danceAssets: Dance[] = await Promise.all(dances.map((d) => loadAsset(cwd, d)));
+
+    // Merge Dance layers
+    const mergedRules = danceAssets
+        .map((d) => `[${d.type}]\n${d.rules || d.description}`)
+        .join("\n\n");
+
+    const mergedSchema = danceAssets.reduce<Record<string, any> | undefined>((acc, d) => {
+        if (!d.schema) return acc;
+        return acc ? deepMerge(acc, d.schema as Record<string, any>) : { ...(d.schema as Record<string, any>) };
+    }, undefined);
+
+    const systemPrompt =
+        `[BEHAVIOR MODE: ${tal.type}]\n${tal.thinking || tal.description}\n\n` +
+        `[OUTPUT FORMATTING]\n${mergedRules}\n\n` +
+        `[CURRENT TASK]\n${taskContext}`;
+
+    return { systemPrompt, schema: mergedSchema };
+}
+
+/** Recursively merges b into a. Later (b) values override earlier (a) values. */
+function deepMerge(a: Record<string, any>, b: Record<string, any>): Record<string, any> {
+    const result = { ...a };
+    for (const [k, v] of Object.entries(b)) {
+        if (v && typeof v === "object" && !Array.isArray(v) && a[k] && typeof a[k] === "object") {
+            result[k] = deepMerge(a[k], v);
+        } else {
+            result[k] = v;
+        }
+    }
+    return result;
 }

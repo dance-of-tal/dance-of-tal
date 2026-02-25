@@ -43,11 +43,11 @@ program
   });
 
 program
-  .command("switch <vibeName>")
-  .description("Switch the active Vibe for the current project")
-  .action(async (vibeName: string) => {
+  .command("switch <comboName>")
+  .description("Switch the active Combo for the current project")
+  .action(async (comboName: string) => {
     try {
-      await runSwitch(vibeName);
+      await runSwitch(comboName);
     } catch (e: any) {
       console.error(ui.error(e.message));
       process.exit(1);

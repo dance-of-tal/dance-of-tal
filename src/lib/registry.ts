@@ -1,76 +1,78 @@
 import fs from "fs/promises";
 import path from "path";
-import os from "os";
-
-// Type configurations and caching
 import { Tal, Dance, Act, ComboSummary } from "../data/types.js";
 
-const DEFAULT_GLOBAL_DOT_DIR = path.join(os.homedir(), ".dance-of-tal");
-
 /**
- * Gets the root `.dance-of-tal` directory for the active project or global location
+ * Returns the root `.dance-of-tal` directory for the active project.
+ * Always local to the project — enforces V2 multi-agent isolation.
  */
 export function getDotDir(cwd: string = process.cwd()): string {
-    // Always use the robust local `.dance-of-tal` relative to the project
-    const localDir = path.join(cwd, ".dance-of-tal");
-    return localDir; // We enforce local project isolation for V2 Multi-Agent Architecture
+    return path.join(cwd, ".dance-of-tal");
 }
 
 /**
- * Retrieves the `.dance-of-tal/registry` path
+ * Resolves the on-disk path for an installed asset from its URN.
+ *
+ * URN structure:  <category>/@<author>/<name>
+ * File structure: .dance-of-tal/<category>/@<author>/<name>.json
+ *
+ * Example:
+ *   tal/@monarchjuno/system-architect
+ *   → .dance-of-tal/tal/@monarchjuno/system-architect.json
  */
-export function getRegistryDir(cwd: string = process.cwd()): string {
-    return path.join(getDotDir(cwd), "registry");
+export function assetFilePath(cwd: string, urn: string): string {
+    // urn: "tal/@monarchjuno/system-architect"
+    const [category, author, name] = urn.split("/");
+    if (!category || !author || !name) {
+        throw new Error(`Invalid URN for file path resolution: '${urn}'`);
+    }
+    return path.join(getDotDir(cwd), category, author, `${name}.json`);
 }
 
 /**
- * Ensures the basic V2 filesystem layout exists
+ * Ensures the V2 filesystem layout exists.
+ * Only creates folders that are actively used.
  */
 export async function initRegistry(cwd: string = process.cwd()): Promise<void> {
     const dotDir = getDotDir(cwd);
-    const registryDir = getRegistryDir(cwd);
+    const combosDir = path.join(dotDir, "combo");
     const runsDir = path.join(dotDir, "runs");
-    const mailboxDir = path.join(dotDir, "mailbox");
-    const actGraphsDir = path.join(dotDir, "act-graphs");
 
     await fs.mkdir(dotDir, { recursive: true });
-    await fs.mkdir(registryDir, { recursive: true });
+    await fs.mkdir(combosDir, { recursive: true });
     await fs.mkdir(runsDir, { recursive: true });
-    await fs.mkdir(mailboxDir, { recursive: true });
-    await fs.mkdir(actGraphsDir, { recursive: true });
 }
 
 export type Combo = {
-    tal: string; // The literal Tal URN
-    dance: string; // The literal Dance URN
-    act?: string; // The optional Act URN
+    tal: string;            // Full Tal URN — tal/@author/name
+    dance: string | string[]; // Single or layered Dance URNs (applied in order)
+    act?: string;            // Optional Act URN — act/@author/name
 };
 
 /**
- * Registers a new Type-Safe combo configuration into the registry
+ * Locks a Combo to disk.
+ * File: .dance-of-tal/combo/<name>.json
  */
 export async function lockCombo(
     cwd: string,
     name: string,
     combo: Combo
 ): Promise<void> {
-    const registryDir = getRegistryDir(cwd);
-    await fs.mkdir(registryDir, { recursive: true }); // Ensure it exists
-    const filepath = path.join(registryDir, `combo.${name}.json`);
-
+    const combosDir = path.join(getDotDir(cwd), "combo");
+    await fs.mkdir(combosDir, { recursive: true });
+    const filepath = path.join(combosDir, `${name}.json`);
     await fs.writeFile(filepath, JSON.stringify(combo, null, 2), "utf-8");
 }
 
 /**
- * Loads a locked Combo configuration from the registry
+ * Loads a locked Combo from disk.
+ * Returns null if the combo does not exist.
  */
 export async function getCombo(
     cwd: string,
     name: string
 ): Promise<Combo | null> {
-    const registryDir = getRegistryDir(cwd);
-    const filepath = path.join(registryDir, `combo.${name}.json`);
-
+    const filepath = path.join(getDotDir(cwd), "combo", `${name}.json`);
     try {
         const raw = await fs.readFile(filepath, "utf-8");
         return JSON.parse(raw) as Combo;
