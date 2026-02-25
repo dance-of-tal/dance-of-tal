@@ -1,6 +1,5 @@
 # Dance of Tal (DOT)
-
-![Dance of Tal Logo](../front/public/logo.webp)
+### *The NPM for Vibe Coding.*
 
 **Dance of Tal (DOT)** is a modular AI context manager and global registry designed for the Agentic AI era.
 
@@ -108,7 +107,7 @@ dot publish --category tal --name my-new-vibe --tags "coding,rust,backend"
 
 ## Model Context Protocol (MCP) Mode
 
-Dance of Tal natively operates as an MCP server. This allows IDEs like Windsurf, Cursor, and Claude Desktop to dynamically invoke your locally locked Context profiles exactly when needed without manually copying the text to the chat window.
+Dance of Tal natively operates as an MCP server. This allows IDEs like Cursor, Windsurf, Codex, Antigravity and Claude Desktop to dynamically invoke your locally locked Context profiles exactly when needed without manually copying the text to the chat window.
 
 *(Check the full GitBook documentation for advanced instructions on hooking the CLI server process to your MCP client.)*
 
