@@ -1,0 +1,10 @@
+{
+    "title": "Dance of Tal V2 - Documentation",
+    "description": "Modular AI Context Manager & Registry",
+    "author": "monarchjuno",
+    "plugins": [
+        "hints",
+        "code",
+        "search-pro"
+    ]
+}

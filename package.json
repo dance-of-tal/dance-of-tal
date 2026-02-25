@@ -1,0 +1,54 @@
+{
+  "name": "dance-of-tal",
+  "version": "1.0.0",
+  "description": "MCP server and CLI for Tal x Dance persona composition",
+  "license": "MIT",
+  "author": "monarchjuno",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dance-of-tal/dance-of-tal.git"
+  },
+  "homepage": "https://github.com/dance-of-tal/dance-of-tal",
+  "bugs": {
+    "url": "https://github.com/dance-of-tal/dance-of-tal/issues"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE",
+    "OPEN_SOURCE_STRATEGY.md"
+  ],
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "persona",
+    "prompt-engineering",
+    "openclaw"
+  ],
+  "type": "module",
+  "bin": {
+    "dance-of-tal": "dist/server/index.js",
+    "dot": "dist/cli/dot.js"
+  },
+  "scripts": {
+    "dev": "tsx src/server/index.ts",
+    "build": "tsup src/server/index.ts src/cli/dot.ts --format esm --out-dir dist --clean",
+    "prepublishOnly": "npm run build",
+    "start": "node dist/server/index.js",
+    "cli:dot": "tsx src/cli/dot.ts"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.17.5",
+    "commander": "^14.0.3",
+    "open": "^11.0.0",
+    "proper-lockfile": "^4.1.2",
+    "zod": "3.24.1"
+  },
+  "devDependencies": {
+    "@types/node": "22.10.5",
+    "@types/proper-lockfile": "^4.1.4",
+    "tsup": "8.3.5",
+    "tsx": "4.19.2",
+    "typescript": "5.7.3"
+  }
+}

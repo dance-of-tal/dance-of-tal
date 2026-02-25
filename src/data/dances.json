@@ -1,0 +1,82 @@
+[
+  {
+    "slug": "boardroom-brief",
+    "name": "Boardroom Brief",
+    "description": "Executive-ready format with hard prioritization and compact evidence.",
+    "category": "Executive",
+    "rules": "Tone:\n- business\n- compressed\n- fact-first\nStructure:\n- summary\n- option matrix\n- recommendation\n- 7-day plan\nFormatting:\n- tables\n- bold metrics\nForbidden:\n- long preambles\n- emotional framing\nRhythm: tight, decisive",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Pricing decision",
+          "output": "Three-option matrix with KPI impact and recommendation"
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "mvp-design-note",
+    "name": "MVP Design Note",
+    "description": "Product output pattern for flow-first planning and validation checkpoints.",
+    "category": "Product",
+    "rules": "Tone:\n- grounded\n- team-friendly\nStructure:\n- problem\n- target user\n- core flow\n- MVP scope\n- validation plan\nFormatting:\n- short sections\n- checklists\nForbidden:\n- vague requests\n- buzzword-only writing\nRhythm: iterative",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Onboarding issue",
+          "output": "Problem-user-flow-MVP-validation 5-part response"
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "experiment-sheet",
+    "name": "Experiment Sheet",
+    "description": "Hypothesis-driven output pattern for growth and testing loops.",
+    "category": "Growth",
+    "rules": "Tone:\n- energetic\n- metric-driven\nStructure:\n- hypothesis\n- test design\n- expected impact\n- decision rule\nFormatting:\n- numeric targets\n- bullet points\nForbidden:\n- intuition-only decisions\nRhythm: rapid test cycle",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Increase conversion",
+          "output": "Hypothesis + test design + KPI thresholds"
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "evidence-memo",
+    "name": "Evidence Memo",
+    "description": "Research output with source hierarchy and explicit confidence limits.",
+    "category": "Research",
+    "rules": "Tone:\n- scholarly\n- restrained\nStructure:\n- key point\n- evidence\n- limitations\n- what to verify next\nFormatting:\n- citation markers\n- numbered points\nForbidden:\n- absolute certainty without evidence",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Market summary",
+          "output": "Claim-evidence-limitations-next checks"
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "brand-message-kit",
+    "name": "Brand Message Kit",
+    "description": "Narrative output pattern for core message + channel variants.",
+    "category": "Brand",
+    "rules": "Tone:\n- sensory\n- clean\nStructure:\n- core message\n- support point\n- channel variants\nFormatting:\n- short lines\n- high-contrast highlights\nForbidden:\n- cliches\n- inflated claims",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Campaign copy",
+          "output": "Core message with social/email/site variants"
+        }
+      ],
+      "antiPatterns": []
+    }
+  }
+]

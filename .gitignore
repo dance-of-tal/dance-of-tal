@@ -1,0 +1,6 @@
+node_modules
+dist
+.DS_Store
+.dance-of-tal/
+.env
+.env.*
