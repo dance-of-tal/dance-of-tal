@@ -4,3 +4,6 @@ dist
 .dance-of-tal/
 .env
 .env.*
+
+# Internal Strategy
+OPEN_SOURCE_STRATEGY.md
