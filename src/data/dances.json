@@ -1,5 +1,205 @@
 [
   {
+    "slug": "elon-musk-case-dance",
+    "name": "Elon Musk Engineering Dispatch",
+    "description": "Constraint-first output pattern inspired by Musk's public engineering communication.",
+    "category": "Public Case",
+    "rules": "Tone:\n- engineering-first\n- blunt\n- high-urgency\nStructure:\n- first-principles premise\n- hard constraints\n- bottleneck\n- next build step\nFormatting:\n- numbered constraints\n- units and costs\n- owner + deadline\nForbidden:\n- vision-only hype\n- soft commitments\n- personality imitation\nRhythm: rapid iteration beats",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "How should we reduce inference cost?",
+          "output": "State physics/economic constraint, rank top bottleneck, assign next experiment with deadline."
+        },
+        {
+          "input": "Plan product launch timeline",
+          "output": "List critical path constraints, choose one bottleneck owner, define immediate ship checkpoint."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "jensen-huang-case-dance",
+    "name": "Jensen Huang Platform Keynote",
+    "description": "Long-horizon platform narrative with technical depth and ecosystem framing.",
+    "category": "Public Case",
+    "rules": "Tone:\n- visionary-technical\n- confident\n- platform-centric\nStructure:\n- industry shift\n- stack thesis\n- developer impact\n- multi-year roadmap\nFormatting:\n- layered sections\n- capability matrix\n- milestone timeline\nForbidden:\n- short-term-only framing\n- feature list without platform logic\n- personality imitation\nRhythm: crescendo from chip to ecosystem",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Announce new AI feature set",
+          "output": "Connect macro shift to full stack, explain developer leverage, end with roadmap checkpoints."
+        },
+        {
+          "input": "Explain infra investment",
+          "output": "Position as platform control decision, include technical leverage and multi-cycle payoff."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "satya-nadella-case-dance",
+    "name": "Satya Nadella Empathy Memo",
+    "description": "Empathy-led executive writing pattern grounded in learning and trust.",
+    "category": "Public Case",
+    "rules": "Tone:\n- calm\n- inclusive\n- mission-driven\nStructure:\n- customer context\n- what we learned\n- responsible action\n- trust outcome\nFormatting:\n- short paragraphs\n- clear commitments\n- plain language\nForbidden:\n- zero-sum rhetoric\n- certainty theater\n- personality imitation\nRhythm: reflect -> learn -> commit",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Address enterprise AI concern",
+          "output": "Acknowledge concern, share learning, define guardrails, state measurable trust commitment."
+        },
+        {
+          "input": "Announce org-level change",
+          "output": "Start from customer need, explain team learning, present accountable next actions."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "warren-buffett-case-dance",
+    "name": "Warren Buffett Shareholder Letter",
+    "description": "Plain-language investor memo pattern focused on durability and downside clarity.",
+    "category": "Public Case",
+    "rules": "Tone:\n- plainspoken\n- patient\n- evidence-led\nStructure:\n- operating reality\n- capital allocation logic\n- risks\n- long-term conclusion\nFormatting:\n- simple prose\n- numeric support\n- explicit caveats\nForbidden:\n- financial jargon overload\n- quarterly drama\n- personality imitation\nRhythm: steady compounding cadence",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Review portfolio strategy",
+          "output": "Explain business economics first, then allocation rationale, then explicit downside limits."
+        },
+        {
+          "input": "Comment on volatile market",
+          "output": "Separate market noise from business value and conclude with long-horizon discipline."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "steve-jobs-case-dance",
+    "name": "Steve Jobs Product Storyboard",
+    "description": "Reveal-driven product narrative with sharp simplicity and memorable contrast.",
+    "category": "Public Case",
+    "rules": "Tone:\n- minimal\n- dramatic\n- taste-led\nStructure:\n- problem tension\n- single big idea\n- live-value proof\n- clear takeaway\nFormatting:\n- short punch lines\n- contrast statements\n- one core message per block\nForbidden:\n- feature dumping\n- committee tone\n- personality imitation\nRhythm: tension to reveal",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Present new app experience",
+          "output": "Frame one frustration, present one elegant promise, prove with concise scenario."
+        },
+        {
+          "input": "Pitch redesign",
+          "output": "Eliminate noise, spotlight one dominant user benefit, close with simple call to action."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "oprah-winfrey-case-dance",
+    "name": "Oprah Human Story Address",
+    "description": "Dignity-centered storytelling pattern that links individual stories to collective action.",
+    "category": "Public Case",
+    "rules": "Tone:\n- warm\n- moral-clarity\n- uplifting\nStructure:\n- human story\n- shared truth\n- responsibility frame\n- hopeful call\nFormatting:\n- emotional beats\n- parallel phrasing\n- direct audience address\nForbidden:\n- empty spectacle\n- dehumanizing language\n- personality imitation\nRhythm: story arc with rising conviction",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Speak on workplace dignity",
+          "output": "Start from lived example, expand to shared principle, end with concrete collective action."
+        },
+        {
+          "input": "Open a social campaign",
+          "output": "Human-first framing, values statement, invitation to sustained participation."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "mrbeast-case-dance",
+    "name": "MrBeast Retention Script",
+    "description": "Hook-driven creator script pattern optimized for retention and payoff escalation.",
+    "category": "Public Case",
+    "rules": "Tone:\n- high-energy\n- clear-stakes\n- playful\nStructure:\n- instant hook\n- rising stakes\n- payoff\n- share/subscribe CTA\nFormatting:\n- short lines\n- timer cues\n- visual beat markers\nForbidden:\n- slow setup\n- low-stakes middle\n- personality imitation\nRhythm: fast escalating beats",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Create video outline",
+          "output": "Open with immediate challenge, escalate stakes every segment, deliver clear final payoff."
+        },
+        {
+          "input": "Script short-form teaser",
+          "output": "Hook in first line, one escalating twist, one direct CTA."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "taylor-swift-case-dance",
+    "name": "Taylor Swift Narrative Chronicle",
+    "description": "Emotion-precise narrative style that ties each release to a larger story world.",
+    "category": "Public Case",
+    "rules": "Tone:\n- confessional\n- detailed\n- intimate\nStructure:\n- emotional premise\n- specific scene\n- meaning shift\n- chapter close\nFormatting:\n- sensory details\n- motif callbacks\n- clean section turns\nForbidden:\n- generic sentiment\n- detached corporate voice\n- personality imitation\nRhythm: verse-like progression",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Write artist statement",
+          "output": "Anchor one emotional truth, add concrete scene detail, connect to larger narrative chapter."
+        },
+        {
+          "input": "Launch message for new era",
+          "output": "Define era motif, recall prior chapter, present forward emotional direction."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "jeff-bezos-case-dance",
+    "name": "Jeff Bezos Day 1 Note",
+    "description": "Mechanism-oriented operator memo style focused on customer value and decision velocity.",
+    "category": "Public Case",
+    "rules": "Tone:\n- operational\n- direct\n- customer-obsessed\nStructure:\n- customer problem\n- decision type\n- mechanism\n- owner + metric\nFormatting:\n- decision bullets\n- input/output metrics\n- single-thread ownership\nForbidden:\n- internal-politics framing\n- process theater\n- personality imitation\nRhythm: decide and execute",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Choose between two roadmap options",
+          "output": "Classify one-way/two-way door, pick option by customer impact, assign mechanism and owner."
+        },
+        {
+          "input": "Fix support backlog",
+          "output": "Define customer pain metric, select mechanism, set owner and weekly operating review."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "gary-vaynerchuk-case-dance",
+    "name": "Gary Vee Social Punch",
+    "description": "High-volume social output pattern that prioritizes native context and direct value.",
+    "category": "Public Case",
+    "rules": "Tone:\n- direct\n- street-pragmatic\n- motivational\nStructure:\n- hot take hook\n- practical value\n- platform-native CTA\nFormatting:\n- one-idea blocks\n- caption-ready lines\n- variant prompts\nForbidden:\n- overproduced abstraction\n- long intros\n- personality imitation\nRhythm: rapid publish cadence",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Repurpose long interview",
+          "output": "Extract one core idea into multiple native short posts with distinct hooks and CTA variants."
+        },
+        {
+          "input": "Write LinkedIn post",
+          "output": "Open with blunt claim, provide tactical list, finish with clear engagement question."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
     "slug": "boardroom-brief",
     "name": "Boardroom Brief",
     "description": "Executive-ready format with hard prioritization and compact evidence.",
@@ -74,6 +274,2758 @@
         {
           "input": "Campaign copy",
           "output": "Core message with social/email/site variants"
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "developer-guide",
+    "name": "Developer Guide",
+    "description": "Execution-first technical writing pattern.",
+    "category": "Developer",
+    "rules": "Tone:\n- pragmatic\n- calm\nStructure:\n- overview\n- prerequisites\n- steps\n- troubleshooting\nFormatting:\n- code blocks\n- numbered list\nForbidden:\n- undefined environment assumptions",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "MCP setup",
+          "output": "Prerequisites, steps, and debug checklist"
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "incident-command",
+    "name": "Incident Command",
+    "description": "High-pressure output pattern for outage handling.",
+    "category": "Operations",
+    "rules": "Tone:\n- command-like\n- brief\nStructure:\n- incident summary\n- immediate actions\n- comms plan\n- post actions\nFormatting:\n- timeline blocks\n- check boxes\nForbidden:\n- defensive excuses\nRhythm: urgent",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Payment outage",
+          "output": "Action timeline + stakeholder comms"
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "teaching-ladder",
+    "name": "Teaching Ladder",
+    "description": "Progressive learning output pattern.",
+    "category": "Education",
+    "rules": "Tone:\n- friendly\n- stepwise\nStructure:\n- core idea\n- plain explanation\n- example\n- check question\nFormatting:\n- numbered stages\n- Q&A prompts\nForbidden:\n- concept leaps",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Explain concept",
+          "output": "Stepwise explanation with checks"
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "risk-screen",
+    "name": "Risk Screen",
+    "description": "Operations-oriented pattern with risk labels and rewrite suggestions.",
+    "category": "Operations",
+    "rules": "Tone:\n- conservative\n- operational\nStructure:\n- scope\n- key risks\n- rewrite suggestion\n- review-needed\nFormatting:\n- risk table\n- severity labels\nForbidden:\n- definitive legal verdicts",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Terms review",
+          "output": "Risk-ranked findings with safer wording"
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "creator-script",
+    "name": "Creator Script",
+    "description": "High-contrast short-form output pattern for content production.",
+    "category": "Creator",
+    "rules": "Tone:\n- punchy\n- rhythmic\nStructure:\n- hook\n- core message\n- call to action\nFormatting:\n- short lines\n- contrast phrases\nForbidden:\n- filler-heavy copy\nRhythm: beat-driven",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Reel script",
+          "output": "Hook-message-CTA in concise lines"
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "data-brief",
+    "name": "Data Brief",
+    "description": "Decision-facing analytics output pattern.",
+    "category": "Analytics",
+    "rules": "Tone:\n- fact-led\n- calm\nStructure:\n- key metrics\n- interpretation\n- hypotheses\n- next actions\nFormatting:\n- tables\n- percent deltas\nForbidden:\n- speculative claims without caveat",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "KPI drop",
+          "output": "Metric delta + hypotheses + action owner"
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "minimal-copy",
+    "name": "Minimal Copy",
+    "description": "Short-form precision output pattern.",
+    "category": "Writing",
+    "rules": "Tone:\n- clean\n- precise\nStructure:\n- one-line core\n- 2-3 support lines\n- action line\nFormatting:\n- short paragraphs\n- minimal emphasis\nForbidden:\n- ornamental prose",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Announcement",
+          "output": "One-line core + compact action line"
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "executive-one-page-brief-dance",
+    "name": "Executive One-Page Brief",
+    "description": "One-page executive output optimized for quick decisions.",
+    "category": "Executive",
+    "rules": "Tone:\n- decisive\n- concise\n- evidence-first\nStructure:\n- context\n- options\n- recommendation\n- execution next steps\nFormatting:\n- short blocks\n- decision bullets\n- owner and date\nForbidden:\n- rambling preambles\n- vague ownership\nRhythm: tight and accountable",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Need help with one-page executive clarity",
+          "output": "Provide output in the Executive One-Page Brief format with explicit structure and execution clarity."
+        },
+        {
+          "input": "Prepare a draft related to one-page executive clarity",
+          "output": "Return a concise, structured draft that follows this style profile and constraints."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "board-memo-decision-dance",
+    "name": "Board Memo Decision Format",
+    "description": "Board-ready memo format for high-stakes decisions.",
+    "category": "Executive",
+    "rules": "Tone:\n- decisive\n- concise\n- evidence-first\nStructure:\n- context\n- options\n- recommendation\n- execution next steps\nFormatting:\n- short blocks\n- decision bullets\n- owner and date\nForbidden:\n- rambling preambles\n- vague ownership\nRhythm: tight and accountable",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Need help with board-level decision communication",
+          "output": "Provide output in the Board Memo Decision Format format with explicit structure and execution clarity."
+        },
+        {
+          "input": "Prepare a draft related to board-level decision communication",
+          "output": "Return a concise, structured draft that follows this style profile and constraints."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "ceo-weekly-review-dance",
+    "name": "CEO Weekly Review Format",
+    "description": "Weekly operating review format for leadership cadence.",
+    "category": "Executive",
+    "rules": "Tone:\n- decisive\n- concise\n- evidence-first\nStructure:\n- context\n- options\n- recommendation\n- execution next steps\nFormatting:\n- short blocks\n- decision bullets\n- owner and date\nForbidden:\n- rambling preambles\n- vague ownership\nRhythm: tight and accountable",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Need help with weekly executive operating review",
+          "output": "Provide output in the CEO Weekly Review Format format with explicit structure and execution clarity."
+        },
+        {
+          "input": "Prepare a draft related to weekly executive operating review",
+          "output": "Return a concise, structured draft that follows this style profile and constraints."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "stakeholder-alignment-note-dance",
+    "name": "Stakeholder Alignment Note",
+    "description": "Concise note for aligning diverse stakeholders.",
+    "category": "Executive",
+    "rules": "Tone:\n- decisive\n- concise\n- evidence-first\nStructure:\n- context\n- options\n- recommendation\n- execution next steps\nFormatting:\n- short blocks\n- decision bullets\n- owner and date\nForbidden:\n- rambling preambles\n- vague ownership\nRhythm: tight and accountable",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Need help with stakeholder alignment communication",
+          "output": "Provide output in the Stakeholder Alignment Note format with explicit structure and execution clarity."
+        },
+        {
+          "input": "Prepare a draft related to stakeholder alignment communication",
+          "output": "Return a concise, structured draft that follows this style profile and constraints."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "high-stakes-decision-log-dance",
+    "name": "High-Stakes Decision Log",
+    "description": "Decision-log style output for accountability and auditability.",
+    "category": "Executive",
+    "rules": "Tone:\n- decisive\n- concise\n- evidence-first\nStructure:\n- context\n- options\n- recommendation\n- execution next steps\nFormatting:\n- short blocks\n- decision bullets\n- owner and date\nForbidden:\n- rambling preambles\n- vague ownership\nRhythm: tight and accountable",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Need help with accountable decision documentation",
+          "output": "Provide output in the High-Stakes Decision Log format with explicit structure and execution clarity."
+        },
+        {
+          "input": "Prepare a draft related to accountable decision documentation",
+          "output": "Return a concise, structured draft that follows this style profile and constraints."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "product-prd-lite-dance",
+    "name": "PRD Lite Format",
+    "description": "Compact PRD format for fast product alignment.",
+    "category": "Product",
+    "rules": "Tone:\n- clear\n- pragmatic\n- user-centered\nStructure:\n- problem\n- user impact\n- solution shape\n- validation plan\nFormatting:\n- checklists\n- scope labels\n- assumption notes\nForbidden:\n- feature dumping\n- scope ambiguity\nRhythm: iterative and testable",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Need help with compact product requirement definition",
+          "output": "Provide output in the PRD Lite Format format with explicit structure and execution clarity."
+        },
+        {
+          "input": "Prepare a draft related to compact product requirement definition",
+          "output": "Return a concise, structured draft that follows this style profile and constraints."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "user-story-flow-dance",
+    "name": "User Story Flow Format",
+    "description": "Flow-first user story output format.",
+    "category": "Product",
+    "rules": "Tone:\n- clear\n- pragmatic\n- user-centered\nStructure:\n- problem\n- user impact\n- solution shape\n- validation plan\nFormatting:\n- checklists\n- scope labels\n- assumption notes\nForbidden:\n- feature dumping\n- scope ambiguity\nRhythm: iterative and testable",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Need help with user flow and story mapping",
+          "output": "Provide output in the User Story Flow Format format with explicit structure and execution clarity."
+        },
+        {
+          "input": "Prepare a draft related to user flow and story mapping",
+          "output": "Return a concise, structured draft that follows this style profile and constraints."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "feature-spec-checklist-dance",
+    "name": "Feature Spec Checklist",
+    "description": "Checklist-driven feature specification output.",
+    "category": "Product",
+    "rules": "Tone:\n- clear\n- pragmatic\n- user-centered\nStructure:\n- problem\n- user impact\n- solution shape\n- validation plan\nFormatting:\n- checklists\n- scope labels\n- assumption notes\nForbidden:\n- feature dumping\n- scope ambiguity\nRhythm: iterative and testable",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Need help with feature specification quality control",
+          "output": "Provide output in the Feature Spec Checklist format with explicit structure and execution clarity."
+        },
+        {
+          "input": "Prepare a draft related to feature specification quality control",
+          "output": "Return a concise, structured draft that follows this style profile and constraints."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "launch-readiness-dance",
+    "name": "Launch Readiness Format",
+    "description": "Go-live readiness format for product launches.",
+    "category": "Product",
+    "rules": "Tone:\n- clear\n- pragmatic\n- user-centered\nStructure:\n- problem\n- user impact\n- solution shape\n- validation plan\nFormatting:\n- checklists\n- scope labels\n- assumption notes\nForbidden:\n- feature dumping\n- scope ambiguity\nRhythm: iterative and testable",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Need help with launch readiness execution",
+          "output": "Provide output in the Launch Readiness Format format with explicit structure and execution clarity."
+        },
+        {
+          "input": "Prepare a draft related to launch readiness execution",
+          "output": "Return a concise, structured draft that follows this style profile and constraints."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "bug-priority-brief-dance",
+    "name": "Bug Priority Brief",
+    "description": "Structured bug triage and priority communication.",
+    "category": "Product",
+    "rules": "Tone:\n- clear\n- pragmatic\n- user-centered\nStructure:\n- problem\n- user impact\n- solution shape\n- validation plan\nFormatting:\n- checklists\n- scope labels\n- assumption notes\nForbidden:\n- feature dumping\n- scope ambiguity\nRhythm: iterative and testable",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Need help with bug prioritization and triage",
+          "output": "Provide output in the Bug Priority Brief format with explicit structure and execution clarity."
+        },
+        {
+          "input": "Prepare a draft related to bug prioritization and triage",
+          "output": "Return a concise, structured draft that follows this style profile and constraints."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "growth-experiment-canvas-dance",
+    "name": "Growth Experiment Canvas",
+    "description": "Experiment-canvas format for growth tests.",
+    "category": "Growth",
+    "rules": "Tone:\n- experimental\n- metric-aware\n- actionable\nStructure:\n- hypothesis\n- test design\n- success threshold\n- decision rule\nFormatting:\n- numbered steps\n- metric deltas\n- stop/continue criteria\nForbidden:\n- intuition-only conclusions\n- missing baseline\nRhythm: rapid experiment loop",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Need help with growth experiment planning",
+          "output": "Provide output in the Growth Experiment Canvas format with explicit structure and execution clarity."
+        },
+        {
+          "input": "Prepare a draft related to growth experiment planning",
+          "output": "Return a concise, structured draft that follows this style profile and constraints."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "campaign-performance-snapshot-dance",
+    "name": "Campaign Performance Snapshot",
+    "description": "Compact campaign performance readout format.",
+    "category": "Growth",
+    "rules": "Tone:\n- experimental\n- metric-aware\n- actionable\nStructure:\n- hypothesis\n- test design\n- success threshold\n- decision rule\nFormatting:\n- numbered steps\n- metric deltas\n- stop/continue criteria\nForbidden:\n- intuition-only conclusions\n- missing baseline\nRhythm: rapid experiment loop",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Need help with campaign KPI snapshot",
+          "output": "Provide output in the Campaign Performance Snapshot format with explicit structure and execution clarity."
+        },
+        {
+          "input": "Prepare a draft related to campaign KPI snapshot",
+          "output": "Return a concise, structured draft that follows this style profile and constraints."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "retention-playbook-dance",
+    "name": "Retention Playbook Format",
+    "description": "Retention action-plan style output.",
+    "category": "Growth",
+    "rules": "Tone:\n- experimental\n- metric-aware\n- actionable\nStructure:\n- hypothesis\n- test design\n- success threshold\n- decision rule\nFormatting:\n- numbered steps\n- metric deltas\n- stop/continue criteria\nForbidden:\n- intuition-only conclusions\n- missing baseline\nRhythm: rapid experiment loop",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Need help with retention improvement playbook",
+          "output": "Provide output in the Retention Playbook Format format with explicit structure and execution clarity."
+        },
+        {
+          "input": "Prepare a draft related to retention improvement playbook",
+          "output": "Return a concise, structured draft that follows this style profile and constraints."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "funnel-diagnosis-dance",
+    "name": "Funnel Diagnosis Format",
+    "description": "Funnel leak diagnosis and action format.",
+    "category": "Growth",
+    "rules": "Tone:\n- experimental\n- metric-aware\n- actionable\nStructure:\n- hypothesis\n- test design\n- success threshold\n- decision rule\nFormatting:\n- numbered steps\n- metric deltas\n- stop/continue criteria\nForbidden:\n- intuition-only conclusions\n- missing baseline\nRhythm: rapid experiment loop",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Need help with funnel bottleneck diagnosis",
+          "output": "Provide output in the Funnel Diagnosis Format format with explicit structure and execution clarity."
+        },
+        {
+          "input": "Prepare a draft related to funnel bottleneck diagnosis",
+          "output": "Return a concise, structured draft that follows this style profile and constraints."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "pricing-test-brief-dance",
+    "name": "Pricing Test Brief",
+    "description": "Pricing test design and interpretation format.",
+    "category": "Growth",
+    "rules": "Tone:\n- experimental\n- metric-aware\n- actionable\nStructure:\n- hypothesis\n- test design\n- success threshold\n- decision rule\nFormatting:\n- numbered steps\n- metric deltas\n- stop/continue criteria\nForbidden:\n- intuition-only conclusions\n- missing baseline\nRhythm: rapid experiment loop",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Need help with pricing experiment communication",
+          "output": "Provide output in the Pricing Test Brief format with explicit structure and execution clarity."
+        },
+        {
+          "input": "Prepare a draft related to pricing experiment communication",
+          "output": "Return a concise, structured draft that follows this style profile and constraints."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "insight-synthesis-note-dance",
+    "name": "Insight Synthesis Note",
+    "description": "Insight synthesis output for decision teams.",
+    "category": "Research",
+    "rules": "Tone:\n- neutral\n- careful\n- source-grounded\nStructure:\n- key claim\n- evidence\n- limitations\n- next verification\nFormatting:\n- citation bullets\n- confidence labels\n- open questions\nForbidden:\n- overclaiming certainty\n- source omission\nRhythm: evidence then inference",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Need help with research insight synthesis",
+          "output": "Provide output in the Insight Synthesis Note format with explicit structure and execution clarity."
+        },
+        {
+          "input": "Prepare a draft related to research insight synthesis",
+          "output": "Return a concise, structured draft that follows this style profile and constraints."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "interview-findings-report-dance",
+    "name": "Interview Findings Report",
+    "description": "Interview findings format with evidence trails.",
+    "category": "Research",
+    "rules": "Tone:\n- neutral\n- careful\n- source-grounded\nStructure:\n- key claim\n- evidence\n- limitations\n- next verification\nFormatting:\n- citation bullets\n- confidence labels\n- open questions\nForbidden:\n- overclaiming certainty\n- source omission\nRhythm: evidence then inference",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Need help with qualitative interview reporting",
+          "output": "Provide output in the Interview Findings Report format with explicit structure and execution clarity."
+        },
+        {
+          "input": "Prepare a draft related to qualitative interview reporting",
+          "output": "Return a concise, structured draft that follows this style profile and constraints."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "competitor-benchmark-sheet-dance",
+    "name": "Competitor Benchmark Sheet",
+    "description": "Benchmark format for competitor comparison.",
+    "category": "Research",
+    "rules": "Tone:\n- neutral\n- careful\n- source-grounded\nStructure:\n- key claim\n- evidence\n- limitations\n- next verification\nFormatting:\n- citation bullets\n- confidence labels\n- open questions\nForbidden:\n- overclaiming certainty\n- source omission\nRhythm: evidence then inference",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Need help with competitor benchmarking",
+          "output": "Provide output in the Competitor Benchmark Sheet format with explicit structure and execution clarity."
+        },
+        {
+          "input": "Prepare a draft related to competitor benchmarking",
+          "output": "Return a concise, structured draft that follows this style profile and constraints."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "source-confidence-brief-dance",
+    "name": "Source Confidence Brief",
+    "description": "Source confidence and limitation format.",
+    "category": "Research",
+    "rules": "Tone:\n- neutral\n- careful\n- source-grounded\nStructure:\n- key claim\n- evidence\n- limitations\n- next verification\nFormatting:\n- citation bullets\n- confidence labels\n- open questions\nForbidden:\n- overclaiming certainty\n- source omission\nRhythm: evidence then inference",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Need help with source quality transparency",
+          "output": "Provide output in the Source Confidence Brief format with explicit structure and execution clarity."
+        },
+        {
+          "input": "Prepare a draft related to source quality transparency",
+          "output": "Return a concise, structured draft that follows this style profile and constraints."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "literature-scan-memo-dance",
+    "name": "Literature Scan Memo",
+    "description": "Rapid literature scan and synthesis format.",
+    "category": "Research",
+    "rules": "Tone:\n- neutral\n- careful\n- source-grounded\nStructure:\n- key claim\n- evidence\n- limitations\n- next verification\nFormatting:\n- citation bullets\n- confidence labels\n- open questions\nForbidden:\n- overclaiming certainty\n- source omission\nRhythm: evidence then inference",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Need help with literature scan summary",
+          "output": "Provide output in the Literature Scan Memo format with explicit structure and execution clarity."
+        },
+        {
+          "input": "Prepare a draft related to literature scan summary",
+          "output": "Return a concise, structured draft that follows this style profile and constraints."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "brand-voice-playbook-dance",
+    "name": "Brand Voice Playbook",
+    "description": "Brand voice rules output for consistency.",
+    "category": "Brand",
+    "rules": "Tone:\n- distinctive\n- confident\n- emotion-aware\nStructure:\n- core message\n- support proof\n- channel adaptation\nFormatting:\n- message hierarchy\n- short punch lines\n- variant blocks\nForbidden:\n- generic slogans\n- tone inconsistency\nRhythm: hook then resonance",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Need help with brand voice consistency",
+          "output": "Provide output in the Brand Voice Playbook format with explicit structure and execution clarity."
+        },
+        {
+          "input": "Prepare a draft related to brand voice consistency",
+          "output": "Return a concise, structured draft that follows this style profile and constraints."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "campaign-message-matrix-dance",
+    "name": "Campaign Message Matrix",
+    "description": "Channel-wise message matrix format.",
+    "category": "Brand",
+    "rules": "Tone:\n- distinctive\n- confident\n- emotion-aware\nStructure:\n- core message\n- support proof\n- channel adaptation\nFormatting:\n- message hierarchy\n- short punch lines\n- variant blocks\nForbidden:\n- generic slogans\n- tone inconsistency\nRhythm: hook then resonance",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Need help with campaign message orchestration",
+          "output": "Provide output in the Campaign Message Matrix format with explicit structure and execution clarity."
+        },
+        {
+          "input": "Prepare a draft related to campaign message orchestration",
+          "output": "Return a concise, structured draft that follows this style profile and constraints."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "positioning-statement-dance",
+    "name": "Positioning Statement Format",
+    "description": "Clear positioning statement structure.",
+    "category": "Brand",
+    "rules": "Tone:\n- distinctive\n- confident\n- emotion-aware\nStructure:\n- core message\n- support proof\n- channel adaptation\nFormatting:\n- message hierarchy\n- short punch lines\n- variant blocks\nForbidden:\n- generic slogans\n- tone inconsistency\nRhythm: hook then resonance",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Need help with positioning clarity",
+          "output": "Provide output in the Positioning Statement Format format with explicit structure and execution clarity."
+        },
+        {
+          "input": "Prepare a draft related to positioning clarity",
+          "output": "Return a concise, structured draft that follows this style profile and constraints."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "social-proof-story-dance",
+    "name": "Social Proof Story Format",
+    "description": "Trust-building story format with proof elements.",
+    "category": "Brand",
+    "rules": "Tone:\n- distinctive\n- confident\n- emotion-aware\nStructure:\n- core message\n- support proof\n- channel adaptation\nFormatting:\n- message hierarchy\n- short punch lines\n- variant blocks\nForbidden:\n- generic slogans\n- tone inconsistency\nRhythm: hook then resonance",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Need help with social proof storytelling",
+          "output": "Provide output in the Social Proof Story Format format with explicit structure and execution clarity."
+        },
+        {
+          "input": "Prepare a draft related to social proof storytelling",
+          "output": "Return a concise, structured draft that follows this style profile and constraints."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "launch-copy-pack-dance",
+    "name": "Launch Copy Pack",
+    "description": "Launch copy pack format for multiple channels.",
+    "category": "Brand",
+    "rules": "Tone:\n- distinctive\n- confident\n- emotion-aware\nStructure:\n- core message\n- support proof\n- channel adaptation\nFormatting:\n- message hierarchy\n- short punch lines\n- variant blocks\nForbidden:\n- generic slogans\n- tone inconsistency\nRhythm: hook then resonance",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Need help with launch copy packaging",
+          "output": "Provide output in the Launch Copy Pack format with explicit structure and execution clarity."
+        },
+        {
+          "input": "Prepare a draft related to launch copy packaging",
+          "output": "Return a concise, structured draft that follows this style profile and constraints."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "api-design-doc-dance",
+    "name": "API Design Doc Format",
+    "description": "API design document output format.",
+    "category": "Developer",
+    "rules": "Tone:\n- technical\n- direct\n- implementation-ready\nStructure:\n- goal\n- constraints\n- steps\n- failure handling\nFormatting:\n- code-like blocks\n- numbered procedures\n- edge-case notes\nForbidden:\n- missing prerequisites\n- undefined behavior\nRhythm: spec to execution",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Need help with api design communication",
+          "output": "Provide output in the API Design Doc Format format with explicit structure and execution clarity."
+        },
+        {
+          "input": "Prepare a draft related to api design communication",
+          "output": "Return a concise, structured draft that follows this style profile and constraints."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "debugging-runbook-dance",
+    "name": "Debugging Runbook Format",
+    "description": "Stepwise debugging runbook output.",
+    "category": "Developer",
+    "rules": "Tone:\n- technical\n- direct\n- implementation-ready\nStructure:\n- goal\n- constraints\n- steps\n- failure handling\nFormatting:\n- code-like blocks\n- numbered procedures\n- edge-case notes\nForbidden:\n- missing prerequisites\n- undefined behavior\nRhythm: spec to execution",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Need help with debugging execution runbook",
+          "output": "Provide output in the Debugging Runbook Format format with explicit structure and execution clarity."
+        },
+        {
+          "input": "Prepare a draft related to debugging execution runbook",
+          "output": "Return a concise, structured draft that follows this style profile and constraints."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "migration-plan-dance",
+    "name": "Migration Plan Format",
+    "description": "Migration planning and rollback format.",
+    "category": "Developer",
+    "rules": "Tone:\n- technical\n- direct\n- implementation-ready\nStructure:\n- goal\n- constraints\n- steps\n- failure handling\nFormatting:\n- code-like blocks\n- numbered procedures\n- edge-case notes\nForbidden:\n- missing prerequisites\n- undefined behavior\nRhythm: spec to execution",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Need help with safe migration planning",
+          "output": "Provide output in the Migration Plan Format format with explicit structure and execution clarity."
+        },
+        {
+          "input": "Prepare a draft related to safe migration planning",
+          "output": "Return a concise, structured draft that follows this style profile and constraints."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "architecture-rfc-dance",
+    "name": "Architecture RFC Format",
+    "description": "RFC-style architecture proposal format.",
+    "category": "Developer",
+    "rules": "Tone:\n- technical\n- direct\n- implementation-ready\nStructure:\n- goal\n- constraints\n- steps\n- failure handling\nFormatting:\n- code-like blocks\n- numbered procedures\n- edge-case notes\nForbidden:\n- missing prerequisites\n- undefined behavior\nRhythm: spec to execution",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Need help with architecture proposal rigor",
+          "output": "Provide output in the Architecture RFC Format format with explicit structure and execution clarity."
+        },
+        {
+          "input": "Prepare a draft related to architecture proposal rigor",
+          "output": "Return a concise, structured draft that follows this style profile and constraints."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "llm-prompt-spec-dance",
+    "name": "LLM Prompt Spec Format",
+    "description": "Prompt spec format for LLM app teams.",
+    "category": "Developer",
+    "rules": "Tone:\n- technical\n- direct\n- implementation-ready\nStructure:\n- goal\n- constraints\n- steps\n- failure handling\nFormatting:\n- code-like blocks\n- numbered procedures\n- edge-case notes\nForbidden:\n- missing prerequisites\n- undefined behavior\nRhythm: spec to execution",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Need help with prompt system specification",
+          "output": "Provide output in the LLM Prompt Spec Format format with explicit structure and execution clarity."
+        },
+        {
+          "input": "Prepare a draft related to prompt system specification",
+          "output": "Return a concise, structured draft that follows this style profile and constraints."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "ops-status-brief-dance",
+    "name": "Ops Status Brief",
+    "description": "Operations status format for daily control.",
+    "category": "Operations",
+    "rules": "Tone:\n- operational\n- clear\n- risk-aware\nStructure:\n- status\n- impact\n- action plan\n- follow-up control\nFormatting:\n- status labels\n- timeline\n- owner mapping\nForbidden:\n- blame language\n- no-closure updates\nRhythm: control and follow-through",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Need help with daily operations visibility",
+          "output": "Provide output in the Ops Status Brief format with explicit structure and execution clarity."
+        },
+        {
+          "input": "Prepare a draft related to daily operations visibility",
+          "output": "Return a concise, structured draft that follows this style profile and constraints."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "incident-update-dance",
+    "name": "Incident Update Format",
+    "description": "Incident update format for stakeholders.",
+    "category": "Operations",
+    "rules": "Tone:\n- operational\n- clear\n- risk-aware\nStructure:\n- status\n- impact\n- action plan\n- follow-up control\nFormatting:\n- status labels\n- timeline\n- owner mapping\nForbidden:\n- blame language\n- no-closure updates\nRhythm: control and follow-through",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Need help with incident communication under pressure",
+          "output": "Provide output in the Incident Update Format format with explicit structure and execution clarity."
+        },
+        {
+          "input": "Prepare a draft related to incident communication under pressure",
+          "output": "Return a concise, structured draft that follows this style profile and constraints."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "sops-checklist-dance",
+    "name": "SOP Checklist Format",
+    "description": "Standard operating procedure checklist format.",
+    "category": "Operations",
+    "rules": "Tone:\n- operational\n- clear\n- risk-aware\nStructure:\n- status\n- impact\n- action plan\n- follow-up control\nFormatting:\n- status labels\n- timeline\n- owner mapping\nForbidden:\n- blame language\n- no-closure updates\nRhythm: control and follow-through",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Need help with sop execution reliability",
+          "output": "Provide output in the SOP Checklist Format format with explicit structure and execution clarity."
+        },
+        {
+          "input": "Prepare a draft related to sop execution reliability",
+          "output": "Return a concise, structured draft that follows this style profile and constraints."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "vendor-review-brief-dance",
+    "name": "Vendor Review Brief",
+    "description": "Vendor performance and risk brief format.",
+    "category": "Operations",
+    "rules": "Tone:\n- operational\n- clear\n- risk-aware\nStructure:\n- status\n- impact\n- action plan\n- follow-up control\nFormatting:\n- status labels\n- timeline\n- owner mapping\nForbidden:\n- blame language\n- no-closure updates\nRhythm: control and follow-through",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Need help with vendor performance governance",
+          "output": "Provide output in the Vendor Review Brief format with explicit structure and execution clarity."
+        },
+        {
+          "input": "Prepare a draft related to vendor performance governance",
+          "output": "Return a concise, structured draft that follows this style profile and constraints."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "postmortem-report-dance",
+    "name": "Postmortem Report Format",
+    "description": "Postmortem format for learning and prevention.",
+    "category": "Operations",
+    "rules": "Tone:\n- operational\n- clear\n- risk-aware\nStructure:\n- status\n- impact\n- action plan\n- follow-up control\nFormatting:\n- status labels\n- timeline\n- owner mapping\nForbidden:\n- blame language\n- no-closure updates\nRhythm: control and follow-through",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Need help with post-incident learning report",
+          "output": "Provide output in the Postmortem Report Format format with explicit structure and execution clarity."
+        },
+        {
+          "input": "Prepare a draft related to post-incident learning report",
+          "output": "Return a concise, structured draft that follows this style profile and constraints."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "lesson-plan-dance",
+    "name": "Lesson Plan Format",
+    "description": "Structured lesson planning output format.",
+    "category": "Education",
+    "rules": "Tone:\n- supportive\n- stepwise\n- clear\nStructure:\n- goal\n- explanation\n- practice\n- feedback\nFormatting:\n- stages\n- examples\n- checkpoint questions\nForbidden:\n- jumps in complexity\n- answer-only output\nRhythm: teach, test, adjust",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Need help with teaching plan structure",
+          "output": "Provide output in the Lesson Plan Format format with explicit structure and execution clarity."
+        },
+        {
+          "input": "Prepare a draft related to teaching plan structure",
+          "output": "Return a concise, structured draft that follows this style profile and constraints."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "concept-explainer-dance",
+    "name": "Concept Explainer Format",
+    "description": "Step-by-step concept explanation format.",
+    "category": "Education",
+    "rules": "Tone:\n- supportive\n- stepwise\n- clear\nStructure:\n- goal\n- explanation\n- practice\n- feedback\nFormatting:\n- stages\n- examples\n- checkpoint questions\nForbidden:\n- jumps in complexity\n- answer-only output\nRhythm: teach, test, adjust",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Need help with concept clarity",
+          "output": "Provide output in the Concept Explainer Format format with explicit structure and execution clarity."
+        },
+        {
+          "input": "Prepare a draft related to concept clarity",
+          "output": "Return a concise, structured draft that follows this style profile and constraints."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "quiz-feedback-dance",
+    "name": "Quiz Feedback Format",
+    "description": "Feedback format after quiz assessments.",
+    "category": "Education",
+    "rules": "Tone:\n- supportive\n- stepwise\n- clear\nStructure:\n- goal\n- explanation\n- practice\n- feedback\nFormatting:\n- stages\n- examples\n- checkpoint questions\nForbidden:\n- jumps in complexity\n- answer-only output\nRhythm: teach, test, adjust",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Need help with assessment feedback clarity",
+          "output": "Provide output in the Quiz Feedback Format format with explicit structure and execution clarity."
+        },
+        {
+          "input": "Prepare a draft related to assessment feedback clarity",
+          "output": "Return a concise, structured draft that follows this style profile and constraints."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "study-sprint-plan-dance",
+    "name": "Study Sprint Plan",
+    "description": "Study sprint planning output format.",
+    "category": "Education",
+    "rules": "Tone:\n- supportive\n- stepwise\n- clear\nStructure:\n- goal\n- explanation\n- practice\n- feedback\nFormatting:\n- stages\n- examples\n- checkpoint questions\nForbidden:\n- jumps in complexity\n- answer-only output\nRhythm: teach, test, adjust",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Need help with short-cycle learning execution",
+          "output": "Provide output in the Study Sprint Plan format with explicit structure and execution clarity."
+        },
+        {
+          "input": "Prepare a draft related to short-cycle learning execution",
+          "output": "Return a concise, structured draft that follows this style profile and constraints."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "interview-drill-dance",
+    "name": "Interview Drill Format",
+    "description": "Mock interview drill and feedback format.",
+    "category": "Education",
+    "rules": "Tone:\n- supportive\n- stepwise\n- clear\nStructure:\n- goal\n- explanation\n- practice\n- feedback\nFormatting:\n- stages\n- examples\n- checkpoint questions\nForbidden:\n- jumps in complexity\n- answer-only output\nRhythm: teach, test, adjust",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Need help with practice and coaching loop",
+          "output": "Provide output in the Interview Drill Format format with explicit structure and execution clarity."
+        },
+        {
+          "input": "Prepare a draft related to practice and coaching loop",
+          "output": "Return a concise, structured draft that follows this style profile and constraints."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "short-video-script-dance",
+    "name": "Short Video Script Format",
+    "description": "Hook-first short video script format.",
+    "category": "Creator",
+    "rules": "Tone:\n- hook-driven\n- energetic\n- audience-aware\nStructure:\n- hook\n- core beat\n- payoff\n- call to action\nFormatting:\n- short lines\n- scene beats\n- CTA lines\nForbidden:\n- slow openings\n- weak payoff\nRhythm: fast hook cadence",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Need help with short video script velocity",
+          "output": "Provide output in the Short Video Script Format format with explicit structure and execution clarity."
+        },
+        {
+          "input": "Prepare a draft related to short video script velocity",
+          "output": "Return a concise, structured draft that follows this style profile and constraints."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "thumbnail-title-lab-dance",
+    "name": "Thumbnail & Title Lab",
+    "description": "Title/thumbnail ideation output format.",
+    "category": "Creator",
+    "rules": "Tone:\n- hook-driven\n- energetic\n- audience-aware\nStructure:\n- hook\n- core beat\n- payoff\n- call to action\nFormatting:\n- short lines\n- scene beats\n- CTA lines\nForbidden:\n- slow openings\n- weak payoff\nRhythm: fast hook cadence",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Need help with click-driving packaging",
+          "output": "Provide output in the Thumbnail & Title Lab format with explicit structure and execution clarity."
+        },
+        {
+          "input": "Prepare a draft related to click-driving packaging",
+          "output": "Return a concise, structured draft that follows this style profile and constraints."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "newsletter-edition-dance",
+    "name": "Newsletter Edition Format",
+    "description": "Recurring newsletter edition format.",
+    "category": "Creator",
+    "rules": "Tone:\n- hook-driven\n- energetic\n- audience-aware\nStructure:\n- hook\n- core beat\n- payoff\n- call to action\nFormatting:\n- short lines\n- scene beats\n- CTA lines\nForbidden:\n- slow openings\n- weak payoff\nRhythm: fast hook cadence",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Need help with newsletter publishing consistency",
+          "output": "Provide output in the Newsletter Edition Format format with explicit structure and execution clarity."
+        },
+        {
+          "input": "Prepare a draft related to newsletter publishing consistency",
+          "output": "Return a concise, structured draft that follows this style profile and constraints."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "podcast-outline-dance",
+    "name": "Podcast Outline Format",
+    "description": "Episode outline format for podcast flow.",
+    "category": "Creator",
+    "rules": "Tone:\n- hook-driven\n- energetic\n- audience-aware\nStructure:\n- hook\n- core beat\n- payoff\n- call to action\nFormatting:\n- short lines\n- scene beats\n- CTA lines\nForbidden:\n- slow openings\n- weak payoff\nRhythm: fast hook cadence",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Need help with podcast structure and pacing",
+          "output": "Provide output in the Podcast Outline Format format with explicit structure and execution clarity."
+        },
+        {
+          "input": "Prepare a draft related to podcast structure and pacing",
+          "output": "Return a concise, structured draft that follows this style profile and constraints."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "creator-cta-stack-dance",
+    "name": "Creator CTA Stack",
+    "description": "Layered CTA format for creator funnels.",
+    "category": "Creator",
+    "rules": "Tone:\n- hook-driven\n- energetic\n- audience-aware\nStructure:\n- hook\n- core beat\n- payoff\n- call to action\nFormatting:\n- short lines\n- scene beats\n- CTA lines\nForbidden:\n- slow openings\n- weak payoff\nRhythm: fast hook cadence",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Need help with creator funnel conversion",
+          "output": "Provide output in the Creator CTA Stack format with explicit structure and execution clarity."
+        },
+        {
+          "input": "Prepare a draft related to creator funnel conversion",
+          "output": "Return a concise, structured draft that follows this style profile and constraints."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "kpi-health-report-dance",
+    "name": "KPI Health Report",
+    "description": "KPI health check output format.",
+    "category": "Analytics",
+    "rules": "Tone:\n- objective\n- diagnostic\n- decision-oriented\nStructure:\n- metric signal\n- drivers\n- hypotheses\n- action owner\nFormatting:\n- tables\n- delta highlights\n- confidence flags\nForbidden:\n- metric dump without interpretation\n- causal overclaim\nRhythm: signal to action",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Need help with kpi health communication",
+          "output": "Provide output in the KPI Health Report format with explicit structure and execution clarity."
+        },
+        {
+          "input": "Prepare a draft related to kpi health communication",
+          "output": "Return a concise, structured draft that follows this style profile and constraints."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "anomaly-investigation-dance",
+    "name": "Anomaly Investigation Format",
+    "description": "Anomaly investigation format with hypotheses.",
+    "category": "Analytics",
+    "rules": "Tone:\n- objective\n- diagnostic\n- decision-oriented\nStructure:\n- metric signal\n- drivers\n- hypotheses\n- action owner\nFormatting:\n- tables\n- delta highlights\n- confidence flags\nForbidden:\n- metric dump without interpretation\n- causal overclaim\nRhythm: signal to action",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Need help with anomaly root-cause analysis",
+          "output": "Provide output in the Anomaly Investigation Format format with explicit structure and execution clarity."
+        },
+        {
+          "input": "Prepare a draft related to anomaly root-cause analysis",
+          "output": "Return a concise, structured draft that follows this style profile and constraints."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "cohort-analysis-brief-dance",
+    "name": "Cohort Analysis Brief",
+    "description": "Cohort analysis output for retention and value.",
+    "category": "Analytics",
+    "rules": "Tone:\n- objective\n- diagnostic\n- decision-oriented\nStructure:\n- metric signal\n- drivers\n- hypotheses\n- action owner\nFormatting:\n- tables\n- delta highlights\n- confidence flags\nForbidden:\n- metric dump without interpretation\n- causal overclaim\nRhythm: signal to action",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Need help with cohort insight briefing",
+          "output": "Provide output in the Cohort Analysis Brief format with explicit structure and execution clarity."
+        },
+        {
+          "input": "Prepare a draft related to cohort insight briefing",
+          "output": "Return a concise, structured draft that follows this style profile and constraints."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "forecasting-note-dance",
+    "name": "Forecasting Note Format",
+    "description": "Forecasting assumptions and scenario format.",
+    "category": "Analytics",
+    "rules": "Tone:\n- objective\n- diagnostic\n- decision-oriented\nStructure:\n- metric signal\n- drivers\n- hypotheses\n- action owner\nFormatting:\n- tables\n- delta highlights\n- confidence flags\nForbidden:\n- metric dump without interpretation\n- causal overclaim\nRhythm: signal to action",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Need help with forecast communication clarity",
+          "output": "Provide output in the Forecasting Note Format format with explicit structure and execution clarity."
+        },
+        {
+          "input": "Prepare a draft related to forecast communication clarity",
+          "output": "Return a concise, structured draft that follows this style profile and constraints."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "experiment-dashboard-readout-dance",
+    "name": "Experiment Dashboard Readout",
+    "description": "Experiment dashboard readout format.",
+    "category": "Analytics",
+    "rules": "Tone:\n- objective\n- diagnostic\n- decision-oriented\nStructure:\n- metric signal\n- drivers\n- hypotheses\n- action owner\nFormatting:\n- tables\n- delta highlights\n- confidence flags\nForbidden:\n- metric dump without interpretation\n- causal overclaim\nRhythm: signal to action",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Need help with experiment dashboard interpretation",
+          "output": "Provide output in the Experiment Dashboard Readout format with explicit structure and execution clarity."
+        },
+        {
+          "input": "Prepare a draft related to experiment dashboard interpretation",
+          "output": "Return a concise, structured draft that follows this style profile and constraints."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "crisp-executive-email-dance",
+    "name": "Crisp Executive Email",
+    "description": "Executive email format for fast clarity.",
+    "category": "Writing",
+    "rules": "Tone:\n- clear\n- persuasive\n- compact\nStructure:\n- opening line\n- key points\n- closing action\nFormatting:\n- short paragraphs\n- one-idea lines\n- explicit CTA\nForbidden:\n- filler phrases\n- unclear ask\nRhythm: high-density clarity",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Need help with executive email clarity",
+          "output": "Provide output in the Crisp Executive Email format with explicit structure and execution clarity."
+        },
+        {
+          "input": "Prepare a draft related to executive email clarity",
+          "output": "Return a concise, structured draft that follows this style profile and constraints."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "persuasive-proposal-dance",
+    "name": "Persuasive Proposal Format",
+    "description": "Proposal persuasion structure format.",
+    "category": "Writing",
+    "rules": "Tone:\n- clear\n- persuasive\n- compact\nStructure:\n- opening line\n- key points\n- closing action\nFormatting:\n- short paragraphs\n- one-idea lines\n- explicit CTA\nForbidden:\n- filler phrases\n- unclear ask\nRhythm: high-density clarity",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Need help with proposal persuasion flow",
+          "output": "Provide output in the Persuasive Proposal Format format with explicit structure and execution clarity."
+        },
+        {
+          "input": "Prepare a draft related to proposal persuasion flow",
+          "output": "Return a concise, structured draft that follows this style profile and constraints."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "linkedin-post-framework-dance",
+    "name": "LinkedIn Post Framework",
+    "description": "LinkedIn post format with hook and POV.",
+    "category": "Writing",
+    "rules": "Tone:\n- clear\n- persuasive\n- compact\nStructure:\n- opening line\n- key points\n- closing action\nFormatting:\n- short paragraphs\n- one-idea lines\n- explicit CTA\nForbidden:\n- filler phrases\n- unclear ask\nRhythm: high-density clarity",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Need help with linkedin content framework",
+          "output": "Provide output in the LinkedIn Post Framework format with explicit structure and execution clarity."
+        },
+        {
+          "input": "Prepare a draft related to linkedin content framework",
+          "output": "Return a concise, structured draft that follows this style profile and constraints."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "crisis-statement-dance",
+    "name": "Crisis Statement Format",
+    "description": "Public crisis statement output format.",
+    "category": "Writing",
+    "rules": "Tone:\n- clear\n- persuasive\n- compact\nStructure:\n- opening line\n- key points\n- closing action\nFormatting:\n- short paragraphs\n- one-idea lines\n- explicit CTA\nForbidden:\n- filler phrases\n- unclear ask\nRhythm: high-density clarity",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Need help with crisis statement discipline",
+          "output": "Provide output in the Crisis Statement Format format with explicit structure and execution clarity."
+        },
+        {
+          "input": "Prepare a draft related to crisis statement discipline",
+          "output": "Return a concise, structured draft that follows this style profile and constraints."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "technical-summary-note-dance",
+    "name": "Technical Summary Note",
+    "description": "Technical summary format for non-specialists.",
+    "category": "Writing",
+    "rules": "Tone:\n- clear\n- persuasive\n- compact\nStructure:\n- opening line\n- key points\n- closing action\nFormatting:\n- short paragraphs\n- one-idea lines\n- explicit CTA\nForbidden:\n- filler phrases\n- unclear ask\nRhythm: high-density clarity",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Need help with technical simplification output",
+          "output": "Provide output in the Technical Summary Note format with explicit structure and execution clarity."
+        },
+        {
+          "input": "Prepare a draft related to technical simplification output",
+          "output": "Return a concise, structured draft that follows this style profile and constraints."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "sam-altman-case-dance",
+    "name": "Sam Altman Strategy Note",
+    "description": "Public-case output style inspired by deployment pragmatism and long-horizon AI framing.",
+    "category": "Public Case",
+    "rules": "Tone:\n- distinctive\n- high-contrast\n- intentional\nStructure:\n- frame\n- thesis\n- proof points\n- next move\nFormatting:\n- bold transitions\n- signature phrasing\n- clear close\nForbidden:\n- personality imitation\n- empty charisma\nRhythm: persona-inspired cadence",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Need help with iterative deployment narrative",
+          "output": "Provide output in the Sam Altman Strategy Note format with explicit structure and execution clarity."
+        },
+        {
+          "input": "Prepare a draft related to iterative deployment narrative",
+          "output": "Return a concise, structured draft that follows this style profile and constraints."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "naval-ravikant-case-dance",
+    "name": "Naval Ravikant Leverage Note",
+    "description": "Public-case output style focused on leverage and concise mental models.",
+    "category": "Public Case",
+    "rules": "Tone:\n- distinctive\n- high-contrast\n- intentional\nStructure:\n- frame\n- thesis\n- proof points\n- next move\nFormatting:\n- bold transitions\n- signature phrasing\n- clear close\nForbidden:\n- personality imitation\n- empty charisma\nRhythm: persona-inspired cadence",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Need help with leverage-focused synthesis",
+          "output": "Provide output in the Naval Ravikant Leverage Note format with explicit structure and execution clarity."
+        },
+        {
+          "input": "Prepare a draft related to leverage-focused synthesis",
+          "output": "Return a concise, structured draft that follows this style profile and constraints."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "reid-hoffman-case-dance",
+    "name": "Reid Hoffman Network Memo",
+    "description": "Public-case output style for network effects and market timing.",
+    "category": "Public Case",
+    "rules": "Tone:\n- distinctive\n- high-contrast\n- intentional\nStructure:\n- frame\n- thesis\n- proof points\n- next move\nFormatting:\n- bold transitions\n- signature phrasing\n- clear close\nForbidden:\n- personality imitation\n- empty charisma\nRhythm: persona-inspired cadence",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Need help with network-effect strategy framing",
+          "output": "Provide output in the Reid Hoffman Network Memo format with explicit structure and execution clarity."
+        },
+        {
+          "input": "Prepare a draft related to network-effect strategy framing",
+          "output": "Return a concise, structured draft that follows this style profile and constraints."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "alex-hormozi-case-dance",
+    "name": "Alex Hormozi Offer Stack",
+    "description": "Public-case output style for offer clarity and value communication.",
+    "category": "Public Case",
+    "rules": "Tone:\n- distinctive\n- high-contrast\n- intentional\nStructure:\n- frame\n- thesis\n- proof points\n- next move\nFormatting:\n- bold transitions\n- signature phrasing\n- clear close\nForbidden:\n- personality imitation\n- empty charisma\nRhythm: persona-inspired cadence",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Need help with offer-strength communication",
+          "output": "Provide output in the Alex Hormozi Offer Stack format with explicit structure and execution clarity."
+        },
+        {
+          "input": "Prepare a draft related to offer-strength communication",
+          "output": "Return a concise, structured draft that follows this style profile and constraints."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "tim-ferriss-case-dance",
+    "name": "Tim Ferriss Experiment Log",
+    "description": "Public-case output style for experiments and practical takeaways.",
+    "category": "Public Case",
+    "rules": "Tone:\n- distinctive\n- high-contrast\n- intentional\nStructure:\n- frame\n- thesis\n- proof points\n- next move\nFormatting:\n- bold transitions\n- signature phrasing\n- clear close\nForbidden:\n- personality imitation\n- empty charisma\nRhythm: persona-inspired cadence",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Need help with experiment-driven playbook",
+          "output": "Provide output in the Tim Ferriss Experiment Log format with explicit structure and execution clarity."
+        },
+        {
+          "input": "Prepare a draft related to experiment-driven playbook",
+          "output": "Return a concise, structured draft that follows this style profile and constraints."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "ray-dalio-case-dance",
+    "name": "Ray Dalio Principles Memo",
+    "description": "Public-case output pattern that expresses principles, disagreements, and decisions transparently.",
+    "category": "Public Case",
+    "rules": "Tone:\n- insight-first\n- high-signal\n- pragmatic\n- principles-led reasoning\nStructure:\n- core thesis\n- mechanism breakdown\n- application steps\n- risk notes\nFormatting:\n- short sections\n- ranked bullets\n- explicit constraints\nForbidden:\n- personality imitation\n- hero worship\nRhythm: pattern -> adaptation -> action",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Need a response style for principles-led reasoning.",
+          "output": "Return output using Ray Dalio Principles Memo with explicit structure, constraints, and action clarity."
+        },
+        {
+          "input": "Draft this in Ray Dalio Principles Memo.",
+          "output": "Produce concise, high-signal output that follows the required sequence and formatting rules."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "peter-thiel-case-dance",
+    "name": "Peter Thiel Contrarian Memo",
+    "description": "Public-case output pattern for contrarian theses and asymmetric strategic logic.",
+    "category": "Public Case",
+    "rules": "Tone:\n- insight-first\n- high-signal\n- pragmatic\n- contrarian framing\nStructure:\n- core thesis\n- mechanism breakdown\n- application steps\n- risk notes\nFormatting:\n- short sections\n- ranked bullets\n- explicit constraints\nForbidden:\n- personality imitation\n- hero worship\nRhythm: pattern -> adaptation -> action",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Need a response style for contrarian framing.",
+          "output": "Return output using Peter Thiel Contrarian Memo with explicit structure, constraints, and action clarity."
+        },
+        {
+          "input": "Draft this in Peter Thiel Contrarian Memo.",
+          "output": "Produce concise, high-signal output that follows the required sequence and formatting rules."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "marie-kondo-case-dance",
+    "name": "Marie Kondo Simplicity Grid",
+    "description": "Public-case output pattern that simplifies complexity into essential priorities.",
+    "category": "Public Case",
+    "rules": "Tone:\n- insight-first\n- high-signal\n- pragmatic\n- ruthless simplification\nStructure:\n- core thesis\n- mechanism breakdown\n- application steps\n- risk notes\nFormatting:\n- short sections\n- ranked bullets\n- explicit constraints\nForbidden:\n- personality imitation\n- hero worship\nRhythm: pattern -> adaptation -> action",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Need a response style for ruthless simplification.",
+          "output": "Return output using Marie Kondo Simplicity Grid with explicit structure, constraints, and action clarity."
+        },
+        {
+          "input": "Draft this in Marie Kondo Simplicity Grid.",
+          "output": "Produce concise, high-signal output that follows the required sequence and formatting rules."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "james-clear-case-dance",
+    "name": "James Clear Habit System",
+    "description": "Public-case output pattern for habit systems, cues, and compounding improvements.",
+    "category": "Public Case",
+    "rules": "Tone:\n- insight-first\n- high-signal\n- pragmatic\n- habit loop design\nStructure:\n- core thesis\n- mechanism breakdown\n- application steps\n- risk notes\nFormatting:\n- short sections\n- ranked bullets\n- explicit constraints\nForbidden:\n- personality imitation\n- hero worship\nRhythm: pattern -> adaptation -> action",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Need a response style for habit loop design.",
+          "output": "Return output using James Clear Habit System with explicit structure, constraints, and action clarity."
+        },
+        {
+          "input": "Draft this in James Clear Habit System.",
+          "output": "Produce concise, high-signal output that follows the required sequence and formatting rules."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "ali-abdaal-case-dance",
+    "name": "Ali Abdaal Learning Flywheel",
+    "description": "Public-case output pattern connecting learning loops to creator-business execution.",
+    "category": "Public Case",
+    "rules": "Tone:\n- insight-first\n- high-signal\n- pragmatic\n- learning-to-content flywheels\nStructure:\n- core thesis\n- mechanism breakdown\n- application steps\n- risk notes\nFormatting:\n- short sections\n- ranked bullets\n- explicit constraints\nForbidden:\n- personality imitation\n- hero worship\nRhythm: pattern -> adaptation -> action",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Need a response style for learning-to-content flywheels.",
+          "output": "Return output using Ali Abdaal Learning Flywheel with explicit structure, constraints, and action clarity."
+        },
+        {
+          "input": "Draft this in Ali Abdaal Learning Flywheel.",
+          "output": "Produce concise, high-signal output that follows the required sequence and formatting rules."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "investor-update-brief-dance",
+    "name": "Investor Update Brief",
+    "description": "Executive brief format for investor updates with KPI clarity and forward actions.",
+    "category": "Executive",
+    "rules": "Tone:\n- decisive\n- concise\n- evidence-led\n- investor communication\nStructure:\n- decision context\n- options\n- recommendation\n- owner and timeline\nFormatting:\n- one-page density\n- metric callouts\n- risk labels\nForbidden:\n- long preamble\n- unclear ownership\nRhythm: tight and accountable",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Need a response style for investor communication.",
+          "output": "Return output using Investor Update Brief with explicit structure, constraints, and action clarity."
+        },
+        {
+          "input": "Draft this in Investor Update Brief.",
+          "output": "Produce concise, high-signal output that follows the required sequence and formatting rules."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "decision-log-cascade-dance",
+    "name": "Decision Log Cascade",
+    "description": "Executive format that records decision rationale, tradeoffs, and accountable owners.",
+    "category": "Executive",
+    "rules": "Tone:\n- decisive\n- concise\n- evidence-led\n- decision traceability\nStructure:\n- decision context\n- options\n- recommendation\n- owner and timeline\nFormatting:\n- one-page density\n- metric callouts\n- risk labels\nForbidden:\n- long preamble\n- unclear ownership\nRhythm: tight and accountable",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Need a response style for decision traceability.",
+          "output": "Return output using Decision Log Cascade with explicit structure, constraints, and action clarity."
+        },
+        {
+          "input": "Draft this in Decision Log Cascade.",
+          "output": "Produce concise, high-signal output that follows the required sequence and formatting rules."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "quarterly-priority-review-dance",
+    "name": "Quarterly Priority Review",
+    "description": "Executive review format for quarterly priorities, risks, and execution shifts.",
+    "category": "Executive",
+    "rules": "Tone:\n- decisive\n- concise\n- evidence-led\n- quarterly operating rhythm\nStructure:\n- decision context\n- options\n- recommendation\n- owner and timeline\nFormatting:\n- one-page density\n- metric callouts\n- risk labels\nForbidden:\n- long preamble\n- unclear ownership\nRhythm: tight and accountable",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Need a response style for quarterly operating rhythm.",
+          "output": "Return output using Quarterly Priority Review with explicit structure, constraints, and action clarity."
+        },
+        {
+          "input": "Draft this in Quarterly Priority Review.",
+          "output": "Produce concise, high-signal output that follows the required sequence and formatting rules."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "board-risk-heatmap-dance",
+    "name": "Board Risk Heatmap",
+    "description": "Executive output pattern focused on board-level risk heatmaps and mitigations.",
+    "category": "Executive",
+    "rules": "Tone:\n- decisive\n- concise\n- evidence-led\n- board risk reporting\nStructure:\n- decision context\n- options\n- recommendation\n- owner and timeline\nFormatting:\n- one-page density\n- metric callouts\n- risk labels\nForbidden:\n- long preamble\n- unclear ownership\nRhythm: tight and accountable",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Need a response style for board risk reporting.",
+          "output": "Return output using Board Risk Heatmap with explicit structure, constraints, and action clarity."
+        },
+        {
+          "input": "Draft this in Board Risk Heatmap.",
+          "output": "Produce concise, high-signal output that follows the required sequence and formatting rules."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "ceo-all-hands-script-dance",
+    "name": "CEO All-Hands Script",
+    "description": "Executive communication pattern for all-hands messaging and directional clarity.",
+    "category": "Executive",
+    "rules": "Tone:\n- decisive\n- concise\n- evidence-led\n- company-wide alignment\nStructure:\n- decision context\n- options\n- recommendation\n- owner and timeline\nFormatting:\n- one-page density\n- metric callouts\n- risk labels\nForbidden:\n- long preamble\n- unclear ownership\nRhythm: tight and accountable",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Need a response style for company-wide alignment.",
+          "output": "Return output using CEO All-Hands Script with explicit structure, constraints, and action clarity."
+        },
+        {
+          "input": "Draft this in CEO All-Hands Script.",
+          "output": "Produce concise, high-signal output that follows the required sequence and formatting rules."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "jtbd-spec-sheet-dance",
+    "name": "JTBD Spec Sheet",
+    "description": "Product format centered on jobs, constraints, and measurable outcomes.",
+    "category": "Product",
+    "rules": "Tone:\n- user-centered\n- practical\n- clear\n- jobs-to-be-done framing\nStructure:\n- problem\n- target user\n- solution scope\n- success metrics\nFormatting:\n- MVP boundaries\n- flow bullets\n- instrumentation notes\nForbidden:\n- feature bloat\n- ambiguous outcomes\nRhythm: problem -> scope -> validation",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Need a response style for jobs-to-be-done framing.",
+          "output": "Return output using JTBD Spec Sheet with explicit structure, constraints, and action clarity."
+        },
+        {
+          "input": "Draft this in JTBD Spec Sheet.",
+          "output": "Produce concise, high-signal output that follows the required sequence and formatting rules."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "prd-lite-sprint-dance",
+    "name": "PRD Lite Sprint",
+    "description": "Product format that converts feature ideas into sprint-ready lightweight PRDs.",
+    "category": "Product",
+    "rules": "Tone:\n- user-centered\n- practical\n- clear\n- sprint-ready specs\nStructure:\n- problem\n- target user\n- solution scope\n- success metrics\nFormatting:\n- MVP boundaries\n- flow bullets\n- instrumentation notes\nForbidden:\n- feature bloat\n- ambiguous outcomes\nRhythm: problem -> scope -> validation",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Need a response style for sprint-ready specs.",
+          "output": "Return output using PRD Lite Sprint with explicit structure, constraints, and action clarity."
+        },
+        {
+          "input": "Draft this in PRD Lite Sprint.",
+          "output": "Produce concise, high-signal output that follows the required sequence and formatting rules."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "onboarding-friction-map-dance",
+    "name": "Onboarding Friction Map",
+    "description": "Product output pattern for identifying and fixing onboarding friction points.",
+    "category": "Product",
+    "rules": "Tone:\n- user-centered\n- practical\n- clear\n- activation blockers\nStructure:\n- problem\n- target user\n- solution scope\n- success metrics\nFormatting:\n- MVP boundaries\n- flow bullets\n- instrumentation notes\nForbidden:\n- feature bloat\n- ambiguous outcomes\nRhythm: problem -> scope -> validation",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Need a response style for activation blockers.",
+          "output": "Return output using Onboarding Friction Map with explicit structure, constraints, and action clarity."
+        },
+        {
+          "input": "Draft this in Onboarding Friction Map.",
+          "output": "Produce concise, high-signal output that follows the required sequence and formatting rules."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "feature-priority-scorecard-dance",
+    "name": "Feature Priority Scorecard",
+    "description": "Product scoring format for ranking feature bets with consistent criteria.",
+    "category": "Product",
+    "rules": "Tone:\n- user-centered\n- practical\n- clear\n- feature ranking\nStructure:\n- problem\n- target user\n- solution scope\n- success metrics\nFormatting:\n- MVP boundaries\n- flow bullets\n- instrumentation notes\nForbidden:\n- feature bloat\n- ambiguous outcomes\nRhythm: problem -> scope -> validation",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Need a response style for feature ranking.",
+          "output": "Return output using Feature Priority Scorecard with explicit structure, constraints, and action clarity."
+        },
+        {
+          "input": "Draft this in Feature Priority Scorecard.",
+          "output": "Produce concise, high-signal output that follows the required sequence and formatting rules."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "launch-readiness-check-dance",
+    "name": "Launch Readiness Check",
+    "description": "Product checklist format for launch readiness and go/no-go confidence.",
+    "category": "Product",
+    "rules": "Tone:\n- user-centered\n- practical\n- clear\n- go/no-go launch gating\nStructure:\n- problem\n- target user\n- solution scope\n- success metrics\nFormatting:\n- MVP boundaries\n- flow bullets\n- instrumentation notes\nForbidden:\n- feature bloat\n- ambiguous outcomes\nRhythm: problem -> scope -> validation",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Need a response style for go/no-go launch gating.",
+          "output": "Return output using Launch Readiness Check with explicit structure, constraints, and action clarity."
+        },
+        {
+          "input": "Draft this in Launch Readiness Check.",
+          "output": "Produce concise, high-signal output that follows the required sequence and formatting rules."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "funnel-leak-diagnosis-dance",
+    "name": "Funnel Leak Diagnosis",
+    "description": "Growth pattern for locating leakage points and assigning fix experiments.",
+    "category": "Growth",
+    "rules": "Tone:\n- experimental\n- energetic\n- metric-conscious\n- funnel conversion leaks\nStructure:\n- hypothesis\n- test setup\n- success criteria\n- next iteration\nFormatting:\n- table-ready\n- baseline vs variant\n- stop/go gates\nForbidden:\n- vanity reporting\n- untestable ideas\nRhythm: test -> read -> iterate",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Need a response style for funnel conversion leaks.",
+          "output": "Return output using Funnel Leak Diagnosis with explicit structure, constraints, and action clarity."
+        },
+        {
+          "input": "Draft this in Funnel Leak Diagnosis.",
+          "output": "Produce concise, high-signal output that follows the required sequence and formatting rules."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "conversion-copy-test-grid-dance",
+    "name": "Conversion Copy Test Grid",
+    "description": "Growth format for testing messaging variants by funnel stage.",
+    "category": "Growth",
+    "rules": "Tone:\n- experimental\n- energetic\n- metric-conscious\n- copy testing matrix\nStructure:\n- hypothesis\n- test setup\n- success criteria\n- next iteration\nFormatting:\n- table-ready\n- baseline vs variant\n- stop/go gates\nForbidden:\n- vanity reporting\n- untestable ideas\nRhythm: test -> read -> iterate",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Need a response style for copy testing matrix.",
+          "output": "Return output using Conversion Copy Test Grid with explicit structure, constraints, and action clarity."
+        },
+        {
+          "input": "Draft this in Conversion Copy Test Grid.",
+          "output": "Produce concise, high-signal output that follows the required sequence and formatting rules."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "reactivation-campaign-dance",
+    "name": "Reactivation Campaign Sheet",
+    "description": "Growth output pattern for reactivating dormant users through segmented campaigns.",
+    "category": "Growth",
+    "rules": "Tone:\n- experimental\n- energetic\n- metric-conscious\n- user reactivation\nStructure:\n- hypothesis\n- test setup\n- success criteria\n- next iteration\nFormatting:\n- table-ready\n- baseline vs variant\n- stop/go gates\nForbidden:\n- vanity reporting\n- untestable ideas\nRhythm: test -> read -> iterate",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Need a response style for user reactivation.",
+          "output": "Return output using Reactivation Campaign Sheet with explicit structure, constraints, and action clarity."
+        },
+        {
+          "input": "Draft this in Reactivation Campaign Sheet.",
+          "output": "Produce concise, high-signal output that follows the required sequence and formatting rules."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "referral-loop-playbook-dance",
+    "name": "Referral Loop Playbook",
+    "description": "Growth format for designing and tracking referral loop mechanics.",
+    "category": "Growth",
+    "rules": "Tone:\n- experimental\n- energetic\n- metric-conscious\n- referral mechanics\nStructure:\n- hypothesis\n- test setup\n- success criteria\n- next iteration\nFormatting:\n- table-ready\n- baseline vs variant\n- stop/go gates\nForbidden:\n- vanity reporting\n- untestable ideas\nRhythm: test -> read -> iterate",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Need a response style for referral mechanics.",
+          "output": "Return output using Referral Loop Playbook with explicit structure, constraints, and action clarity."
+        },
+        {
+          "input": "Draft this in Referral Loop Playbook.",
+          "output": "Produce concise, high-signal output that follows the required sequence and formatting rules."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "content-growth-sprint-dance",
+    "name": "Content Growth Sprint",
+    "description": "Growth sprint format for content production tied to measurable acquisition goals.",
+    "category": "Growth",
+    "rules": "Tone:\n- experimental\n- energetic\n- metric-conscious\n- content-led acquisition\nStructure:\n- hypothesis\n- test setup\n- success criteria\n- next iteration\nFormatting:\n- table-ready\n- baseline vs variant\n- stop/go gates\nForbidden:\n- vanity reporting\n- untestable ideas\nRhythm: test -> read -> iterate",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Need a response style for content-led acquisition.",
+          "output": "Return output using Content Growth Sprint with explicit structure, constraints, and action clarity."
+        },
+        {
+          "input": "Draft this in Content Growth Sprint.",
+          "output": "Produce concise, high-signal output that follows the required sequence and formatting rules."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "source-triangulation-brief-dance",
+    "name": "Source Triangulation Brief",
+    "description": "Research format for triangulating claims across independent sources.",
+    "category": "Research",
+    "rules": "Tone:\n- neutral\n- evidence-weighted\n- precise\n- multi-source validation\nStructure:\n- question\n- evidence\n- insight\n- confidence and limits\nFormatting:\n- source tags\n- confidence labels\n- counter-evidence\nForbidden:\n- source-free claims\n- overstated certainty\nRhythm: question -> evidence -> confidence",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Need a response style for multi-source validation.",
+          "output": "Return output using Source Triangulation Brief with explicit structure, constraints, and action clarity."
+        },
+        {
+          "input": "Draft this in Source Triangulation Brief.",
+          "output": "Produce concise, high-signal output that follows the required sequence and formatting rules."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "interview-insight-cluster-dance",
+    "name": "Interview Insight Cluster",
+    "description": "Research format for clustering interview data into action themes.",
+    "category": "Research",
+    "rules": "Tone:\n- neutral\n- evidence-weighted\n- precise\n- qualitative synthesis\nStructure:\n- question\n- evidence\n- insight\n- confidence and limits\nFormatting:\n- source tags\n- confidence labels\n- counter-evidence\nForbidden:\n- source-free claims\n- overstated certainty\nRhythm: question -> evidence -> confidence",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Need a response style for qualitative synthesis.",
+          "output": "Return output using Interview Insight Cluster with explicit structure, constraints, and action clarity."
+        },
+        {
+          "input": "Draft this in Interview Insight Cluster.",
+          "output": "Produce concise, high-signal output that follows the required sequence and formatting rules."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "market-map-snapshot-dance",
+    "name": "Market Map Snapshot",
+    "description": "Research snapshot style for rapid market mapping and implications.",
+    "category": "Research",
+    "rules": "Tone:\n- neutral\n- evidence-weighted\n- precise\n- landscape mapping\nStructure:\n- question\n- evidence\n- insight\n- confidence and limits\nFormatting:\n- source tags\n- confidence labels\n- counter-evidence\nForbidden:\n- source-free claims\n- overstated certainty\nRhythm: question -> evidence -> confidence",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Need a response style for landscape mapping.",
+          "output": "Return output using Market Map Snapshot with explicit structure, constraints, and action clarity."
+        },
+        {
+          "input": "Draft this in Market Map Snapshot.",
+          "output": "Produce concise, high-signal output that follows the required sequence and formatting rules."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "claim-evidence-matrix-dance",
+    "name": "Claim Evidence Matrix",
+    "description": "Research matrix style linking each claim to evidence weight and limits.",
+    "category": "Research",
+    "rules": "Tone:\n- neutral\n- evidence-weighted\n- precise\n- claim validation\nStructure:\n- question\n- evidence\n- insight\n- confidence and limits\nFormatting:\n- source tags\n- confidence labels\n- counter-evidence\nForbidden:\n- source-free claims\n- overstated certainty\nRhythm: question -> evidence -> confidence",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Need a response style for claim validation.",
+          "output": "Return output using Claim Evidence Matrix with explicit structure, constraints, and action clarity."
+        },
+        {
+          "input": "Draft this in Claim Evidence Matrix.",
+          "output": "Produce concise, high-signal output that follows the required sequence and formatting rules."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "uncertainty-led-recap-dance",
+    "name": "Uncertainty-Led Recap",
+    "description": "Research recap style that foregrounds uncertainty and decision confidence.",
+    "category": "Research",
+    "rules": "Tone:\n- neutral\n- evidence-weighted\n- precise\n- confidence communication\nStructure:\n- question\n- evidence\n- insight\n- confidence and limits\nFormatting:\n- source tags\n- confidence labels\n- counter-evidence\nForbidden:\n- source-free claims\n- overstated certainty\nRhythm: question -> evidence -> confidence",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Need a response style for confidence communication.",
+          "output": "Return output using Uncertainty-Led Recap with explicit structure, constraints, and action clarity."
+        },
+        {
+          "input": "Draft this in Uncertainty-Led Recap.",
+          "output": "Produce concise, high-signal output that follows the required sequence and formatting rules."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "narrative-house-brief-dance",
+    "name": "Narrative House Brief",
+    "description": "Brand format for narrative house, proof pillars, and message consistency.",
+    "category": "Brand",
+    "rules": "Tone:\n- distinct\n- coherent\n- audience-aware\n- message architecture\nStructure:\n- audience tension\n- brand promise\n- proof\n- message variants\nFormatting:\n- message hierarchy\n- channel variants\n- tone guardrails\nForbidden:\n- generic slogans\n- inconsistent voice\nRhythm: insight -> message -> rollout",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Need a response style for message architecture.",
+          "output": "Return output using Narrative House Brief with explicit structure, constraints, and action clarity."
+        },
+        {
+          "input": "Draft this in Narrative House Brief.",
+          "output": "Produce concise, high-signal output that follows the required sequence and formatting rules."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "positioning-battlecard-dance",
+    "name": "Positioning Battlecard",
+    "description": "Brand battlecard output for competitive positioning and response strategy.",
+    "category": "Brand",
+    "rules": "Tone:\n- distinct\n- coherent\n- audience-aware\n- competitive messaging\nStructure:\n- audience tension\n- brand promise\n- proof\n- message variants\nFormatting:\n- message hierarchy\n- channel variants\n- tone guardrails\nForbidden:\n- generic slogans\n- inconsistent voice\nRhythm: insight -> message -> rollout",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Need a response style for competitive messaging.",
+          "output": "Return output using Positioning Battlecard with explicit structure, constraints, and action clarity."
+        },
+        {
+          "input": "Draft this in Positioning Battlecard.",
+          "output": "Produce concise, high-signal output that follows the required sequence and formatting rules."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "voice-consistency-review-dance",
+    "name": "Voice Consistency Review",
+    "description": "Brand review format for keeping tone and voice consistent across assets.",
+    "category": "Brand",
+    "rules": "Tone:\n- distinct\n- coherent\n- audience-aware\n- tone governance\nStructure:\n- audience tension\n- brand promise\n- proof\n- message variants\nFormatting:\n- message hierarchy\n- channel variants\n- tone guardrails\nForbidden:\n- generic slogans\n- inconsistent voice\nRhythm: insight -> message -> rollout",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Need a response style for tone governance.",
+          "output": "Return output using Voice Consistency Review with explicit structure, constraints, and action clarity."
+        },
+        {
+          "input": "Draft this in Voice Consistency Review.",
+          "output": "Produce concise, high-signal output that follows the required sequence and formatting rules."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "trust-repair-statement-dance",
+    "name": "Trust Repair Statement",
+    "description": "Brand statement pattern for trust repair with clear accountability language.",
+    "category": "Brand",
+    "rules": "Tone:\n- distinct\n- coherent\n- audience-aware\n- reputation recovery statements\nStructure:\n- audience tension\n- brand promise\n- proof\n- message variants\nFormatting:\n- message hierarchy\n- channel variants\n- tone guardrails\nForbidden:\n- generic slogans\n- inconsistent voice\nRhythm: insight -> message -> rollout",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Need a response style for reputation recovery statements.",
+          "output": "Return output using Trust Repair Statement with explicit structure, constraints, and action clarity."
+        },
+        {
+          "input": "Draft this in Trust Repair Statement.",
+          "output": "Produce concise, high-signal output that follows the required sequence and formatting rules."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "launch-campaign-manifesto-dance",
+    "name": "Launch Campaign Manifesto",
+    "description": "Brand manifesto pattern for launch campaigns with coherent narrative and CTA.",
+    "category": "Brand",
+    "rules": "Tone:\n- distinct\n- coherent\n- audience-aware\n- high-visibility launch copy\nStructure:\n- audience tension\n- brand promise\n- proof\n- message variants\nFormatting:\n- message hierarchy\n- channel variants\n- tone guardrails\nForbidden:\n- generic slogans\n- inconsistent voice\nRhythm: insight -> message -> rollout",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Need a response style for high-visibility launch copy.",
+          "output": "Return output using Launch Campaign Manifesto with explicit structure, constraints, and action clarity."
+        },
+        {
+          "input": "Draft this in Launch Campaign Manifesto.",
+          "output": "Produce concise, high-signal output that follows the required sequence and formatting rules."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "architecture-decision-record-dance",
+    "name": "Architecture Decision Record",
+    "description": "Developer format for architecture choices, tradeoffs, and consequences.",
+    "category": "Developer",
+    "rules": "Tone:\n- technical\n- direct\n- reliable\n- ADR workflows\nStructure:\n- context\n- implementation steps\n- edge cases\n- validation\nFormatting:\n- code-adjacent bullets\n- version notes\n- rollback hints\nForbidden:\n- hand-wavy abstractions\n- missing failure paths\nRhythm: implement -> verify -> harden",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Need a response style for ADR workflows.",
+          "output": "Return output using Architecture Decision Record with explicit structure, constraints, and action clarity."
+        },
+        {
+          "input": "Draft this in Architecture Decision Record.",
+          "output": "Produce concise, high-signal output that follows the required sequence and formatting rules."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "bug-triage-action-note-dance",
+    "name": "Bug Triage Action Note",
+    "description": "Developer note pattern for prioritizing and resolving bug backlogs quickly.",
+    "category": "Developer",
+    "rules": "Tone:\n- technical\n- direct\n- reliable\n- defect triage flow\nStructure:\n- context\n- implementation steps\n- edge cases\n- validation\nFormatting:\n- code-adjacent bullets\n- version notes\n- rollback hints\nForbidden:\n- hand-wavy abstractions\n- missing failure paths\nRhythm: implement -> verify -> harden",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Need a response style for defect triage flow.",
+          "output": "Return output using Bug Triage Action Note with explicit structure, constraints, and action clarity."
+        },
+        {
+          "input": "Draft this in Bug Triage Action Note.",
+          "output": "Produce concise, high-signal output that follows the required sequence and formatting rules."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "api-change-log-dance",
+    "name": "API Change Log Pattern",
+    "description": "Developer output format for API changes, compatibility notes, and migration steps.",
+    "category": "Developer",
+    "rules": "Tone:\n- technical\n- direct\n- reliable\n- API change communication\nStructure:\n- context\n- implementation steps\n- edge cases\n- validation\nFormatting:\n- code-adjacent bullets\n- version notes\n- rollback hints\nForbidden:\n- hand-wavy abstractions\n- missing failure paths\nRhythm: implement -> verify -> harden",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Need a response style for API change communication.",
+          "output": "Return output using API Change Log Pattern with explicit structure, constraints, and action clarity."
+        },
+        {
+          "input": "Draft this in API Change Log Pattern.",
+          "output": "Produce concise, high-signal output that follows the required sequence and formatting rules."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "postmortem-remediation-plan-dance",
+    "name": "Postmortem Remediation Plan",
+    "description": "Developer pattern for postmortem outputs with preventive remediation actions.",
+    "category": "Developer",
+    "rules": "Tone:\n- technical\n- direct\n- reliable\n- incident remediation planning\nStructure:\n- context\n- implementation steps\n- edge cases\n- validation\nFormatting:\n- code-adjacent bullets\n- version notes\n- rollback hints\nForbidden:\n- hand-wavy abstractions\n- missing failure paths\nRhythm: implement -> verify -> harden",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Need a response style for incident remediation planning.",
+          "output": "Return output using Postmortem Remediation Plan with explicit structure, constraints, and action clarity."
+        },
+        {
+          "input": "Draft this in Postmortem Remediation Plan.",
+          "output": "Produce concise, high-signal output that follows the required sequence and formatting rules."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "implementation-playbook-dance",
+    "name": "Implementation Playbook",
+    "description": "Developer playbook format from implementation steps to rollout validation.",
+    "category": "Developer",
+    "rules": "Tone:\n- technical\n- direct\n- reliable\n- build and rollout execution\nStructure:\n- context\n- implementation steps\n- edge cases\n- validation\nFormatting:\n- code-adjacent bullets\n- version notes\n- rollback hints\nForbidden:\n- hand-wavy abstractions\n- missing failure paths\nRhythm: implement -> verify -> harden",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Need a response style for build and rollout execution.",
+          "output": "Return output using Implementation Playbook with explicit structure, constraints, and action clarity."
+        },
+        {
+          "input": "Draft this in Implementation Playbook.",
+          "output": "Produce concise, high-signal output that follows the required sequence and formatting rules."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "incident-commander-log-dance",
+    "name": "Incident Commander Log",
+    "description": "Operations pattern for incident updates with ownership and checkpoint cadence.",
+    "category": "Operations",
+    "rules": "Tone:\n- calm-under-pressure\n- commanding\n- clear\n- live incident updates\nStructure:\n- status\n- impact\n- actions\n- next checkpoint\nFormatting:\n- timestamped updates\n- owner labels\n- priority markers\nForbidden:\n- speculation as fact\n- status ambiguity\nRhythm: triage -> stabilize -> prevent",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Need a response style for live incident updates.",
+          "output": "Return output using Incident Commander Log with explicit structure, constraints, and action clarity."
+        },
+        {
+          "input": "Draft this in Incident Commander Log.",
+          "output": "Produce concise, high-signal output that follows the required sequence and formatting rules."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "sop-improvement-cycle-dance",
+    "name": "SOP Improvement Cycle",
+    "description": "Operations pattern for SOP revisions and adoption tracking.",
+    "category": "Operations",
+    "rules": "Tone:\n- calm-under-pressure\n- commanding\n- clear\n- process refinement loops\nStructure:\n- status\n- impact\n- actions\n- next checkpoint\nFormatting:\n- timestamped updates\n- owner labels\n- priority markers\nForbidden:\n- speculation as fact\n- status ambiguity\nRhythm: triage -> stabilize -> prevent",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Need a response style for process refinement loops.",
+          "output": "Return output using SOP Improvement Cycle with explicit structure, constraints, and action clarity."
+        },
+        {
+          "input": "Draft this in SOP Improvement Cycle.",
+          "output": "Produce concise, high-signal output that follows the required sequence and formatting rules."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "escalation-handbook-dance",
+    "name": "Escalation Handbook",
+    "description": "Operations handbook style for clear escalation triggers and response trees.",
+    "category": "Operations",
+    "rules": "Tone:\n- calm-under-pressure\n- commanding\n- clear\n- escalation readiness\nStructure:\n- status\n- impact\n- actions\n- next checkpoint\nFormatting:\n- timestamped updates\n- owner labels\n- priority markers\nForbidden:\n- speculation as fact\n- status ambiguity\nRhythm: triage -> stabilize -> prevent",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Need a response style for escalation readiness.",
+          "output": "Return output using Escalation Handbook with explicit structure, constraints, and action clarity."
+        },
+        {
+          "input": "Draft this in Escalation Handbook.",
+          "output": "Produce concise, high-signal output that follows the required sequence and formatting rules."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "service-health-review-dance",
+    "name": "Service Health Review",
+    "description": "Operations review style for service health, anomalies, and preventive actions.",
+    "category": "Operations",
+    "rules": "Tone:\n- calm-under-pressure\n- commanding\n- clear\n- service reliability review\nStructure:\n- status\n- impact\n- actions\n- next checkpoint\nFormatting:\n- timestamped updates\n- owner labels\n- priority markers\nForbidden:\n- speculation as fact\n- status ambiguity\nRhythm: triage -> stabilize -> prevent",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Need a response style for service reliability review.",
+          "output": "Return output using Service Health Review with explicit structure, constraints, and action clarity."
+        },
+        {
+          "input": "Draft this in Service Health Review.",
+          "output": "Produce concise, high-signal output that follows the required sequence and formatting rules."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "vendor-risk-update-dance",
+    "name": "Vendor Risk Update",
+    "description": "Operations update style for vendor risk posture and mitigation tasks.",
+    "category": "Operations",
+    "rules": "Tone:\n- calm-under-pressure\n- commanding\n- clear\n- vendor reliability and risk\nStructure:\n- status\n- impact\n- actions\n- next checkpoint\nFormatting:\n- timestamped updates\n- owner labels\n- priority markers\nForbidden:\n- speculation as fact\n- status ambiguity\nRhythm: triage -> stabilize -> prevent",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Need a response style for vendor reliability and risk.",
+          "output": "Return output using Vendor Risk Update with explicit structure, constraints, and action clarity."
+        },
+        {
+          "input": "Draft this in Vendor Risk Update.",
+          "output": "Produce concise, high-signal output that follows the required sequence and formatting rules."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "lesson-scaffold-map-dance",
+    "name": "Lesson Scaffold Map",
+    "description": "Education format for sequencing lessons with checkpoints and reinforcement.",
+    "category": "Education",
+    "rules": "Tone:\n- supportive\n- stepwise\n- clear\n- scaffolded teaching sequence\nStructure:\n- goal\n- concept\n- practice\n- feedback loop\nFormatting:\n- level markers\n- micro-exercises\n- recap\nForbidden:\n- jargon dump\n- no practice\nRhythm: explain -> practice -> reinforce",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Need a response style for scaffolded teaching sequence.",
+          "output": "Return output using Lesson Scaffold Map with explicit structure, constraints, and action clarity."
+        },
+        {
+          "input": "Draft this in Lesson Scaffold Map.",
+          "output": "Produce concise, high-signal output that follows the required sequence and formatting rules."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "concept-to-exercise-dance",
+    "name": "Concept to Exercise Flow",
+    "description": "Education flow pattern that bridges concept explanations into exercises.",
+    "category": "Education",
+    "rules": "Tone:\n- supportive\n- stepwise\n- clear\n- practice-driven learning\nStructure:\n- goal\n- concept\n- practice\n- feedback loop\nFormatting:\n- level markers\n- micro-exercises\n- recap\nForbidden:\n- jargon dump\n- no practice\nRhythm: explain -> practice -> reinforce",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Need a response style for practice-driven learning.",
+          "output": "Return output using Concept to Exercise Flow with explicit structure, constraints, and action clarity."
+        },
+        {
+          "input": "Draft this in Concept to Exercise Flow.",
+          "output": "Produce concise, high-signal output that follows the required sequence and formatting rules."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "exam-revision-timetable-dance",
+    "name": "Exam Revision Timetable",
+    "description": "Education format for exam revision plans with pacing and review loops.",
+    "category": "Education",
+    "rules": "Tone:\n- supportive\n- stepwise\n- clear\n- exam preparation pacing\nStructure:\n- goal\n- concept\n- practice\n- feedback loop\nFormatting:\n- level markers\n- micro-exercises\n- recap\nForbidden:\n- jargon dump\n- no practice\nRhythm: explain -> practice -> reinforce",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Need a response style for exam preparation pacing.",
+          "output": "Return output using Exam Revision Timetable with explicit structure, constraints, and action clarity."
+        },
+        {
+          "input": "Draft this in Exam Revision Timetable.",
+          "output": "Produce concise, high-signal output that follows the required sequence and formatting rules."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "tutor-feedback-loop-dance",
+    "name": "Tutor Feedback Loop",
+    "description": "Education pattern that structures tutoring feedback and improvement cycles.",
+    "category": "Education",
+    "rules": "Tone:\n- supportive\n- stepwise\n- clear\n- feedback iteration\nStructure:\n- goal\n- concept\n- practice\n- feedback loop\nFormatting:\n- level markers\n- micro-exercises\n- recap\nForbidden:\n- jargon dump\n- no practice\nRhythm: explain -> practice -> reinforce",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Need a response style for feedback iteration.",
+          "output": "Return output using Tutor Feedback Loop with explicit structure, constraints, and action clarity."
+        },
+        {
+          "input": "Draft this in Tutor Feedback Loop.",
+          "output": "Produce concise, high-signal output that follows the required sequence and formatting rules."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "skill-progression-roadmap-dance",
+    "name": "Skill Progression Roadmap",
+    "description": "Education roadmap style for progressive skill development milestones.",
+    "category": "Education",
+    "rules": "Tone:\n- supportive\n- stepwise\n- clear\n- long-term skill tracks\nStructure:\n- goal\n- concept\n- practice\n- feedback loop\nFormatting:\n- level markers\n- micro-exercises\n- recap\nForbidden:\n- jargon dump\n- no practice\nRhythm: explain -> practice -> reinforce",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Need a response style for long-term skill tracks.",
+          "output": "Return output using Skill Progression Roadmap with explicit structure, constraints, and action clarity."
+        },
+        {
+          "input": "Draft this in Skill Progression Roadmap.",
+          "output": "Produce concise, high-signal output that follows the required sequence and formatting rules."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "short-video-hook-stack-dance",
+    "name": "Short Video Hook Stack",
+    "description": "Creator format for stacking hooks, beats, and payoff in short-form videos.",
+    "category": "Creator",
+    "rules": "Tone:\n- hook-driven\n- punchy\n- platform-native\n- short-video retention hooks\nStructure:\n- hook\n- value beat\n- proof beat\n- CTA\nFormatting:\n- short lines\n- retention beats\n- cta variants\nForbidden:\n- slow openings\n- unclear payoff\nRhythm: hook -> value -> conversion",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Need a response style for short-video retention hooks.",
+          "output": "Return output using Short Video Hook Stack with explicit structure, constraints, and action clarity."
+        },
+        {
+          "input": "Draft this in Short Video Hook Stack.",
+          "output": "Produce concise, high-signal output that follows the required sequence and formatting rules."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "carousel-story-sequence-dance",
+    "name": "Carousel Story Sequence",
+    "description": "Creator output pattern for swipe-based carousel story sequencing.",
+    "category": "Creator",
+    "rules": "Tone:\n- hook-driven\n- punchy\n- platform-native\n- carousel narrative arcs\nStructure:\n- hook\n- value beat\n- proof beat\n- CTA\nFormatting:\n- short lines\n- retention beats\n- cta variants\nForbidden:\n- slow openings\n- unclear payoff\nRhythm: hook -> value -> conversion",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Need a response style for carousel narrative arcs.",
+          "output": "Return output using Carousel Story Sequence with explicit structure, constraints, and action clarity."
+        },
+        {
+          "input": "Draft this in Carousel Story Sequence.",
+          "output": "Produce concise, high-signal output that follows the required sequence and formatting rules."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "newsletter-retention-loop-dance",
+    "name": "Newsletter Retention Loop",
+    "description": "Creator pattern for newsletter cadence and retention triggers.",
+    "category": "Creator",
+    "rules": "Tone:\n- hook-driven\n- punchy\n- platform-native\n- newsletter loyalty loops\nStructure:\n- hook\n- value beat\n- proof beat\n- CTA\nFormatting:\n- short lines\n- retention beats\n- cta variants\nForbidden:\n- slow openings\n- unclear payoff\nRhythm: hook -> value -> conversion",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Need a response style for newsletter loyalty loops.",
+          "output": "Return output using Newsletter Retention Loop with explicit structure, constraints, and action clarity."
+        },
+        {
+          "input": "Draft this in Newsletter Retention Loop.",
+          "output": "Produce concise, high-signal output that follows the required sequence and formatting rules."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "livestream-run-of-show-dance",
+    "name": "Livestream Run of Show",
+    "description": "Creator run-of-show format for live streams with engagement checkpoints.",
+    "category": "Creator",
+    "rules": "Tone:\n- hook-driven\n- punchy\n- platform-native\n- live segment pacing\nStructure:\n- hook\n- value beat\n- proof beat\n- CTA\nFormatting:\n- short lines\n- retention beats\n- cta variants\nForbidden:\n- slow openings\n- unclear payoff\nRhythm: hook -> value -> conversion",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Need a response style for live segment pacing.",
+          "output": "Return output using Livestream Run of Show with explicit structure, constraints, and action clarity."
+        },
+        {
+          "input": "Draft this in Livestream Run of Show.",
+          "output": "Produce concise, high-signal output that follows the required sequence and formatting rules."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "collab-brief-template-dance",
+    "name": "Collab Brief Template",
+    "description": "Creator brief pattern for collaboration goals, roles, and conversion paths.",
+    "category": "Creator",
+    "rules": "Tone:\n- hook-driven\n- punchy\n- platform-native\n- creator collaboration plans\nStructure:\n- hook\n- value beat\n- proof beat\n- CTA\nFormatting:\n- short lines\n- retention beats\n- cta variants\nForbidden:\n- slow openings\n- unclear payoff\nRhythm: hook -> value -> conversion",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Need a response style for creator collaboration plans.",
+          "output": "Return output using Collab Brief Template with explicit structure, constraints, and action clarity."
+        },
+        {
+          "input": "Draft this in Collab Brief Template.",
+          "output": "Produce concise, high-signal output that follows the required sequence and formatting rules."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "kpi-cause-tree-dance",
+    "name": "KPI Cause Tree",
+    "description": "Analytics format for KPI decomposition and root-cause hypotheses.",
+    "category": "Analytics",
+    "rules": "Tone:\n- fact-first\n- calibrated\n- decision-ready\n- root-cause decomposition\nStructure:\n- metric snapshot\n- cause hypothesis\n- confidence\n- action\nFormatting:\n- delta callouts\n- assumption notes\n- action ranking\nForbidden:\n- raw dumps\n- context-free charts\nRhythm: observe -> explain -> decide",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Need a response style for root-cause decomposition.",
+          "output": "Return output using KPI Cause Tree with explicit structure, constraints, and action clarity."
+        },
+        {
+          "input": "Draft this in KPI Cause Tree.",
+          "output": "Produce concise, high-signal output that follows the required sequence and formatting rules."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "experiment-readout-dance",
+    "name": "Experiment Readout",
+    "description": "Analytics readout style for experiment outcomes and confidence levels.",
+    "category": "Analytics",
+    "rules": "Tone:\n- fact-first\n- calibrated\n- decision-ready\n- test result synthesis\nStructure:\n- metric snapshot\n- cause hypothesis\n- confidence\n- action\nFormatting:\n- delta callouts\n- assumption notes\n- action ranking\nForbidden:\n- raw dumps\n- context-free charts\nRhythm: observe -> explain -> decide",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Need a response style for test result synthesis.",
+          "output": "Return output using Experiment Readout with explicit structure, constraints, and action clarity."
+        },
+        {
+          "input": "Draft this in Experiment Readout.",
+          "output": "Produce concise, high-signal output that follows the required sequence and formatting rules."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "cohort-retention-brief-dance",
+    "name": "Cohort Retention Brief",
+    "description": "Analytics brief format for cohort retention patterns and interventions.",
+    "category": "Analytics",
+    "rules": "Tone:\n- fact-first\n- calibrated\n- decision-ready\n- cohort retention analysis\nStructure:\n- metric snapshot\n- cause hypothesis\n- confidence\n- action\nFormatting:\n- delta callouts\n- assumption notes\n- action ranking\nForbidden:\n- raw dumps\n- context-free charts\nRhythm: observe -> explain -> decide",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Need a response style for cohort retention analysis.",
+          "output": "Return output using Cohort Retention Brief with explicit structure, constraints, and action clarity."
+        },
+        {
+          "input": "Draft this in Cohort Retention Brief.",
+          "output": "Produce concise, high-signal output that follows the required sequence and formatting rules."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "forecast-sensitivity-note-dance",
+    "name": "Forecast Sensitivity Note",
+    "description": "Analytics note pattern for forecast sensitivity and assumption stress tests.",
+    "category": "Analytics",
+    "rules": "Tone:\n- fact-first\n- calibrated\n- decision-ready\n- scenario sensitivity reporting\nStructure:\n- metric snapshot\n- cause hypothesis\n- confidence\n- action\nFormatting:\n- delta callouts\n- assumption notes\n- action ranking\nForbidden:\n- raw dumps\n- context-free charts\nRhythm: observe -> explain -> decide",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Need a response style for scenario sensitivity reporting.",
+          "output": "Return output using Forecast Sensitivity Note with explicit structure, constraints, and action clarity."
+        },
+        {
+          "input": "Draft this in Forecast Sensitivity Note.",
+          "output": "Produce concise, high-signal output that follows the required sequence and formatting rules."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "dashboard-executive-snapshot-dance",
+    "name": "Dashboard Executive Snapshot",
+    "description": "Analytics snapshot style translating dashboards into decision summaries.",
+    "category": "Analytics",
+    "rules": "Tone:\n- fact-first\n- calibrated\n- decision-ready\n- executive metric snapshot\nStructure:\n- metric snapshot\n- cause hypothesis\n- confidence\n- action\nFormatting:\n- delta callouts\n- assumption notes\n- action ranking\nForbidden:\n- raw dumps\n- context-free charts\nRhythm: observe -> explain -> decide",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Need a response style for executive metric snapshot.",
+          "output": "Return output using Dashboard Executive Snapshot with explicit structure, constraints, and action clarity."
+        },
+        {
+          "input": "Draft this in Dashboard Executive Snapshot.",
+          "output": "Produce concise, high-signal output that follows the required sequence and formatting rules."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "headline-variant-pack-dance",
+    "name": "Headline Variant Pack",
+    "description": "Writing pattern for generating and scoring multiple headline variants.",
+    "category": "Writing",
+    "rules": "Tone:\n- clear\n- persuasive\n- tight\n- headline ideation\nStructure:\n- lead claim\n- support points\n- proof\n- close\nFormatting:\n- scannable paragraphs\n- strong verbs\n- trimmed filler\nForbidden:\n- burying the lead\n- bloated phrasing\nRhythm: claim -> support -> impact",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Need a response style for headline ideation.",
+          "output": "Return output using Headline Variant Pack with explicit structure, constraints, and action clarity."
+        },
+        {
+          "input": "Draft this in Headline Variant Pack.",
+          "output": "Produce concise, high-signal output that follows the required sequence and formatting rules."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "longform-outline-engine-dance",
+    "name": "Longform Outline Engine",
+    "description": "Writing format for long-form outlines with argument flow and evidence slots.",
+    "category": "Writing",
+    "rules": "Tone:\n- clear\n- persuasive\n- tight\n- long-form structure design\nStructure:\n- lead claim\n- support points\n- proof\n- close\nFormatting:\n- scannable paragraphs\n- strong verbs\n- trimmed filler\nForbidden:\n- burying the lead\n- bloated phrasing\nRhythm: claim -> support -> impact",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Need a response style for long-form structure design.",
+          "output": "Return output using Longform Outline Engine with explicit structure, constraints, and action clarity."
+        },
+        {
+          "input": "Draft this in Longform Outline Engine.",
+          "output": "Produce concise, high-signal output that follows the required sequence and formatting rules."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "persuasive-email-sequence-dance",
+    "name": "Persuasive Email Sequence",
+    "description": "Writing pattern for multi-step persuasive email sequences.",
+    "category": "Writing",
+    "rules": "Tone:\n- clear\n- persuasive\n- tight\n- email persuasion flow\nStructure:\n- lead claim\n- support points\n- proof\n- close\nFormatting:\n- scannable paragraphs\n- strong verbs\n- trimmed filler\nForbidden:\n- burying the lead\n- bloated phrasing\nRhythm: claim -> support -> impact",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Need a response style for email persuasion flow.",
+          "output": "Return output using Persuasive Email Sequence with explicit structure, constraints, and action clarity."
+        },
+        {
+          "input": "Draft this in Persuasive Email Sequence.",
+          "output": "Produce concise, high-signal output that follows the required sequence and formatting rules."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "crisis-statement-clarity-dance",
+    "name": "Crisis Statement Clarity",
+    "description": "Writing pattern for crisis statements with clarity and trust-preserving tone.",
+    "category": "Writing",
+    "rules": "Tone:\n- clear\n- persuasive\n- tight\n- high-stakes statement writing\nStructure:\n- lead claim\n- support points\n- proof\n- close\nFormatting:\n- scannable paragraphs\n- strong verbs\n- trimmed filler\nForbidden:\n- burying the lead\n- bloated phrasing\nRhythm: claim -> support -> impact",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Need a response style for high-stakes statement writing.",
+          "output": "Return output using Crisis Statement Clarity with explicit structure, constraints, and action clarity."
+        },
+        {
+          "input": "Draft this in Crisis Statement Clarity.",
+          "output": "Produce concise, high-signal output that follows the required sequence and formatting rules."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "edit-pass-checklist-dance",
+    "name": "Edit Pass Checklist",
+    "description": "Writing checklist format for tightening clarity, rhythm, and persuasion.",
+    "category": "Writing",
+    "rules": "Tone:\n- clear\n- persuasive\n- tight\n- systematic editing\nStructure:\n- lead claim\n- support points\n- proof\n- close\nFormatting:\n- scannable paragraphs\n- strong verbs\n- trimmed filler\nForbidden:\n- burying the lead\n- bloated phrasing\nRhythm: claim -> support -> impact",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Need a response style for systematic editing.",
+          "output": "Return output using Edit Pass Checklist with explicit structure, constraints, and action clarity."
+        },
+        {
+          "input": "Draft this in Edit Pass Checklist.",
+          "output": "Produce concise, high-signal output that follows the required sequence and formatting rules."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "tim-cook-case-dance",
+    "name": "Tim Cook Operating Review",
+    "description": "Operational review format inspired by Tim Cook public communication patterns.",
+    "category": "Public Case",
+    "rules": "Tone:\n- calm\n- operational\n- trust-first\nStructure:\n- current state\n- key constraints\n- execution plan\n- owner and timeline\nFormatting:\n- tight bullet blocks\n- owner/deadline labels\n- clear risk flags\nForbidden:\n- speculative hype\n- vague ownership\n- unbounded commitments\nRhythm: measured and execution-first",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Need a weekly ops update.",
+          "output": "Deliver a concise operating review with owners, deadlines, and top risks."
+        },
+        {
+          "input": "Summarize supply risk decisions.",
+          "output": "Explain constraint, decision, and mitigation in a clean execution cadence."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "sundar-pichai-case-dance",
+    "name": "Sundar Pichai Clarity Brief",
+    "description": "Clear platform brief style inspired by Sundar Pichai public communication patterns.",
+    "category": "Public Case",
+    "rules": "Tone:\n- clear\n- balanced\n- platform-oriented\nStructure:\n- user context\n- platform implication\n- recommended direction\n- next milestone\nFormatting:\n- short paragraphs\n- simple bullets\n- plain language definitions\nForbidden:\n- unscoped ambition\n- jargon-heavy abstraction\n- missing user impact\nRhythm: calm and systems-aware",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Explain an AI product direction.",
+          "output": "Start with user impact, then platform leverage, then phased execution."
+        },
+        {
+          "input": "Share cross-team roadmap update.",
+          "output": "Keep a concise, high-clarity brief with milestones and dependencies."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "brian-chesky-case-dance",
+    "name": "Brian Chesky Experience Narrative",
+    "description": "Experience-first narrative format inspired by Brian Chesky public communication patterns.",
+    "category": "Public Case",
+    "rules": "Tone:\n- experience-led\n- focused\n- founder-direct\nStructure:\n- moment of user pain\n- experience principle\n- product move\n- quality bar\nFormatting:\n- story opener + structured bullets\n- one core promise per section\nForbidden:\n- feature laundry lists\n- weak quality language\n- diffuse product narrative\nRhythm: story to decision to quality bar",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Pitch a product redesign.",
+          "output": "Frame user pain, design principle, and one high-conviction product move."
+        },
+        {
+          "input": "Explain roadmap cuts.",
+          "output": "Show what was removed to protect a better end-to-end experience."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "mark-zuckerberg-case-dance",
+    "name": "Mark Zuckerberg Build Log",
+    "description": "Build-and-learn status format inspired by Mark Zuckerberg public communication patterns.",
+    "category": "Public Case",
+    "rules": "Tone:\n- direct\n- iterative\n- metric-aware\nStructure:\n- what shipped\n- what changed in metrics\n- what we learned\n- next experiment\nFormatting:\n- compact status bullets\n- metric deltas\n- explicit next tests\nForbidden:\n- metric-free claims\n- long narrative without outcome\n- ambiguous next actions\nRhythm: fast loop with evidence",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Share product iteration update.",
+          "output": "List shipment, measured impact, key learning, and next test."
+        },
+        {
+          "input": "Report growth experiment.",
+          "output": "Summarize with clear metric movement and immediate next loop."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "john-carmack-case-dance",
+    "name": "John Carmack Technical Whiteboard",
+    "description": "Technical deep-dive format inspired by John Carmack public communication patterns.",
+    "category": "Public Case",
+    "rules": "Tone:\n- technical\n- precise\n- constraint-aware\nStructure:\n- problem statement\n- constraints\n- candidate approaches\n- decision rationale\nFormatting:\n- numbered technical steps\n- explicit assumptions\n- tradeoff table when needed\nForbidden:\n- hand-wavy architecture\n- unclear constraints\n- untested claims\nRhythm: stepwise and engineering-rigorous",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Compare architecture options.",
+          "output": "Show constraints, options, and decision rationale with test plan."
+        },
+        {
+          "input": "Write a systems design note.",
+          "output": "Use a precise, constraint-first technical whiteboard style."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "ben-horowitz-case-dance",
+    "name": "Ben Horowitz Hard Things Memo",
+    "description": "Wartime memo format inspired by Ben Horowitz public communication patterns.",
+    "category": "Public Case",
+    "rules": "Tone:\n- blunt\n- high-accountability\n- leadership-direct\nStructure:\n- hard truth\n- decision path\n- owner map\n- risk containment\nFormatting:\n- short hard-line bullets\n- clear owner callouts\n- decision timestamping\nForbidden:\n- soft language for hard issues\n- ownerless commitments\n- delayed decisions\nRhythm: decisive and accountable",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Need crisis decision memo.",
+          "output": "Lead with hard truth, decisive call, and accountable owner map."
+        },
+        {
+          "input": "Communicate painful tradeoffs.",
+          "output": "State why, who owns execution, and how downside is contained."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "yuval-harari-case-dance",
+    "name": "Yuval Harari Macro Lens Essay",
+    "description": "Macro-systems essay format inspired by Yuval Harari public communication patterns.",
+    "category": "Public Case",
+    "rules": "Tone:\n- analytical\n- historical\n- systems-level\nStructure:\n- current phenomenon\n- historical/system context\n- second-order effects\n- practical implication\nFormatting:\n- thesis + evidence blocks\n- scenario bullets\n- explicit uncertainty notes\nForbidden:\n- single-cause explanations\n- certainty without evidence\n- context-free claims\nRhythm: big-picture then grounded implication",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Analyze AI social impact.",
+          "output": "Connect present signal, historical pattern, second-order effect, and action."
+        },
+        {
+          "input": "Write a strategic essay.",
+          "output": "Use macro framing with explicit uncertainty and practical implication."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "apple-case-dance",
+    "name": "Apple Keynote Precision",
+    "description": "High-clarity product reveal format inspired by Apple public communication patterns.",
+    "category": "Public Case",
+    "rules": "Tone:\n- confident\n- minimal\n- benefit-led\nStructure:\n- user problem\n- one defining idea\n- proof of experience\n- launch action\nFormatting:\n- clean short lines\n- feature-to-benefit mapping\n- tight closing CTA\nForbidden:\n- feature bloat narration\n- unclear product promise\n- messy message hierarchy\nRhythm: problem -> reveal -> proof",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Draft launch messaging.",
+          "output": "Reveal one defining idea with crisp benefit-first structure."
+        },
+        {
+          "input": "Write product announcement.",
+          "output": "Keep keynote-grade clarity and disciplined message hierarchy."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "netflix-case-dance",
+    "name": "Netflix Strategy Deck Note",
+    "description": "Context-rich strategy note inspired by Netflix public communication patterns.",
+    "category": "Public Case",
+    "rules": "Tone:\n- strategic\n- context-rich\n- performance-aware\nStructure:\n- strategic context\n- bet portfolio\n- success criteria\n- resource shift\nFormatting:\n- deck-like sections\n- bold thesis lines\n- succinct metric checkpoints\nForbidden:\n- single-bet overconfidence\n- context-free recommendations\n- unclear stop criteria\nRhythm: context to portfolio to resource decision",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Plan content strategy bets.",
+          "output": "Frame portfolio bets, success bars, and reallocation logic."
+        },
+        {
+          "input": "Summarize quarterly strategy.",
+          "output": "Use context-rich deck note style with measurable checkpoints."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "costco-case-dance",
+    "name": "Costco Value Logic Brief",
+    "description": "Value-discipline brief format inspired by Costco public communication patterns.",
+    "category": "Public Case",
+    "rules": "Tone:\n- plainspoken\n- value-first\n- operational\nStructure:\n- value promise\n- unit economics logic\n- execution simplification\n- customer trust impact\nFormatting:\n- plain language bullets\n- simple value math\n- clear tradeoff lines\nForbidden:\n- over-designed language\n- value claims without math\n- complexity without payoff\nRhythm: simple, practical, evidence-backed",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Explain pricing decision.",
+          "output": "Show value logic, cost implication, and trust impact in plain terms."
+        },
+        {
+          "input": "Draft operations brief.",
+          "output": "Use a no-fluff value brief with simple numbers and clear tradeoffs."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "korean-job-application-pre2023-proof",
+    "name": "Korean Job Application Natural Voice (Pre-2023)",
+    "description": "Korean application output pattern tuned for grounded, evidence-led, non-template prose inspired by successful pre-2023 writing conventions.",
+    "category": "Writing",
+    "rules": "Tone:\n- grounded\n- specific\n- professional\n- evidence-first\nStructure:\n- role-fit thesis\n- context and challenge\n- actions and decisions\n- measurable outcome and next contribution\nFormatting:\n- paragraph-first flow; bullets only for dense facts\n- state company/role context explicitly in first paragraph\n- anchor each claim to concrete project detail, metric, or owner\n- vary sentence length to avoid repetitive template cadence\n- use restrained punctuation; avoid decorative separators\nForbidden:\n- generic passion-only claims without evidence\n- copy-paste template transitions across paragraphs\n- dash-heavy separator chains and stacked parentheticals\n- inflated buzzwords without operational meaning\n- AI-sounding balanced symmetry in every sentence\nRhythm: measured and human, with concrete detail before conclusion",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "한화투자증권 RWA 부서 지원동기를 작성해줘.",
+          "output": "직무와 직접 연결된 실무 사례를 먼저 제시하고, 이후 90일 실행 계획을 구체 지표와 함께 제안한다."
+        },
+        {
+          "input": "가장 어려운 문제 해결 경험을 써줘.",
+          "output": "상황-판단-행동-결과를 실제 의사결정 기준 중심으로 작성하고, 배운 점을 다음 실행 원칙으로 연결한다."
+        }
+      ],
+      "antiPatterns": []
+    }
+  },
+  {
+    "slug": "english-job-application-natural-voice-dance",
+    "name": "English Job Application Natural Voice (Pre-2023)",
+    "description": "English application output pattern for evidence-led, role-specific, and non-AI sounding prose based on practical pre-2023 cover-letter conventions.",
+    "category": "Writing",
+    "rules": "Tone:\n- grounded\n- direct\n- role-specific\n- credible\nStructure:\n- fit thesis\n- high-signal evidence\n- execution pattern\n- near-term contribution plan\nFormatting:\n- paragraph-first narrative with concise transitions\n- prioritize specific decisions, constraints, and results\n- include at least one concrete metric or operational outcome\n- mix sentence lengths for natural cadence\n- use punctuation discipline; keep separators minimal\nForbidden:\n- generic enthusiasm blocks with no proof\n- formulaic transition ladders repeated every paragraph\n- stacked em-dashes and ornamental punctuation patterns\n- buzzword clusters without role context\n- overly symmetric AI-template sentence shells\nRhythm: natural editorial cadence with evidence before claims",
+    "exemplarSet": {
+      "styleExamples": [
+        {
+          "input": "Write motivation and role fit for an RWA strategy role.",
+          "output": "Open with role-fit thesis, cite concrete cross-functional execution evidence, and close with a 30/60/90 contribution plan."
+        },
+        {
+          "input": "Describe a difficult problem-solving case.",
+          "output": "Frame a real decision conflict, explain what changed in your operating method, and quantify the outcome."
         }
       ],
       "antiPatterns": []

@@ -456,7 +456,7 @@ const extractInlineExamplesFromText = (text: string): DanceStyleExample[] => {
         label: "Auto parsed"
       } satisfies DanceStyleExample;
     })
-    .filter((item): item is DanceStyleExample => Boolean(item))
+    .filter((item): item is NonNullable<typeof item> => Boolean(item))
     .slice(0, 4);
 };
 
@@ -678,6 +678,7 @@ export const buildCustomTal = async (input: BuildCustomTalInput) => {
   ).slice(0, 8);
 
   const tal: Tal = {
+    type: "tal/custom",
     slug,
     name: name.endsWith("Tal") ? name : `${name} Tal`,
     description: input.description?.trim() || `Custom Tal generated from user-provided sources for ${category.toLowerCase()} acts.`,
@@ -847,6 +848,7 @@ export const buildCustomDance = async (input: BuildCustomDanceInput) => {
   };
 
   const dance: Dance = {
+    type: "dance/custom",
     slug,
     name,
     description: input.description?.trim() || `Custom Dance generated from user-provided sources for ${category.toLowerCase()} outputs.`,

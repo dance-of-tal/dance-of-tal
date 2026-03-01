@@ -94,9 +94,9 @@ const NEED_HINT_RULES: NeedHintRule[] = [
 
 const uniq = <T>(items: T[]) => Array.from(new Set(items));
 
-export const tals: Tal[] = talsJson as Tal[];
-export const dances: Dance[] = dancesJson as Dance[];
-export const recommendedCombos: RecommendedCombos = recommendedCombosJson as RecommendedCombos;
+export const tals: Tal[] = talsJson as unknown as Tal[];
+export const dances: Dance[] = dancesJson as unknown as Dance[];
+export const recommendedCombos: RecommendedCombos = recommendedCombosJson as unknown as RecommendedCombos;
 
 const talToDance = recommendedCombos.talToDance ?? {};
 const talBySlug = new Map(tals.map((tal) => [tal.slug, tal]));

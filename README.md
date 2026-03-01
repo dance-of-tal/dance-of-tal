@@ -16,13 +16,13 @@ Modern AI-powered development relies on system prompts that have quietly grown i
 
 **Dance of Tal** treats AI behaviour the same way good software treats code:
 
-| Software principle | DOT equivalent |
-|---|---|
-| Dependency Injection | Context assembled from discrete, typed components |
-| `package.json` → `package-lock.json` | Combo locks exact Tal + Dance versions |
-| npm registry | Global Cloudflare KV registry |
-| Multiple CSS classes on one element | Multiple Dances layered in one Combo |
-| CI/CD pipeline | Every engineer on every machine runs the **exact** same AI persona |
+| Software principle                   | DOT equivalent                                                     |
+| ------------------------------------ | ------------------------------------------------------------------ |
+| Dependency Injection                 | Context assembled from discrete, typed components                  |
+| `package.json` → `package-lock.json` | Combo locks exact Tal + Dance versions                             |
+| npm registry                         | Global Cloudflare KV registry                                      |
+| Multiple CSS classes on one element  | Multiple Dances layered in one Combo                               |
+| CI/CD pipeline                       | Every engineer on every machine runs the **exact** same AI persona |
 
 ---
 
@@ -30,10 +30,10 @@ Modern AI-powered development relies on system prompts that have quietly grown i
 
 Picture a newly onboarded senior engineer at your company.
 
-- Their **Tal** is their *professional mindset* — the thinking framework your company expects. Do they prioritise correctness or delivery speed? Do they design for GDPR compliance by default? This is the **who** of the AI.
-- Their **Dance** is their *working methodology* — the rules they follow on every task. Always write tests first. Always output structured JSON. Always flag security implications. This is the **how** of the AI.
+- Their **Tal** is their _professional mindset_ — the thinking framework your company expects. Do they prioritise correctness or delivery speed? Do they design for GDPR compliance by default? This is the **who** of the AI.
+- Their **Dance** is their _working methodology_ — the rules they follow on every task. Always write tests first. Always output structured JSON. Always flag security implications. This is the **how** of the AI.
 - A **Combo** locks a Tal + one or more Dances together — a frozen, versioned snapshot that everyone on the team installs.
-- An **Act** is a *workflow choreographer* — a DAG that switches AI behaviour based on context (e.g. normal sprint → incident response mode).
+- An **Act** is a _workflow choreographer_ — a DAG that switches AI behaviour based on context (e.g. normal sprint → incident response mode).
 
 ---
 
@@ -45,7 +45,7 @@ All assets use strict **URN notation**: `<category>/@<author>/<name>`
 
 ### 1. `Tal` — Intelligence Persona
 
-Encodes the *thinking layer*: how the AI reasons, what it prioritises, and its professional identity.
+Encodes the _thinking layer_: how the AI reasons, what it prioritises, and its professional identity.
 
 ```jsonc
 // tal/@acme-platform/senior-backend-engineer
@@ -54,13 +54,13 @@ Encodes the *thinking layer*: how the AI reasons, what it prioritises, and its p
   "version": "3.1.0",
   "description": "Backend engineer mindset for ACME's platform team.",
   "thinking": "You are a senior backend engineer at ACME. You build for correctness, observability, and horizontal scale. You always consider failure modes before writing implementation. You default to Kotlin/Spring Boot, PostgreSQL, and Kafka. You never suggest solutions that don't have a rollback path.",
-  "tags": ["backend", "kotlin", "spring", "platform"]
+  "tags": ["backend", "kotlin", "spring", "platform"],
 }
 ```
 
 ### 2. `Dance` — Format Constraints
 
-Encodes the *output layer*: structural rules, formatting discipline, and JSON Schema enforcement.
+Encodes the _output layer_: structural rules, formatting discipline, and JSON Schema enforcement.
 
 ```jsonc
 // dance/@acme-platform/pr-review-standard
@@ -73,9 +73,12 @@ Encodes the *output layer*: structural rules, formatting discipline, and JSON Sc
     "type": "object",
     "required": ["summary", "risks", "requiredChanges"],
     "properties": {
-      "risks": { "type": "array", "items": { "enum": ["low", "medium", "high", "critical"] } }
-    }
-  }
+      "risks": {
+        "type": "array",
+        "items": { "enum": ["low", "medium", "high", "critical"] },
+      },
+    },
+  },
 }
 ```
 
@@ -88,10 +91,10 @@ Pins a Tal + one **or more** Dances. Multiple Dances are layered in order — ru
 {
   "tal": "tal/@acme-platform/senior-backend-engineer",
   "dance": [
-    "dance/@acme-platform/kotlin-style-guide",   // base: language standards
-    "dance/@acme-security/gdpr-awareness",       // layer: data handling rules
-    "dance/@acme-platform/pr-review-standard"    // layer: output format
-  ]
+    "dance/@acme-platform/kotlin-style-guide", // base: language standards
+    "dance/@acme-security/gdpr-awareness", // layer: data handling rules
+    "dance/@acme-platform/pr-review-standard", // layer: output format
+  ],
 }
 ```
 
@@ -105,15 +108,24 @@ Routes between different Tal+Dance pairs conditionally. Production examples: nor
 {
   "type": "act/@acme-platform/incident-response",
   "nodes": {
-    "triage":  { "tal": "tal/@acme-platform/senior-backend-engineer", "dance": "dance/@acme-platform/incident-triage-format" },
-    "hotfix":  { "tal": "tal/@acme-platform/hotfix-specialist",       "dance": "dance/@acme-platform/minimal-change-only" },
-    "postmortem": { "tal": "tal/@acme-platform/senior-backend-engineer", "dance": "dance/@acme-platform/postmortem-format" }
+    "triage": {
+      "tal": "tal/@acme-platform/senior-backend-engineer",
+      "dance": "dance/@acme-platform/incident-triage-format",
+    },
+    "hotfix": {
+      "tal": "tal/@acme-platform/hotfix-specialist",
+      "dance": "dance/@acme-platform/minimal-change-only",
+    },
+    "postmortem": {
+      "tal": "tal/@acme-platform/senior-backend-engineer",
+      "dance": "dance/@acme-platform/postmortem-format",
+    },
   },
   "edges": [
-    { "from": "triage",  "to": "hotfix",      "condition": "SEVERITY=P0" },
-    { "from": "triage",  "to": "postmortem",  "condition": "SEVERITY=P1" },
-    { "from": "hotfix",  "to": "postmortem" }
-  ]
+    { "from": "triage", "to": "hotfix", "condition": "SEVERITY=P0" },
+    { "from": "triage", "to": "postmortem", "condition": "SEVERITY=P1" },
+    { "from": "hotfix", "to": "postmortem" },
+  ],
 }
 ```
 
@@ -284,16 +296,22 @@ Each runs under its own Combo, isolated in .dance-of-tal/runs/{uuid}/
 
 ## CLI Reference
 
-| Command | Description |
-|---|---|
-| `dot init` | Scaffold `.dance-of-tal/` workspace |
-| `dot login` | GitHub OAuth → `~/.dance-of-tal/auth.json` |
-| `dot install <urn>` | Download asset by URN → saved locally |
-| `dot lock --tal <urn> --dance <urn>[,<urn>...] --name <name>` | Lock Combo (single or layered Dance) |
-| `dot compile <name>` | Validate all locked assets exist and are type-correct |
-| `dot run <name> --task <string>` | Compile and print assembled context |
-| `dot switch <name>` | Switch active combo |
-| `dot publish --category <cat> --name <slug> --tags <tags>` | Publish local asset to registry |
+| Command                                                       | Description                                                                                       |
+| ------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| `dot init`                                                    | Scaffold `.dance-of-tal/` workspace                                                               |
+| `dot login`                                                   | GitHub OAuth → `~/.dance-of-tal/auth.json`                                                        |
+| `dot install <urn>`                                           | Download asset by URN → saved locally. Combo URNs trigger cascading install of all tal/dance deps |
+| `dot search <keyword>`                                        | Search global registry by keyword (matches name, author, description, tags)                       |
+| `dot list [--mine] [--category <cat>]`                        | List registry packages; `--mine` filters to logged-in user's packages                             |
+| `dot create --category <cat> --name <slug>`                   | Scaffold a new asset locally under your namespace (login auto-sets author; or pass `--author`)    |
+| `dot lock --tal <urn> --dance <urn>[,<urn>...] --name <name>` | Lock Combo (single or layered Dance)                                                              |
+| `dot compile <name>`                                          | Validate all locked assets exist and are type-correct                                             |
+| `dot run <name> --task <string>`                              | Compile and print assembled context                                                               |
+| `dot switch <name>`                                           | Switch active combo                                                                               |
+| `dot publish --category <cat> --name <slug> --tags <tags>`    | Publish local asset to registry (requires `dot login`)                                            |
+| `dot agents set --role <name> --combo <comboName>`            | Assign a combo to an agent role (saved in `.dance-of-tal/agents.json`)                            |
+| `dot agents list`                                             | List all agent role → combo mappings                                                              |
+| `dot agents remove --role <name>`                             | Remove an agent role from the manifest                                                            |
 
 ### URN Format
 
@@ -322,31 +340,40 @@ DOT implements the **Model Context Protocol (MCP)**, so AI IDEs can pull the exa
   "mcpServers": {
     "dance-of-tal": {
       "command": "npx",
-      "args": ["dance-of-tal"]
-    }
-  }
+      "args": ["dance-of-tal"],
+    },
+  },
 }
 ```
 
 ### MCP Tools
 
-| Tool | Description |
-|---|---|
-| `init_run` | Create an isolated sandbox for one agent run |
+| Tool              | Description                                    |
+| ----------------- | ---------------------------------------------- |
+| `init_run`        | Create an isolated sandbox for one agent run   |
 | `get_run_context` | Return the compiled system prompt for that run |
-| `clear_run` | Clean up the sandbox after the run completes |
+| `clear_run`       | Clean up the sandbox after the run completes   |
 
 ---
 
-## Publishing Your Own Assets
+## Creating and Publishing Your Own Assets
 
 ```bash
 dot login
+# Your GitHub username becomes your protected namespace
 
-# Place asset at .dance-of-tal/tal/@acme-platform/my-persona.json
+# Create a new asset locally
+dot create --category tal --name my-persona --display-name "My Persona"
+# → .dance-of-tal/tal/@yourusername/my-persona.json  (local file, not yet in registry)
+
+# Edit the generated template, then publish
 dot publish --category tal --name my-persona --tags "backend,kotlin,platform"
-# → Live at: tal/@acme-platform/my-persona
+# → Live at: tal/@yourusername/my-persona
 ```
+
+No `--author` needed — your GitHub login is the namespace. The create → edit → publish flow mirrors npm exactly.
+
+> **Without login:** pass `--author <name>` to `dot create` to specify the namespace manually. You'll need to log in before publishing.
 
 ### Publishing rules
 
@@ -360,13 +387,23 @@ dot publish --category tal --name my-persona --tags "backend,kotlin,platform"
 
 **Base URL:** `https://registry.dance-of-tal-v2.workers.dev`
 
-| Endpoint | Description |
-|---|---|
-| `GET /packages?category=tal` | List all assets for a category |
-| `GET /packages/:category/:username/:name` | Fetch asset by URN |
-| `POST /publish` | Publish (`Authorization: Bearer <token>`) |
-| `POST /auth/device/code` | Start GitHub Device Flow |
-| `POST /auth/device/poll` | Poll for access token |
+| Endpoint                                   | Description                               |
+| ------------------------------------------ | ----------------------------------------- |
+| `GET /packages?category=tal`               | List all assets for a category            |
+| `GET /packages?category=tal&tier=verified` | List only verified (official) assets      |
+| `GET /packages/:category/:username/:name`  | Fetch asset by URN                        |
+| `POST /publish`                            | Publish (`Authorization: Bearer <token>`) |
+| `POST /auth/device/code`                   | Start GitHub Device Flow                  |
+| `POST /auth/device/poll`                   | Poll for access token                     |
+
+### Registry Tiers
+
+| Tier        | Namespace                       | Who can publish         | Description                        |
+| ----------- | ------------------------------- | ----------------------- | ---------------------------------- |
+| `verified`  | `@dot-presets`, `@dot-official` | System (admin token)    | Curated official assets            |
+| `community` | `@yourusername`                 | Anyone with `dot login` | GitHub-namespaced community assets |
+
+Assets you create with `dot create` live only on your local disk until you run `dot publish`. There is no separate "local tier" — unpublished assets are just local files, identical to how npm treats packages before `npm publish`.
 
 ---
 

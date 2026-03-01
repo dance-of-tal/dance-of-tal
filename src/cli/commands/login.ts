@@ -4,9 +4,13 @@ import fs from "fs/promises";
 import path from "path";
 import os from "os";
 import open from "open";
+import http from "http";
+import crypto from "crypto";
+import readline from "readline";
 
-// Registry endpoint URL (Can be overridden via env for testing)
-const REGISTRY_URL = process.env.DOT_REGISTRY_URL || "https://registry.dance-of-tal-v2.workers.dev"; // Fallback demo registry url
+const SUPABASE_URL = "https://qbildcrfjencoqkngyfw.supabase.co";
+// The ANON key is intentionally public to allow client-side Supabase communication
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFiaWxkY3JmamVuY29xa25neWZ3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIyNjE5MzYsImV4cCI6MjA4NzgzNzkzNn0.9aI9FU-j20w3UIG7BuVtmpAPh3qClz7xTNXjcq7ofNQ";
 
 function getAuthFilePath() {
     const dotGlobalDir = path.join(os.homedir(), ".dance-of-tal");
@@ -41,102 +45,154 @@ export async function getAuthUser(): Promise<{ token: string; username: string }
     }
 }
 
-async function pollForToken(deviceCode: string, intervalSeconds: number): Promise<string> {
-    const pollUrl = `${REGISTRY_URL}/auth/device/poll`;
-    let currentInterval = intervalSeconds;
+function generateCodeVerifier() {
+    return crypto.randomBytes(32).toString('base64url');
+}
 
-    while (true) {
-        // Wait for the prescribed interval before polling
-        await new Promise(resolve => setTimeout(resolve, currentInterval * 1000));
-
-        try {
-            const req = await fetch(pollUrl, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ device_code: deviceCode })
-            });
-            const data: any = await req.json();
-
-            if (data.access_token) {
-                return data.access_token;
-            } else if (data.error) {
-                if (data.error === 'authorization_pending') {
-                    // Keep waiting
-                    continue;
-                } else if (data.error === 'slow_down') {
-                    // GitHub requested we slow down
-                    currentInterval += 5;
-                    continue;
-                } else {
-                    throw new Error(data.error_description || data.error);
-                }
-            }
-        } catch (e: any) {
-            // If it's a fetch error, we might just sleep and retry, but let's throw for now
-            throw new Error(`Polling failed: ${e.message}`);
-        }
-    }
+function generateCodeChallenge(verifier: string) {
+    return crypto.createHash('sha256').update(verifier).digest('base64url');
 }
 
 export const loginCmd = new Command("login")
-    .description("Login to Dance of Tal Registry using GitHub (Device Flow)")
-    .action(async () => {
-        console.log(ui.title("Authenticating with GitHub"));
+    .description("Login to Dance of Tal Registry using Supabase OAuth")
+    .option("-p, --provider <provider>", "OAuth provider to use: 'google' or 'github'")
+    .action(async (options) => {
+        console.log(ui.title("Authenticating with Dance of Tal Registry"));
 
-        try {
-            // 1. Request device code
-            const codeUrl = `${REGISTRY_URL}/auth/device/code`;
-            const codeReq = await fetch(codeUrl, { method: "POST" });
+        let provider = options.provider?.toLowerCase();
 
-            if (!codeReq.ok) {
-                throw new Error(`Registry error: ${codeReq.statusText}`);
-            }
+        if (!provider || !["google", "github"].includes(provider)) {
+            provider = await new Promise<string>((resolve) => {
+                const rl = readline.createInterface({
+                    input: process.stdin,
+                    output: process.stdout
+                });
 
-            const codeData: any = await codeReq.json();
+                console.log(ui.dim("Please select your authentication provider:"));
+                console.log("  1. Google (Recommended for Vibe Coders)");
+                console.log("  2. GitHub (Classic for Developers)");
 
-            if (codeData.error) {
-                throw new Error(codeData.error_description || codeData.error);
-            }
+                const promptOption = () => {
+                    rl.question(ui.highlight("\nEnter choice (1 or 2): "), (answer) => {
+                        const choice = answer.trim();
+                        if (choice === "1" || choice.toLowerCase() === "google") {
+                            rl.close();
+                            resolve("google");
+                        } else if (choice === "2" || choice.toLowerCase() === "github") {
+                            rl.close();
+                            resolve("github");
+                        } else {
+                            console.log(ui.error("Invalid choice. Please enter 1 or 2."));
+                            promptOption();
+                        }
+                    });
+                };
+                promptOption();
+            });
+        }
 
-            console.log(ui.success(`Please complete authentication in your browser.`));
-            console.log(ui.dim(`Your One-Time Code is: `) + ui.highlight(codeData.user_code));
-            console.log(ui.dim(`\nIf your browser doesn't open automatically, navigate to:`));
-            console.log(ui.dim(codeData.verification_uri));
+        console.log(ui.dim(`\nSelected provider: ${provider}...`));
 
-            // Auto-open browser
-            await open(codeData.verification_uri);
+        const codeVerifier = generateCodeVerifier();
+        const codeChallenge = generateCodeChallenge(codeVerifier);
 
-            // 2. Poll for token
-            console.log("\nWaiting for authorization...");
-            const token = await pollForToken(codeData.device_code, codeData.interval || 5);
+        return new Promise<void>((resolve, reject) => {
+            const server = http.createServer(async (req, res) => {
+                try {
+                    const baseUrl = `http://localhost:4242`;
+                    const url = new URL(req.url || "/", baseUrl);
 
+                    if (url.pathname === "/callback") {
+                        const code = url.searchParams.get("code");
 
-            // Attempt to fetch their username just to verify and greet them
-            const userReq = await fetch("https://api.github.com/user", {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                    "User-Agent": "Dance-of-Tal-CLI"
+                        if (!code) {
+                            res.writeHead(400, { "Content-Type": "text/html" });
+                            res.end("<h2 style='color: red; text-align: center; font-family: sans-serif; margin-top: 50px;'>Authentication failed: No code received. You can close this window.</h2>");
+                            server.close();
+                            reject(new Error("No auth code received"));
+                            return;
+                        }
+
+                        res.writeHead(200, { "Content-Type": "text/html" });
+                        res.write("<h2 style='font-family: sans-serif; text-align: center; margin-top: 50px;'>Completing authentication... Please wait.</h2>");
+
+                        try {
+                            // Exchange the authorization code for a session token using PKCE
+                            const tokenRes = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=pkce`, {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'apikey': SUPABASE_ANON_KEY
+                                },
+                                body: JSON.stringify({
+                                    auth_code: code,
+                                    code_verifier: codeVerifier
+                                })
+                            });
+
+                            const data: any = await tokenRes.json();
+
+                            if (!tokenRes.ok || !data.access_token) {
+                                throw new Error(data.error_description || data.msg || "Failed to exchange token");
+                            }
+
+                            const accessToken = data.access_token;
+                            const user = data.user;
+                            const username = user?.user_metadata?.preferred_username || user?.user_metadata?.user_name || "developer";
+
+                            await saveAuthToken(accessToken, username);
+
+                            console.log(ui.success(`\n✔ Authentication successful! You are logged in as @${username}.`));
+
+                            res.end(`
+                                <script>
+                                    document.body.innerHTML = "<h2 style='color: green; font-family: sans-serif; text-align: center; margin-top: 50px;'>Authentication Successful! You can safely close this window.</h2>";
+                                    setTimeout(() => window.close(), 3000);
+                                </script>
+                            `);
+                            server.close();
+                            resolve();
+                        } catch (e: any) {
+                            console.error(ui.error(`\nLogin failed during code exchange: ${e.message}`));
+                            res.end(`
+                                <script>
+                                    document.body.innerHTML = "<h2 style='color: red; font-family: sans-serif; text-align: center; margin-top: 50px;'>Authentication Failed. Please try again.</h2>";
+                                </script>
+                            `);
+                            server.close();
+                            reject(e);
+                        }
+                    } else {
+                        res.writeHead(404).end("Not Found");
+                    }
+                } catch (e) {
+                    res.writeHead(500).end("Server Error");
                 }
             });
 
-            const userData: any = await userReq.json();
+            server.on('error', (e: any) => {
+                if (e.code === 'EADDRINUSE') {
+                    console.error(ui.error("Port 4242 is already in use. Cannot start login server."));
+                    process.exit(1);
+                }
+            });
 
-            if (!userReq.ok) {
-                throw new Error(`Failed to fetch GitHub user info: ${userData.message || userReq.statusText}`);
-            }
+            server.listen(4242, async () => {
+                const REDIRECT_URI = "http://localhost:4242/callback";
+                const authUrl = `${SUPABASE_URL}/auth/v1/authorize?provider=${provider}&redirect_to=${encodeURIComponent(REDIRECT_URI)}&code_challenge=${codeChallenge}&code_challenge_method=s256`;
 
-            if (!userData || !userData.login) {
-                throw new Error("Invalid GitHub user data received.");
-            }
+                console.log(ui.dim(`Opening browser to authenticate...`));
+                console.log(ui.dim(`If your browser doesn't open automatically, navigate to:`));
+                console.log(ui.highlight(authUrl));
+                console.log(ui.dim(`\nWaiting for authorization...`));
 
-            // 3. Authenticated successfully — save token AND username
-            await saveAuthToken(token, userData.login);
+                await open(authUrl);
+            });
 
-            console.log(ui.success(`\nAuthentication successful! You are logged in as @${userData.login}.`));
-            console.log(ui.dim("You can now publish your V2 Tals, Dances, and Combos."));
-
-        } catch (err: any) {
-            console.error(ui.error(`Login failed: ${err.message}`));
-            process.exit(1);
-        }
+            // Allow manual Ctrl+C
+            process.on("SIGINT", () => {
+                server.close();
+                process.exit(1);
+            });
+        });
     });

@@ -10,7 +10,7 @@ const CONFIG_FILE = "combo.config.json";
  * Reads the active combo config.
  * Config file: .dance-of-tal/combo.config.json
  */
-async function readConfig(dotDir: string): Promise<Record<string, any>> {
+export async function readConfig(dotDir: string): Promise<Record<string, any>> {
     const configPath = path.join(dotDir, CONFIG_FILE);
     try {
         const raw = await fs.readFile(configPath, "utf-8");
@@ -20,7 +20,7 @@ async function readConfig(dotDir: string): Promise<Record<string, any>> {
     }
 }
 
-async function writeConfig(dotDir: string, config: Record<string, any>): Promise<void> {
+export async function writeConfig(dotDir: string, config: Record<string, any>): Promise<void> {
     const configPath = path.join(dotDir, CONFIG_FILE);
     await fs.writeFile(configPath, JSON.stringify(config, null, 2), "utf-8");
 }

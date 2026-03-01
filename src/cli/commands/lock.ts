@@ -36,7 +36,7 @@ function normaliseUrn(raw: string, prefix: "tal" | "dance" | "act"): string {
 export const lockCmd = new Command("lock")
     .description("Lock a Type-Safe Dance of Tal combo for this project")
     .requiredOption("--name <comboName>", "The name for this combo")
-    .requiredOption("--tal <talUrn>", "Tal URN — e.g. tal/@monarchjuno/system-architect  or  @monarchjuno/system-architect")
+    .requiredOption("--tal <talUrn>", "Tal *  * dot use combo/@dot-presets/gpt-architecture-review  @system-architect")
     .requiredOption("--dance <danceUrns>", "Dance URN(s) — single or comma-separated for layering, e.g. dance/@base/ts,dance/@team/tdd")
     .option("--act <actUrn>", "Optional Act URN — e.g. act/@infra/hotfix-override")
     .action(async (options) => {

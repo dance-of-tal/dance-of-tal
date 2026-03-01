@@ -17,8 +17,8 @@ export function getDotDir(cwd: string = process.cwd()): string {
  * File structure: .dance-of-tal/<category>/@<author>/<name>.json
  *
  * Example:
- *   tal/@monarchjuno/system-architect
- *   → .dance-of-tal/tal/@monarchjuno/system-architect.json
+ *   tal/@dot-presets/system-architect
+ *   → .dance-of-tal/tal/@dot-presets/system-architect.json
  */
 export function assetFilePath(cwd: string, urn: string): string {
     // urn: "tal/@monarchjuno/system-architect"

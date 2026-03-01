@@ -49,8 +49,8 @@ export async function executeActGraph(
   initialTaskContext: string
 ): Promise<void> {
 
-  const nodes = act.nodes;
-  const edges = act.edges;
+  const nodes = act.nodes ?? {};
+  const edges = act.edges ?? [];
 
   // Find start nodes (nodes with no incoming edges)
   const incomingEdgeCounts: Record<string, number> = {};
@@ -74,7 +74,7 @@ export async function executeActGraph(
   // pass the output of previous nodes as the input of the next, etc.
 
   for (const nodeId of startNodes) {
-    await executeActNode(cwd, runId, nodeId, nodes[nodeId], initialTaskContext);
+    await executeActNode(cwd, runId, nodeId, nodes[nodeId] as ActNode, initialTaskContext);
 
     // Process outgoing edges
     const outgoingEdges = edges.filter(e => e.from === nodeId);
@@ -85,7 +85,7 @@ export async function executeActGraph(
       await Promise.all(toNodes.map(async (nextNodeId) => {
         // Simulate passing context via a Message Broker (Stage)
         const nextContext = `Result from ${nodeId}`;
-        await executeActNode(cwd, runId, nextNodeId, nodes[nextNodeId], nextContext);
+        await executeActNode(cwd, runId, nextNodeId, nodes[nextNodeId] as ActNode, nextContext);
       }));
     }
   }

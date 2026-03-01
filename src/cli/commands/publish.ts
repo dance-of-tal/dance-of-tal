@@ -11,7 +11,7 @@ const REGISTRY_URL = process.env.DOT_REGISTRY_URL || "https://registry.dance-of-
  *
  * --name accepts either:
  *   a) plain slug:      "strategy-chief"
- *   b) @author/name:   "@monarchjuno/strategy-chief"
+ *   b) @author/name:   "@dot-presets/strategy-chief"
  *
  * The author is resolved from auth.json (set during `dot login`).
  * File path: .dance-of-tal/<category>/@<author>/<name>.json
@@ -24,7 +24,7 @@ async function loadLocalAsset(
 ): Promise<Record<string, unknown>> {
     // Normalise the name to just the slug (strip @author/ prefix if present)
     const slug = name.includes("/")
-        ? name.split("/").pop()!          // "@monarchjuno/strategy-chief" → "strategy-chief"
+        ? name.split("/").pop()!          // "@dot-presets/strategy-chief" → "strategy-chief"
         : name;                           // "strategy-chief" stays as is
 
     const urn = `${category}/@${username}/${slug}`;

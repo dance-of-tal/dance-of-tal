@@ -27,8 +27,13 @@ export type Act = {
   slug: string;
   name: string;
   description: string;
-  nodes: Record<string, ActNode>; // V2: DAG nodes
-  edges: ActEdge[]; // V2: DAG edges
+  master?: {
+    tal: string;
+    dance: string;
+  };
+  steps?: string[];
+  nodes?: Record<string, ActNode>; // V2: DAG nodes
+  edges?: ActEdge[]; // V2: DAG edges
 };
 
 export type DanceStyleExample = {

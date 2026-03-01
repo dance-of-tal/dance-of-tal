@@ -1,0 +1,133 @@
+import { Command } from "commander";
+import fs from "fs";
+import path from "path";
+import { ui } from "../utils/ui.js";
+import { getDotDir, assetFilePath } from "../../lib/registry.js";
+import { getAuthUser } from "./login.js";
+
+const VALID_CATEGORIES = ["tal", "dance", "act"] as const;
+type CreateCategory = typeof VALID_CATEGORIES[number];
+
+function buildTalTemplate(slug: string, name: string, description: string): Record<string, unknown> {
+    return {
+        type: `tal/${slug}`,
+        slug,
+        name,
+        description,
+        category: "Custom",
+        tags: [],
+        featuredScore: 0,
+        createdAt: new Date().toISOString().split("T")[0],
+        thinking: "Add your thinking model here.\n\nCore principles:\n- ...\n\nDo:\n- ...\n\nDo not:\n- ..."
+    };
+}
+
+function buildDanceTemplate(slug: string, name: string, description: string): Record<string, unknown> {
+    return {
+        type: `dance/${slug}`,
+        slug,
+        name,
+        description,
+        category: "Custom",
+        rules: "Tone:\n- ...\nStructure:\n- ...\nFormatting:\n- ...\nForbidden:\n- ..."
+    };
+}
+
+function buildActTemplate(slug: string, name: string, description: string, author: string): Record<string, unknown> {
+    return {
+        type: `act/${slug}`,
+        slug,
+        name,
+        description,
+        nodes: {
+            "step-1": {
+                tal: `tal/@${author}/your-tal`,
+                dance: `dance/@${author}/your-dance`
+            }
+        },
+        edges: []
+    };
+}
+
+export const createCmd = new Command("create")
+    .description("Create a new asset locally (publish later with: dot publish)")
+    .requiredOption("--category <category>", "Asset type: tal, dance, act")
+    .requiredOption("--name <slug>", "Asset slug (e.g. my-custom-tal)")
+    .option("--author <author>", "Author namespace (defaults to logged-in GitHub username)")
+    .option("--display-name <displayName>", "Human-readable name")
+    .option("--description <description>", "Short description")
+    .action(async (options) => {
+        console.log(ui.title("Creating Asset"));
+
+        try {
+            const category = options.category as CreateCategory;
+            if (!VALID_CATEGORIES.includes(category)) {
+                throw new Error(`Invalid category '${category}'. Must be one of: ${VALID_CATEGORIES.join(", ")}`);
+            }
+
+            const slug = options.name as string;
+            if (!/^[a-z0-9][a-z0-9._-]{1,98}[a-z0-9]$/.test(slug)) {
+                throw new Error(
+                    `Invalid slug '${slug}'. Use lowercase letters, numbers, hyphens, dots only (2-100 chars).`
+                );
+            }
+
+            // Resolve author: --author flag > logged-in GitHub username
+            let author = options.author as string | undefined;
+            if (!author) {
+                const auth = await getAuthUser();
+                if (auth) {
+                    author = auth.username;
+                } else {
+                    throw new Error(
+                        `No author specified.\n` +
+                        `  Option 1: dot login  (uses your GitHub username automatically)\n` +
+                        `  Option 2: dot create --author <name> --category ${category} --name ${slug}`
+                    );
+                }
+            }
+
+            const cwd = process.cwd();
+            const dotDir = getDotDir(cwd);
+            if (!fs.existsSync(dotDir)) {
+                throw new Error("Workspace not initialised. Run 'dot init' first.");
+            }
+
+            const urn = `${category}/@${author}/${slug}`;
+            const filePath = assetFilePath(cwd, urn);
+            if (fs.existsSync(filePath)) {
+                throw new Error(
+                    `Asset already exists at '${filePath}'.\n` +
+                    `  Edit it directly or delete it to recreate.`
+                );
+            }
+
+            const displayName = options.displayName || slug.replace(/-/g, " ").replace(/\b\w/g, (c: string) => c.toUpperCase());
+            const description = options.description || `${displayName}`;
+
+            let template: Record<string, unknown>;
+            if (category === "tal") template = buildTalTemplate(slug, displayName, description);
+            else if (category === "dance") template = buildDanceTemplate(slug, displayName, description);
+            else template = buildActTemplate(slug, displayName, description, author);
+
+            fs.mkdirSync(path.dirname(filePath), { recursive: true });
+            fs.writeFileSync(filePath, JSON.stringify(template, null, 2), "utf-8");
+
+            console.log(ui.success(`\n✔ Created ${urn}`));
+            console.log(ui.dim(`  Saved to: ${filePath}`));
+            console.log(ui.dim(`\n  Edit the file to customise, then publish:`));
+            console.log(ui.dim(`    dot publish --category ${category} --name ${slug}`));
+
+            if (category === "tal" || category === "dance") {
+                console.log(ui.dim(`\n  Or lock a combo immediately:`));
+                if (category === "tal") {
+                    console.log(ui.dim(`    dot lock --name my-combo --tal ${urn} --dance dance/@dot-presets/<slug>`));
+                } else {
+                    console.log(ui.dim(`    dot lock --name my-combo --tal tal/@dot-presets/<slug> --dance ${urn}`));
+                }
+            }
+        } catch (err: any) {
+            console.error(ui.error(`Create failed: ${err.message}`));
+            process.exit(1);
+        }
+    });

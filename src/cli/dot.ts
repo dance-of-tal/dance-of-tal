@@ -10,6 +10,13 @@ import { compileCmd } from "./commands/compile.js";
 import { runCmd } from "./commands/run.js";
 import { publishCmd } from "./commands/publish.js";
 import { loginCmd } from "./commands/login.js";
+import { agentsCmd } from "./commands/agents.js";
+import { searchCmd } from "./commands/search.js";
+import { listCmd } from "./commands/list.js";
+import { useCmd } from "./commands/use.js";
+import { quickstartCmd } from "./commands/quickstart.js";
+import { createCmd } from "./commands/create.js";
+import { launchCmd } from "./commands/launch.js";
 
 const program = new Command();
 
@@ -32,7 +39,7 @@ program
 
 program
   .command("install <package>")
-  .description("Install a Vibe, Tal, Dance, Act, or Stage (e.g. dot install tal/@monarchjuno/strategy-chief)")
+  .description("Install a Vibe, Tal, Dance, Act, or Stage (e.g. dot install combo/@dot-presets/gpt-architecture-review)")
   .action(async (pkg: string) => {
     try {
       await runInstall(pkg);
@@ -59,5 +66,12 @@ program.addCommand(compileCmd);
 program.addCommand(runCmd);
 program.addCommand(publishCmd);
 program.addCommand(loginCmd);
+program.addCommand(agentsCmd);
+program.addCommand(searchCmd);
+program.addCommand(listCmd);
+program.addCommand(useCmd);
+program.addCommand(quickstartCmd);
+program.addCommand(createCmd);
+program.addCommand(launchCmd);
 
 program.parse(process.argv);

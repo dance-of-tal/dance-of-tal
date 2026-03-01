@@ -17,5 +17,5 @@ export async function runInit() {
     }
 
     console.log(ui.success("\nDOT setup complete!"));
-    console.log(ui.dim("Next: dot login  →  dot install tal/@monarchjuno/strategy-chief"));
+    console.log(ui.dim("    dot init @dot-presets/strategy-chief"));
 }

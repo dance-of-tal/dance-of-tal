@@ -191,7 +191,7 @@ export const buildActPrompt = (act: Act) => {
     `Act Profile: ${act.name}`,
     `Description: ${act.description}`,
     "Required Steps:",
-    ...act.steps.map((step, index) => `${index + 1}. ${step}`)
+    ...(act.steps || []).map((step: any, index: any) => `${index + 1}. ${step}`)
   ].join("\n");
 };
 
