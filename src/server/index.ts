@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import {
@@ -29,6 +30,7 @@ const server = new Server(
 const GET_PROJECT_STATUS_TOOL: Tool = {
   name: "get_project_status",
   description:
+    "Dance of Tal (dot) is a Type-Safe AI Behavior Engine that uses Combos to enforce your persona and constraints. " +
     "Check the current Dance of Tal project state. " +
     "ALWAYS call this first before init_run or get_run_context. " +
     "Returns: whether the workspace is initialized, which combos are locally available, " +
@@ -190,6 +192,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         content: [{
           type: "text",
           text: JSON.stringify({
+            _mcp_guidance: "You are an AI agent operating via Dance of Tal (DOT). To proceed: 1) Identify your appropriate combo from the 'combos' or 'agents' list. 2) Call 'init_run' with that combo. 3) Call 'get_run_context' to receive your strictly-typed system prompt and JSON schema. You MUST adhere to the returned constraints.",
             initialized,
             combos,
             agents: manifest,
