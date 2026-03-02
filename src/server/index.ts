@@ -7,23 +7,20 @@ import {
   Tool,
 } from "@modelcontextprotocol/sdk/types.js";
 import { initRun, startRunContext, clearRun } from "../lib/runs.js";
-import { getCombo, getDotDir } from "../lib/registry.js";
+import {
+  assetFilePath,
+  getCombo,
+  getDotDir,
+  listLockedComboNames,
+} from "../lib/registry.js";
 import { readAgentManifest } from "../lib/agents.js";
-import { existsSync, readdirSync } from "fs";
+import { assertSafeComboName, assertSafeRunId } from "../lib/identifiers.js";
+import { existsSync, statSync } from "fs";
 import fs from "fs/promises";
 import path from "path";
+import { fileURLToPath } from "url";
 
-const server = new Server(
-  {
-    name: "dance-of-tal",
-    version: "2.0.0",
-  },
-  {
-    capabilities: {
-      tools: {},
-    },
-  }
-);
+const SERVER_VERSION = "2.0.2";
 
 // ─── Tool Definitions ──────────────────────────────────────────────────────
 
@@ -48,7 +45,8 @@ const LIST_COMBOS_TOOL: Tool = {
   description:
     "List all locally installed combos and agent role mappings for this project. " +
     "Use this to discover valid comboName values before calling init_run. " +
-    "Returns combo names, their tal/dance/act URNs, and the agents.json role→combo map.",
+    "Returns combo names, their tal/dance/act URNs, and the agents.json role→combo map. " +
+    "If malformed combo files exist, they are skipped and returned in warnings.",
   inputSchema: {
     type: "object",
     properties: {},
@@ -117,205 +115,273 @@ const CLEAR_RUN_TOOL: Tool = {
   },
 };
 
-// ─── Handlers ─────────────────────────────────────────────────────────────
+function resolveProjectCwd(): string {
+  const configured = process.env.DANCE_OF_TAL_PROJECT_DIR?.trim();
+  if (!configured) return process.cwd();
 
-server.setRequestHandler(ListToolsRequestSchema, async () => {
-  return {
-    tools: [
-      GET_PROJECT_STATUS_TOOL,
-      LIST_COMBOS_TOOL,
-      INIT_RUN_TOOL,
-      GET_RUN_CONTEXT_TOOL,
-      CLEAR_RUN_TOOL,
-    ],
-  };
-});
+  const resolved = path.resolve(configured);
+  if (!existsSync(resolved)) {
+    throw new Error(`DANCE_OF_TAL_PROJECT_DIR does not exist: ${resolved}`);
+  }
+  if (!statSync(resolved).isDirectory()) {
+    throw new Error(`DANCE_OF_TAL_PROJECT_DIR is not a directory: ${resolved}`);
+  }
 
-server.setRequestHandler(CallToolRequestSchema, async (request) => {
-  try {
-    const cwd = process.cwd();
+  return resolved;
+}
 
-    // ── get_project_status ──────────────────────────────────────────────
-    if (request.params.name === "get_project_status") {
-      const dotDir = getDotDir(cwd);
-      const initialized = existsSync(dotDir);
+export function createServer(): Server {
+  const server = new Server(
+    {
+      name: "dance-of-tal",
+      version: SERVER_VERSION,
+    },
+    {
+      capabilities: {
+        tools: {},
+      },
+    }
+  );
 
-      if (!initialized) {
-        return {
-          content: [{
-            type: "text",
-            text: JSON.stringify({
-              initialized: false,
-              message: "Workspace not initialized. Ask the user to run 'dot init' or 'dot quickstart'.",
-            }, null, 2),
-          }],
-        };
-      }
+  server.setRequestHandler(ListToolsRequestSchema, async () => {
+    return {
+      tools: [
+        GET_PROJECT_STATUS_TOOL,
+        LIST_COMBOS_TOOL,
+        INIT_RUN_TOOL,
+        GET_RUN_CONTEXT_TOOL,
+        CLEAR_RUN_TOOL,
+      ],
+    };
+  });
 
-      const comboDir = path.join(dotDir, "combo");
-      const combos = existsSync(comboDir)
-        ? readdirSync(comboDir)
-          .filter((f) => f.endsWith(".json"))
-          .map((f) => f.replace(/\.json$/, ""))
-        : [];
+  server.setRequestHandler(CallToolRequestSchema, async (request) => {
+    try {
+      const cwd = resolveProjectCwd();
 
-      const configPath = path.join(dotDir, "combo.config.json");
-      const [configRaw, manifest] = await Promise.all([
-        fs.readFile(configPath, "utf-8").catch(() => "{}"),
-        readAgentManifest(cwd)
-      ]);
+      // ── get_project_status ──────────────────────────────────────────────
+      if (request.params.name === "get_project_status") {
+        const dotDir = getDotDir(cwd);
+        const initialized = existsSync(dotDir);
+        const warnings: string[] = [];
 
-      const config = JSON.parse(configRaw);
-      const activeCombo = config.activeCombo || null;
-      let actInitialPrompt: string | undefined = undefined;
+        if (!initialized) {
+          return {
+            content: [{
+              type: "text",
+              text: JSON.stringify({
+                initialized: false,
+                message: "Workspace not initialized. Ask the user to run 'dot init' or 'dot quickstart'.",
+              }, null, 2),
+            }],
+          };
+        }
 
-      // If there is an active combo and it belongs to an Act, try to find an initialPrompt
-      if (activeCombo) {
-        const comboData = await getCombo(cwd, activeCombo).catch(() => null);
-        if (comboData && comboData.act) {
+        const { names: combos, skipped } = await listLockedComboNames(cwd);
+        if (skipped.length > 0) {
+          warnings.push(
+            ...skipped.map((item) => `Skipped malformed combo filename '${item.file}': ${item.reason}`)
+          );
+        }
+
+        const configPath = path.join(dotDir, "combo.config.json");
+        const [configRaw, manifest] = await Promise.all([
+          fs.readFile(configPath, "utf-8").catch(() => "{}"),
+          readAgentManifest(cwd)
+        ]);
+
+        const config = JSON.parse(configRaw);
+        const activeCombo = config.activeCombo || null;
+        let actInitialPrompt: string | undefined = undefined;
+
+        // If there is an active combo and it belongs to an Act, try to find an initialPrompt
+        if (activeCombo) {
+          let comboData = null;
           try {
-            const actPath = path.join(dotDir, "assets", "act", ...comboData.act.split("/").slice(1)) + ".json";
-            const actRaw = await fs.readFile(actPath, "utf-8");
-            const actContent = JSON.parse(actRaw);
-            const nodes = actContent.nodes || {};
-            const startNode = Object.values(nodes)[0] as any;
-            if (startNode && startNode.initialPrompt) {
-              actInitialPrompt = startNode.initialPrompt;
+            assertSafeComboName(activeCombo);
+            comboData = await getCombo(cwd, activeCombo);
+          } catch (err: any) {
+            warnings.push(`Invalid activeCombo '${activeCombo}' in combo.config.json: ${err.message}`);
+          }
+          if (comboData && comboData.act) {
+            try {
+              const actPath = assetFilePath(cwd, comboData.act);
+              const actRaw = await fs.readFile(actPath, "utf-8");
+              const actContent = JSON.parse(actRaw);
+              const nodes = actContent.nodes || {};
+              const startNode = Object.values(nodes)[0] as any;
+              if (startNode && startNode.initialPrompt) {
+                actInitialPrompt = startNode.initialPrompt;
+              }
+            } catch {
+              // ignore if act file is missing or invalid
             }
-          } catch (e) {
-            // ignore if act file is missing or invalid
           }
         }
-      }
 
-      return {
-        content: [{
-          type: "text",
-          text: JSON.stringify({
-            _mcp_guidance: "You are an AI agent operating via Dance of Tal (DOT). To proceed: 1) Identify your appropriate combo from the 'combos' or 'agents' list. 2) Call 'init_run' with that combo. 3) Call 'get_run_context' to receive your strictly-typed system prompt and JSON schema. You MUST adhere to the returned constraints.",
-            initialized,
-            combos,
-            agents: manifest,
-            activeCombo,
-            ...(actInitialPrompt ? {
-              actInitialPrompt,
-              _instruction: `This project is running an Act. Your FIRST message to the user MUST be exactly: "${actInitialPrompt}"`
-            } : {}),
-            hint: combos.length === 0
-              ? "No combos found. Ask the user to run 'dot use combo/@<author>/<name>' or 'dot quickstart'."
-              : `Use init_run with one of: ${combos.join(", ")}`,
-          }, null, 2),
-        }],
-      };
-    }
-
-    // ── list_combos ─────────────────────────────────────────────────────
-    if (request.params.name === "list_combos") {
-      const dotDir = getDotDir(cwd);
-      const comboDir = path.join(dotDir, "combo");
-
-      if (!existsSync(dotDir) || !existsSync(comboDir)) {
         return {
           content: [{
             type: "text",
             text: JSON.stringify({
-              combos: [],
-              agents: {},
-              message: "No combos found. Run 'dot use <combo-urn>' or 'dot quickstart' to get started.",
+              _mcp_guidance: "You are an AI agent operating via Dance of Tal (DOT). To proceed: 1) Identify your appropriate combo from the 'combos' or 'agents' list. 2) Call 'init_run' with that combo. 3) Call 'get_run_context' to receive your strictly-typed system prompt and JSON schema. You MUST adhere to the returned constraints.",
+              initialized,
+              combos,
+              agents: manifest,
+              activeCombo,
+              ...(warnings.length > 0 ? { warnings } : {}),
+              ...(actInitialPrompt ? {
+                actInitialPrompt,
+                _instruction: `This project is running an Act. Your FIRST message to the user MUST be exactly: "${actInitialPrompt}"`
+              } : {}),
+              hint: combos.length === 0
+                ? "No combos found. Ask the user to run 'dot use combo/@<author>/<name>' or 'dot quickstart'."
+                : `Use init_run with one of: ${combos.join(", ")}`,
             }, null, 2),
           }],
         };
       }
 
-      const comboFiles = readdirSync(comboDir).filter((f) => f.endsWith(".json"));
-      const combos = await Promise.all(
-        comboFiles.map(async (file) => {
-          const name = file.replace(/\.json$/, "");
-          const combo = await getCombo(cwd, name);
-          return { name, ...combo };
-        })
-      );
+      // ── list_combos ─────────────────────────────────────────────────────
+      if (request.params.name === "list_combos") {
+        const dotDir = getDotDir(cwd);
+        if (!existsSync(dotDir)) {
+          return {
+            content: [{
+              type: "text",
+              text: JSON.stringify({
+                combos: [],
+                agents: {},
+                message: "No combos found. Run 'dot use <combo-urn>' or 'dot quickstart' to get started.",
+              }, null, 2),
+            }],
+          };
+        }
 
-      const agents = await readAgentManifest(cwd);
-
-      return {
-        content: [{
-          type: "text",
-          text: JSON.stringify({ combos, agents }, null, 2),
-        }],
-      };
-    }
-
-    // ── init_run ────────────────────────────────────────────────────────
-    if (request.params.name === "init_run") {
-      const args = request.params.arguments as any;
-
-      const combo = await getCombo(cwd, args.comboName);
-      if (!combo) {
-        throw new Error(
-          `Combo '${args.comboName}' not found. Call list_combos to see available options.`
+        const { names, skipped } = await listLockedComboNames(cwd);
+        const warnings: string[] = skipped.map(
+          (item) => `Skipped malformed combo filename '${item.file}': ${item.reason}`
         );
+
+        const comboSettled = await Promise.allSettled(
+          names.map(async (name) => {
+            const combo = await getCombo(cwd, name);
+            if (!combo) throw new Error(`Combo '${name}' is missing or unreadable.`);
+            return { name, ...combo };
+          })
+        );
+
+        const combos: Array<Record<string, unknown>> = [];
+        comboSettled.forEach((result, idx) => {
+          const name = names[idx];
+          if (result.status === "fulfilled") {
+            combos.push(result.value);
+            return;
+          }
+          warnings.push(`Skipped combo '${name}': ${result.reason?.message || "unknown error"}`);
+        });
+
+        const agents = await readAgentManifest(cwd);
+
+        return {
+          content: [{
+            type: "text",
+            text: JSON.stringify(
+              {
+                combos,
+                agents,
+                ...(warnings.length > 0 ? { warnings } : {}),
+              },
+              null,
+              2
+            ),
+          }],
+        };
       }
 
-      await initRun(cwd, args.runId, args.comboName);
+      // ── init_run ────────────────────────────────────────────────────────
+      if (request.params.name === "init_run") {
+        const args = request.params.arguments as any;
+        assertSafeRunId(args.runId);
+        assertSafeComboName(args.comboName);
 
+        const combo = await getCombo(cwd, args.comboName);
+        if (!combo) {
+          throw new Error(
+            `Combo '${args.comboName}' not found. Call list_combos to see available options.`
+          );
+        }
+
+        await initRun(cwd, args.runId, args.comboName);
+
+        return {
+          content: [{
+            type: "text",
+            text: `Successfully initialized run '${args.runId}' using combo '${args.comboName}'. Now call get_run_context to retrieve the compiled system prompt.`,
+          }],
+        };
+      }
+
+      // ── get_run_context ─────────────────────────────────────────────────
+      if (request.params.name === "get_run_context") {
+        const args = request.params.arguments as any;
+        assertSafeRunId(args.runId);
+        const compiled = await startRunContext(cwd, args.runId, args.taskContext);
+
+        let responseText = `--- V2 ISOLATED CONTEXT [Run: ${args.runId}] ---\n\n`;
+        responseText += `[SYSTEM PROMPT]\n${compiled.systemPrompt}\n\n`;
+
+        if (compiled.schema) {
+          responseText += `[ENFORCED JSON SCHEMA]\n${JSON.stringify(compiled.schema, null, 2)}`;
+        }
+
+        responseText += `\n\n---\nApply the above system prompt to your behavior for this task.`;
+
+        return {
+          content: [{ type: "text", text: responseText }],
+        };
+      }
+
+      // ── clear_run ───────────────────────────────────────────────────────
+      if (request.params.name === "clear_run") {
+        const args = request.params.arguments as any;
+        assertSafeRunId(args.runId);
+        await clearRun(cwd, args.runId);
+        return {
+          content: [{ type: "text", text: `Run '${args.runId}' cleared.` }],
+        };
+      }
+
+      throw new Error(`Unknown tool: ${request.params.name}`);
+    } catch (error: any) {
       return {
         content: [{
           type: "text",
-          text: `Successfully initialized run '${args.runId}' using combo '${args.comboName}'. Now call get_run_context to retrieve the compiled system prompt.`,
+          text: `Error: ${error.message}`,
         }],
+        isError: true,
       };
     }
+  });
 
-    // ── get_run_context ─────────────────────────────────────────────────
-    if (request.params.name === "get_run_context") {
-      const args = request.params.arguments as any;
-      const compiled = await startRunContext(cwd, args.runId, args.taskContext);
+  return server;
+}
 
-      let responseText = `--- V2 ISOLATED CONTEXT [Run: ${args.runId}] ---\n\n`;
-      responseText += `[SYSTEM PROMPT]\n${compiled.systemPrompt}\n\n`;
-
-      if (compiled.schema) {
-        responseText += `[ENFORCED JSON SCHEMA]\n${JSON.stringify(compiled.schema, null, 2)}`;
-      }
-
-      responseText += `\n\n---\nApply the above system prompt to your behavior for this task.`;
-
-      return {
-        content: [{ type: "text", text: responseText }],
-      };
-    }
-
-    // ── clear_run ───────────────────────────────────────────────────────
-    if (request.params.name === "clear_run") {
-      const args = request.params.arguments as any;
-      await clearRun(cwd, args.runId);
-      return {
-        content: [{ type: "text", text: `Run '${args.runId}' cleared.` }],
-      };
-    }
-
-    throw new Error(`Unknown tool: ${request.params.name}`);
-  } catch (error: any) {
-    return {
-      content: [{
-        type: "text",
-        text: `Error: ${error.message}`,
-      }],
-      isError: true,
-    };
-  }
-});
-
-// ─── Start ─────────────────────────────────────────────────────────────────
-
-async function run() {
+export async function runServer(): Promise<void> {
+  const server = createServer();
   const transport = new StdioServerTransport();
   await server.connect(transport);
   console.error("Dance of Tal V2 - MCP Server running (tools: get_project_status, list_combos, init_run, get_run_context, clear_run)");
 }
 
-run().catch((error) => {
-  console.error("Fatal error:", error);
-  process.exit(1);
-});
+function isMainModule(): boolean {
+  const entry = process.argv[1];
+  if (!entry) return false;
+  return path.resolve(entry) === fileURLToPath(import.meta.url);
+}
+
+if (isMainModule()) {
+  runServer().catch((error) => {
+    console.error("Fatal error:", error);
+    process.exit(1);
+  });
+}

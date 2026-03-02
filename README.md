@@ -276,7 +276,7 @@ dot lock \
   --act   act/@acme-platform/incident-response \
   --name  incident
 
-# During a P0 outage, the AI automatically switches to hotfix persona
+# During a P0 outage, the compiled context includes incident workflow guidance
 dot run incident --task "Payment service returning 500 on all POST /charge requests since 03:12 UTC"
 ```
 
@@ -340,16 +340,23 @@ DOT implements the **Model Context Protocol (MCP)**, so AI IDEs can pull the exa
   "mcpServers": {
     "dance-of-tal": {
       "command": "npx",
-      "args": ["dance-of-tal"],
+      "args": ["-y", "dance-of-tal"],
+      "env": {
+        "DANCE_OF_TAL_PROJECT_DIR": "/absolute/path/to/your-repo"
+      }
     },
   },
 }
 ```
 
+`DANCE_OF_TAL_PROJECT_DIR` is optional but recommended when your MCP host launches from a different working directory.
+
 ### MCP Tools
 
 | Tool              | Description                                    |
 | ----------------- | ---------------------------------------------- |
+| `get_project_status` | Check initialization, available combos, agent role mappings, and active combo |
+| `list_combos`     | List local combos with Tal/Dance/Act metadata plus `agents.json` mappings |
 | `init_run`        | Create an isolated sandbox for one agent run   |
 | `get_run_context` | Return the compiled system prompt for that run |
 | `clear_run`       | Clean up the sandbox after the run completes   |

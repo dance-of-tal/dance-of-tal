@@ -1,6 +1,10 @@
 import fs from "fs/promises";
 import path from "path";
-import { Tal, Dance, Act, ComboSummary } from "../data/types.js";
+import {
+    assertPathInside,
+    assertSafeAssetUrn,
+    assertSafeComboName,
+} from "./identifiers.js";
 
 /**
  * Returns the root `.dance-of-tal` directory for the active project.
@@ -21,12 +25,12 @@ export function getDotDir(cwd: string = process.cwd()): string {
  *   → .dance-of-tal/tal/@dot-presets/system-architect.json
  */
 export function assetFilePath(cwd: string, urn: string): string {
-    // urn: "tal/@monarchjuno/system-architect"
+    assertSafeAssetUrn(urn);
     const [category, author, name] = urn.split("/");
-    if (!category || !author || !name) {
-        throw new Error(`Invalid URN for file path resolution: '${urn}'`);
-    }
-    return path.join(getDotDir(cwd), category, author, `${name}.json`);
+    const dotDir = path.resolve(getDotDir(cwd));
+    const filePath = path.resolve(dotDir, category, author, `${name}.json`);
+    assertPathInside(dotDir, filePath, "asset");
+    return filePath;
 }
 
 /**
@@ -49,6 +53,11 @@ export type Combo = {
     act?: string;            // Optional Act URN — act/@author/name
 };
 
+export type LockedComboNameList = {
+    names: string[];
+    skipped: Array<{ file: string; reason: string }>;
+};
+
 /**
  * Locks a Combo to disk.
  * File: .dance-of-tal/combo/<name>.json
@@ -58,9 +67,11 @@ export async function lockCombo(
     name: string,
     combo: Combo
 ): Promise<void> {
-    const combosDir = path.join(getDotDir(cwd), "combo");
+    assertSafeComboName(name);
+    const combosDir = path.resolve(getDotDir(cwd), "combo");
     await fs.mkdir(combosDir, { recursive: true });
-    const filepath = path.join(combosDir, `${name}.json`);
+    const filepath = path.resolve(combosDir, `${name}.json`);
+    assertPathInside(combosDir, filepath, "combo");
     await fs.writeFile(filepath, JSON.stringify(combo, null, 2), "utf-8");
 }
 
@@ -72,7 +83,10 @@ export async function getCombo(
     cwd: string,
     name: string
 ): Promise<Combo | null> {
-    const filepath = path.join(getDotDir(cwd), "combo", `${name}.json`);
+    assertSafeComboName(name);
+    const combosDir = path.resolve(getDotDir(cwd), "combo");
+    const filepath = path.resolve(combosDir, `${name}.json`);
+    assertPathInside(combosDir, filepath, "combo");
     try {
         const raw = await fs.readFile(filepath, "utf-8");
         return JSON.parse(raw) as Combo;
@@ -80,4 +94,38 @@ export async function getCombo(
         if (err.code === "ENOENT") return null;
         throw err;
     }
+}
+
+/**
+ * Lists top-level locked combo files from `.dance-of-tal/combo/*.json`.
+ * Invalid filenames are skipped and returned as warnings.
+ */
+export async function listLockedComboNames(cwd: string): Promise<LockedComboNameList> {
+    const combosDir = path.resolve(getDotDir(cwd), "combo");
+
+    let entries: Array<{ name: string; isFile: () => boolean }>;
+    try {
+        entries = await fs.readdir(combosDir, { withFileTypes: true });
+    } catch (err: any) {
+        if (err.code === "ENOENT") return { names: [], skipped: [] };
+        throw err;
+    }
+
+    const names: string[] = [];
+    const skipped: Array<{ file: string; reason: string }> = [];
+
+    for (const entry of entries) {
+        if (!entry.isFile() || !entry.name.endsWith(".json")) continue;
+
+        const name = entry.name.replace(/\.json$/, "");
+        try {
+            assertSafeComboName(name);
+            names.push(name);
+        } catch (err: any) {
+            skipped.push({ file: entry.name, reason: err.message });
+        }
+    }
+
+    names.sort((a, b) => a.localeCompare(b));
+    return { names, skipped };
 }

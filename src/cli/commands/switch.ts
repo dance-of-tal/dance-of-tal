@@ -1,8 +1,8 @@
 import path from "path";
 import { ui } from "../utils/ui.js";
-import { getDotDir, getCombo } from "../../lib/registry.js";
+import { getDotDir, getCombo, listLockedComboNames } from "../../lib/registry.js";
 import fs from "fs/promises";
-import { existsSync, readdirSync } from "fs";
+import { existsSync } from "fs";
 
 const CONFIG_FILE = "combo.config.json";
 
@@ -45,14 +45,9 @@ export async function runSwitch(comboName: string) {
     const combo = await getCombo(cwd, comboName);
     if (!combo) {
         // List available combos to help the user
-        const comboDir = path.join(dotDir, "combo");
         let available = "(none)";
-        if (existsSync(comboDir)) {
-            const files = readdirSync(comboDir)
-                .filter((f) => f.endsWith(".json"))
-                .map((f) => f.replace(/\.json$/, ""));
-            if (files.length > 0) available = files.join(", ");
-        }
+        const locked = await listLockedComboNames(cwd);
+        if (locked.names.length > 0) available = locked.names.join(", ");
         throw new Error(
             `Combo '${comboName}' not found.\n  Available: ${available}\n  Run 'dot lock' to create one.`
         );

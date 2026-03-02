@@ -1,6 +1,5 @@
-import { Act, ActNode, ActEdge } from "../data/types.js";
-import { Combo } from "./registry.js";
-import { initRun, startRunContext, getRunState, saveRunState } from "./runs.js";
+import { Act, ActNode } from "../data/types.js";
+import { initRun, startRunContext } from "./runs.js";
 
 /**
  * Executes a single DAG Node
@@ -14,13 +13,6 @@ export async function executeActNode(
   taskContext: string
 ): Promise<void> {
   const comboName = `act_${nodeId}_combo`;
-
-  // We temporarily create a runtime Combo from the node's Tal & Dance.
-  // In a full implementation, these would be strictly checked against the registry.
-  const runtimeCombo: Combo = {
-    tal: node.tal,
-    dance: node.dance
-  };
 
   // We save the combo in the current run's domain or global registry
   // For now, we simulate initializing the run directly for this node

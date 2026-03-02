@@ -22,14 +22,9 @@ export const compileCmd = new Command("compile")
             }
 
             console.log(ui.success("\nType-Safety validation running..."));
-
-            import("../../lib/engine.js").then(async ({ validateComboFiles }) => {
-                await validateComboFiles(process.cwd(), combo);
-                console.log(ui.success("✔ Compilation sequence completed without errors."));
-            }).catch(err => {
-                console.error(ui.error(`Compilation Failed: ${err.message}`));
-                process.exit(1);
-            });
+            const { validateComboFiles } = await import("../../lib/engine.js");
+            await validateComboFiles(process.cwd(), combo);
+            console.log(ui.success("✔ Compilation sequence completed without errors."));
 
         } catch (err: any) {
             console.error(ui.error(`Compilation Failed: ${err.message}`));

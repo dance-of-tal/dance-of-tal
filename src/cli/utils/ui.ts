@@ -16,33 +16,24 @@ export const ui = {
 
 export const printUsage = () => {
     const commandRows: Array<[string, string]> = [
-        ["dot pick tal|dance [filters]", "Pick a Tal or Dance from presets/custom items"],
-        ["dot lock --tal <slug> [--dance <slug>]", "Lock active Tal/Dance into current project"],
-        ["dot deploy --stage gpts|mcp|openclaw|threads", "Build channel-ready package from active Tal/Dance"],
-        ["dot init [--project ...]", "Step-by-step setup wizard for .dance-of-tal config"],
-        ["dot init --tal ... [--dance ...] [--name ...] [--target ...]", "Non-interactive init + optional starting combo"],
-        ["dot setup ...", "Alias of dot init"],
-        ["dot list tal|dance [filters]", "Browse preset data (add --include-custom to include saved custom items)"],
-        ["dot show tal|dance <slug>", "Inspect one Tal or Dance"],
-        ["dot switch tal|dance|combo", "Switch active Tal/Dance/Combo with selection UX"],
-        ["dot doctor [--project ...] [--target ...]", "Run host-connection diagnostics and setup hints"],
-        ["dot current", "Show active mode and combo details"],
-        ["dot prompt --mode combined|thinking|output", "Print active prompt block"],
-        ["dot run --task \"...\"", "Build task-ready SYSTEM + USER package from active mode"],
-        ["dot combo list|show|use|rename", "Manage saved combos in this project"],
-        ["dot combo custom --name ...", "Generate custom Tal/Dance and save as combo"],
-        ["dot channel list|show|connect|disconnect", "Manage per-project channel credentials in .dance-of-tal/channels.json"],
-        ["dot clear", "Clear active combo"],
-        ["dot config show|path", "Inspect config file location/content"]
+        ["dot init", "Initialize .dance-of-tal workspace"],
+        ["dot quickstart", "Interactive setup: recommend, install, lock, switch combo"],
+        ["dot install <urn>", "Install tal|dance|act|combo asset from registry"],
+        ["dot use combo/@author/name", "Install + lock + switch combo in one step"],
+        ["dot lock --name <n> --tal ... --dance ...", "Create local combo lockfile"],
+        ["dot switch <comboName>", "Switch active combo"],
+        ["dot compile <comboName>", "Validate combo asset existence and URN format"],
+        ["dot run <comboName> --task \"...\"", "Compile and print system prompt payload"],
+        ["dot launch <urn> --editor cursor|windsurf|code", "Install and open IDE with active combo"],
+        ["dot create --category tal|dance|act --name <slug>", "Create local asset template"],
+        ["dot publish --category ... --name ...", "Publish local asset/combo to registry"],
+        ["dot search <keyword>", "Search registry packages"],
+        ["dot list [--category ...] [--mine]", "List registry packages"],
+        ["dot agents set|list|remove", "Manage role -> combo mappings in agents.json"],
+        ["dot login", "Authenticate with GitHub for publish operations"]
     ];
 
-    const comboRows: Array<[string, string]> = [
-        ["Combo", "Tal + Dance"],
-        ["Tal-only", "Tal thinking only (no Dance)"],
-        ["Dance-only", "Dance style only (no Tal)"]
-    ];
-
-    const width = Math.max(...commandRows.map(([left]) => left.length), ...comboRows.map(([left]) => left.length)) + 2;
+    const width = Math.max(...commandRows.map(([left]) => left.length)) + 2;
     const pad = (value: string) => value.padEnd(width, " ");
 
     console.log(
@@ -52,39 +43,27 @@ export const printUsage = () => {
             ui.dim("================"),
             "",
             ui.section("Purpose"),
-            "  Apply Tal (thinking) and Dance (output) to AI behavior per project.",
+            "  Build and activate reproducible Tal + Dance combos for MCP/CLI workflows.",
             "",
             ui.section("Quick Start"),
-            `  1) ${ui.command("dot pick tal --query founder")}`,
-            `  2) ${ui.command('dot lock --tal elon-musk-case-tal --dance boardroom-brief --name "Founder Combo"')}`,
-            `  3) ${ui.command('dot deploy --stage mcp --task "Draft weekly board update"')}`,
-            "",
-            ui.section("Modes"),
-            ...comboRows.map(([left, right]) => `  ${pad(left)}${right}`),
-            "",
-            ui.section("Flow"),
-            "  Pick -> Lock -> Deploy",
+            `  1) ${ui.command("dot init")}`,
+            `  2) ${ui.command("dot use combo/@dot-presets/gpt-architecture-review")}`,
+            `  3) ${ui.command('dot run gpt-architecture-review --task "Review my API design"')}`,
             "",
             ui.section("Commands"),
             ...commandRows.map(([left, right]) => `  ${ui.command(pad(left))}${right}`),
             "",
             ui.section("Examples"),
-            `  ${ui.command('dot init --tal elon-musk-case-tal --name "Thinking Start"')}`,
-            `  ${ui.command('dot init --tal elon-musk-case-tal --dance boardroom-brief --target openclaw --no-interactive')}`,
-            `  ${ui.command("dot doctor --target windsurf")}`,
-            `  ${ui.command('dot lock --dance boardroom-brief --name "Output Only"')}`,
-            `  ${ui.command("dot switch tal")}`,
-            `  ${ui.command('dot combo custom --name "My Custom" --tal-only --input "first principles and constraints"')}`,
-            `  ${ui.command('dot combo custom --name "Threads Voice" --dance-only --stage threads --example "Input => Output"')}`,
-            `  ${ui.command('dot channel connect threads --token "<TOKEN>" --meta userId="<THREADS_USER_ID>"')}`,
-            `  ${ui.command("dot channel connect threads   # token can come from .dance-of-tal/.env")}`,
-            `  ${ui.command('dot deploy --stage threads --publish --text "Launching private beta now."')}`,
-            `  ${ui.command("dot list dance --category Executive --query concise")}`,
+            `  ${ui.command("dot quickstart")}`,
+            `  ${ui.command("dot install tal/@dot-presets/system-architect")}`,
+            `  ${ui.command("dot lock --name sprint --tal @dot-presets/system-architect --dance @dot-presets/pr-review-standard")}`,
+            `  ${ui.command("dot switch sprint")}`,
+            `  ${ui.command('dot run sprint --task "Implement OAuth callback endpoint"')}`,
             "",
             ui.section("Project Config"),
-            "  Stored at: .dance-of-tal/config.json",
-            "  Channel secrets: .dance-of-tal/channels.json",
-            "  Init targets: windsurf | claude | openclaw | cursor | gpts | other",
+            "  Active combo: .dance-of-tal/combo.config.json",
+            "  Combos:       .dance-of-tal/combo/<name>.json",
+            "  Runs:         .dance-of-tal/runs/<runId>/state.json",
             ""
         ].join("\n")
     );

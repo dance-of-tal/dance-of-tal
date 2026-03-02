@@ -8,9 +8,9 @@ import { getAuthUser } from "./login.js";
 const VALID_CATEGORIES = ["tal", "dance", "act"] as const;
 type CreateCategory = typeof VALID_CATEGORIES[number];
 
-function buildTalTemplate(slug: string, name: string, description: string): Record<string, unknown> {
+function buildTalTemplate(author: string, slug: string, name: string, description: string): Record<string, unknown> {
     return {
-        type: `tal/${slug}`,
+        type: `tal/@${author}/${slug}`,
         slug,
         name,
         description,
@@ -22,9 +22,9 @@ function buildTalTemplate(slug: string, name: string, description: string): Reco
     };
 }
 
-function buildDanceTemplate(slug: string, name: string, description: string): Record<string, unknown> {
+function buildDanceTemplate(author: string, slug: string, name: string, description: string): Record<string, unknown> {
     return {
-        type: `dance/${slug}`,
+        type: `dance/@${author}/${slug}`,
         slug,
         name,
         description,
@@ -35,7 +35,7 @@ function buildDanceTemplate(slug: string, name: string, description: string): Re
 
 function buildActTemplate(slug: string, name: string, description: string, author: string): Record<string, unknown> {
     return {
-        type: `act/${slug}`,
+        type: `act/@${author}/${slug}`,
         slug,
         name,
         description,
@@ -106,8 +106,8 @@ export const createCmd = new Command("create")
             const description = options.description || `${displayName}`;
 
             let template: Record<string, unknown>;
-            if (category === "tal") template = buildTalTemplate(slug, displayName, description);
-            else if (category === "dance") template = buildDanceTemplate(slug, displayName, description);
+            if (category === "tal") template = buildTalTemplate(author, slug, displayName, description);
+            else if (category === "dance") template = buildDanceTemplate(author, slug, displayName, description);
             else template = buildActTemplate(slug, displayName, description, author);
 
             fs.mkdirSync(path.dirname(filePath), { recursive: true });

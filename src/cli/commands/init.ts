@@ -1,5 +1,3 @@
-import fs from "fs";
-import path from "path";
 import { ui } from "../utils/ui.js";
 import { initRegistry } from "../../lib/registry.js";
 
@@ -17,5 +15,5 @@ export async function runInit() {
     }
 
     console.log(ui.success("\nDOT setup complete!"));
-    console.log(ui.dim("    dot init @dot-presets/strategy-chief"));
+    console.log(ui.dim("    Next: dot quickstart"));
 }

@@ -1,5 +1,5 @@
 import { Combo } from "./registry.js";
-import { Tal, Dance } from "../data/types.js";
+import { Tal, Dance, Act } from "../data/types.js";
 import { assetFilePath } from "./registry.js";
 import fs from "fs/promises";
 
@@ -71,13 +71,17 @@ export async function validateComboFiles(cwd: string, combo: Combo): Promise<voi
  *  - rules   → concatenated in order (first = base, last = most specific)
  *  - schema  → deep-merged in order (later keys override earlier ones)
  */
-export async function compileContext(combo: Combo, taskContext: string): Promise<CompiledContext> {
+export async function compileContext(
+    combo: Combo,
+    taskContext: string,
+    cwd: string = process.cwd()
+): Promise<CompiledContext> {
     validateCombo(combo);
     const { tal: talUrn, dances } = normaliseCombo(combo);
-    const cwd = process.cwd();
 
     const tal: Tal = await loadAsset(cwd, talUrn);
     const danceAssets: Dance[] = await Promise.all(dances.map((d) => loadAsset(cwd, d)));
+    const actAsset: Act | null = combo.act ? await loadAsset(cwd, combo.act) : null;
 
     // Merge Dance layers
     const mergedRules = danceAssets
@@ -89,9 +93,25 @@ export async function compileContext(combo: Combo, taskContext: string): Promise
         return acc ? deepMerge(acc, d.schema as Record<string, any>) : { ...(d.schema as Record<string, any>) };
     }, undefined);
 
+    let actContextBlock = "";
+    if (actAsset) {
+        const actLines: string[] = [];
+        if (actAsset.description) actLines.push(actAsset.description);
+        if (Array.isArray(actAsset.steps) && actAsset.steps.length > 0) {
+            actLines.push(`Steps: ${actAsset.steps.join(" -> ")}`);
+        }
+        if (actAsset.nodes && Object.keys(actAsset.nodes).length > 0) {
+            actLines.push(`Nodes: ${Object.keys(actAsset.nodes).join(", ")}`);
+        }
+        if (actLines.length > 0) {
+            actContextBlock = `[WORKFLOW ACT: ${actAsset.type || combo.act}]\n${actLines.join("\n")}\n\n`;
+        }
+    }
+
     const systemPrompt =
         `[BEHAVIOR MODE: ${tal.type}]\n${tal.thinking || tal.description}\n\n` +
         `[OUTPUT FORMATTING]\n${mergedRules}\n\n` +
+        actContextBlock +
         `[CURRENT TASK]\n${taskContext}`;
 
     return { systemPrompt, schema: mergedSchema };

@@ -1,7 +1,8 @@
 import fs from "fs/promises";
 import path from "path";
-import { getDotDir, getCombo, Combo } from "./registry.js";
+import { getDotDir, getCombo } from "./registry.js";
 import { compileContext, CompiledContext } from "./engine.js";
+import { assertPathInside, assertSafeRunId } from "./identifiers.js";
 
 // V2 Run State Isolation
 
@@ -19,8 +20,11 @@ export interface RunState {
  * Gets the isolated directory path for a specific agent run
  */
 export function getRunDir(cwd: string, runId: string): string {
-    const dotDir = getDotDir(cwd);
-    return path.join(dotDir, "runs", runId);
+    assertSafeRunId(runId);
+    const runsDir = path.resolve(getDotDir(cwd), "runs");
+    const runDir = path.resolve(runsDir, runId);
+    assertPathInside(runsDir, runDir, "run");
+    return runDir;
 }
 
 /**
@@ -92,7 +96,7 @@ export async function startRunContext(cwd: string, runId: string, taskContext: s
         throw new Error(`Combo '${state.comboName}' not found in registry.`);
     }
 
-    const compiled = await compileContext(combo, taskContext);
+    const compiled = await compileContext(combo, taskContext, cwd);
 
     state.status = "running";
     state.context = compiled;

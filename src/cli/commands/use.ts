@@ -47,7 +47,7 @@ export const useCmd = new Command("use")
             // 2. Read combo content to build the lockfile
             console.log(ui.dim("\nStep 2/3 — Creating lockfile...\n"));
 
-            const { assetFilePath, getCombo } = await import("../../lib/registry.js");
+            const { assetFilePath } = await import("../../lib/registry.js");
             const cwd = process.cwd();
 
             // The combo content lands at .dance-of-tal/combo/@author/slug.json

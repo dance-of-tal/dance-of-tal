@@ -23,7 +23,7 @@ const program = new Command();
 program
   .name("dot")
   .description("Dance of Tal V2 - Type-Safe AI Behavior Engine")
-  .version("2.0.0");
+  .version("2.0.2");
 
 program
   .command("init")
@@ -39,7 +39,7 @@ program
 
 program
   .command("install <package>")
-  .description("Install a Vibe, Tal, Dance, Act, or Stage (e.g. dot install combo/@dot-presets/gpt-architecture-review)")
+  .description("Install a Tal, Dance, Act, or Combo (e.g. dot install combo/@dot-presets/gpt-architecture-review)")
   .action(async (pkg: string) => {
     try {
       await runInstall(pkg);

@@ -26,7 +26,7 @@ export const buildTargetSetup = (targetHost: InitTargetHost) => {
                 "Open Windsurf MCP settings and register a local stdio server.",
                 "Set command: npx",
                 "Set args: -y dance-of-tal",
-                "Reload MCP tools and run: act_overview."
+                "Reload MCP tools and run: get_project_status."
             ]
         };
     }
@@ -37,7 +37,7 @@ export const buildTargetSetup = (targetHost: InitTargetHost) => {
                 "Open Claude Desktop MCP settings.",
                 "Set command: npx",
                 "Set args: -y dance-of-tal",
-                "Reload Claude Desktop and verify with: act_overview."
+                "Reload Claude Desktop and verify with: get_project_status."
             ]
         };
     }
@@ -46,8 +46,8 @@ export const buildTargetSetup = (targetHost: InitTargetHost) => {
             host: "openclaw",
             steps: [
                 "Run this MCP server via stdio command: npx -y dance-of-tal.",
-                "Call build_openclaw_profile with selected Tal/Dance.",
-                "Paste returned systemPrompt into your OpenClaw assistant profile."
+                "Call get_project_status -> init_run -> get_run_context.",
+                "Apply returned SYSTEM PROMPT to your OpenClaw assistant profile."
             ]
         };
     }
@@ -58,7 +58,7 @@ export const buildTargetSetup = (targetHost: InitTargetHost) => {
                 "Open Cursor MCP integration settings and add a local stdio server.",
                 "Set command: npx",
                 "Set args: -y dance-of-tal",
-                "Reload tools and test with: list_tals."
+                "Reload tools and test with: get_project_status."
             ]
         };
     }
@@ -76,7 +76,7 @@ export const buildTargetSetup = (targetHost: InitTargetHost) => {
         host: "other",
         steps: [
             "Connect any MCP host using stdio command: npx -y dance-of-tal.",
-            "Verify tool visibility with: act_overview.",
+            "Verify tool visibility with: get_project_status.",
             "Use dot switch and dot run to validate active behavior."
         ]
     };

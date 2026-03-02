@@ -7,10 +7,9 @@ import { lockCombo, assetFilePath, getDotDir } from "../../lib/registry.js";
 import { existsSync } from "fs";
 import fs from "fs/promises";
 import { exec } from "child_process";
-import path from "path";
 
 export const launchCmd = new Command("launch")
-    .description("Launch a Vibe, Tal, Dance, or Act in an IDE (e.g. dot launch act/@dot-presets/threads-viral --editor cursor)")
+    .description("Launch a combo or act in an IDE (e.g. dot launch act/@dot-presets/incident-response --editor cursor)")
     .argument("<urn>", "Full URN (e.g. act/@dot-presets/threads-viral)")
     .option("--editor <editor>", "IDE to open: cursor, windsurf, or code", "cursor")
     .option("--name <alias>", "Local combo name to lock as (defaults to the asset slug)")
@@ -24,7 +23,6 @@ export const launchCmd = new Command("launch")
             }
 
             const category = parts[0];
-            const author = parts[1];
             const slug = parts[2];
             const localName = options.name || slug;
             const cwd = process.cwd();
@@ -66,7 +64,7 @@ export const launchCmd = new Command("launch")
                     throw new Error(`Act '${urn}' has no nodes defined.`);
                 }
                 // Pick the first node listed (or could analyze edges to find real root)
-                const [firstNodeId, firstNodeParams] = startNodes[0];
+                const [, firstNodeParams] = startNodes[0];
                 const nodeParams = firstNodeParams as { tal: string; dance?: string | string[] };
 
                 await lockCombo(cwd, localName, {
@@ -93,7 +91,7 @@ export const launchCmd = new Command("launch")
             console.log(ui.dim(`Launching ${options.editor}...`));
 
             const launchCommand = `${options.editor} .`;
-            exec(launchCommand, (error, stdout, stderr) => {
+            exec(launchCommand, (error, _stdout, _stderr) => {
                 if (error) {
                     if (error.code === 127) {
                         console.error(ui.error(`\nFailed to launch '${options.editor}'. Command not found.`));

@@ -7,7 +7,6 @@ import { runInstall } from "./install.js";
 import { lockCombo, assetFilePath, getDotDir } from "../../lib/registry.js";
 import { existsSync } from "fs";
 import fs from "fs/promises";
-import https from "https";
 
 // ─── Recommendation Fallback ───────────────────────────────────────────────
 
