@@ -1,13 +1,13 @@
 import { Command } from "commander";
 import { ui } from "../utils/ui.js";
+import { ASSET_KINDS, isAssetKind } from "../../lib/kinds.js";
 
 const REGISTRY_URL = process.env.DOT_REGISTRY_URL || "https://registry.dance-of-tal-v2.workers.dev";
-
-const ALL_CATEGORIES = ["tal", "dance", "act", "combo"] as const;
+const ASSET_KIND_HELP = ASSET_KINDS.join(" | ");
 
 interface PackageMeta {
     urn: string;
-    category: string;
+    kind: string;
     name: string;
     author: string;
     version: string;
@@ -30,17 +30,16 @@ function matchesKeyword(pkg: PackageMeta, keyword: string): boolean {
 export const searchCmd = new Command("search")
     .description("Search the global registry for assets by keyword")
     .argument("<keyword>", "Keyword to search for (matches URN, name, author, description, tags)")
-    .option("--category <category>", "Filter by category: tal | dance | act | combo")
+    .option("--kind <kind>", `Filter by kind: ${ASSET_KIND_HELP}`)
     .action(async (keyword: string, options) => {
         console.log(ui.title(`Searching registry for: "${keyword}"`));
 
-        const categories = options.category
-            ? [options.category as string]
-            : [...ALL_CATEGORIES];
+        const kinds = options.kind
+            ? [options.kind as string]
+            : [...ASSET_KINDS];
 
-        const validCategories = [...ALL_CATEGORIES] as string[];
-        if (options.category && !validCategories.includes(options.category)) {
-            console.error(ui.error(`Invalid category. Must be one of: ${validCategories.join(", ")}`));
+        if (options.kind && !isAssetKind(options.kind)) {
+            console.error(ui.error(`Invalid kind. Must be one of: ${ASSET_KINDS.join(", ")}`));
             process.exit(1);
         }
 
@@ -48,10 +47,10 @@ export const searchCmd = new Command("search")
             const results: PackageMeta[] = [];
 
             await Promise.all(
-                categories.map(async (category) => {
-                    const url = `${REGISTRY_URL}/packages?category=${category}`;
+                kinds.map(async (kind) => {
+                    const url = `${REGISTRY_URL}/packages?kind=${kind}`;
                     const res = await fetch(url);
-                    if (!res.ok) throw new Error(`Registry error for category '${category}': ${res.statusText}`);
+                    if (!res.ok) throw new Error(`Registry error for kind '${kind}': ${res.statusText}`);
                     const data: any = await res.json();
                     const packages: PackageMeta[] = (data.packages || []).filter(Boolean);
                     const matched = packages.filter((pkg) => matchesKeyword(pkg, keyword));
@@ -64,17 +63,17 @@ export const searchCmd = new Command("search")
                 return;
             }
 
-            // Group by category
-            const byCategory: Record<string, PackageMeta[]> = {};
+            // Group by asset kind
+            const byKind: Record<string, PackageMeta[]> = {};
             for (const pkg of results) {
-                if (!byCategory[pkg.category]) byCategory[pkg.category] = [];
-                byCategory[pkg.category].push(pkg);
+                if (!byKind[pkg.kind]) byKind[pkg.kind] = [];
+                byKind[pkg.kind].push(pkg);
             }
 
             console.log(ui.dim(`\nFound ${results.length} result(s):\n`));
 
-            for (const [cat, pkgs] of Object.entries(byCategory)) {
-                console.log(ui.section(`  [${cat.toUpperCase()}]`));
+            for (const [kind, pkgs] of Object.entries(byKind)) {
+                console.log(ui.section(`  [${kind.toUpperCase()}]`));
                 for (const pkg of pkgs) {
                     console.log(`    ${ui.highlight(pkg.urn)}`);
                     if (pkg.description) console.log(`      ${ui.dim(pkg.description)}`);

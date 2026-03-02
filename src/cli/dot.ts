@@ -14,7 +14,6 @@ import { agentsCmd } from "./commands/agents.js";
 import { searchCmd } from "./commands/search.js";
 import { listCmd } from "./commands/list.js";
 import { useCmd } from "./commands/use.js";
-import { quickstartCmd } from "./commands/quickstart.js";
 import { createCmd } from "./commands/create.js";
 import { launchCmd } from "./commands/launch.js";
 
@@ -22,8 +21,8 @@ const program = new Command();
 
 program
   .name("dot")
-  .description("Dance of Tal V2 - Type-Safe AI Behavior Engine")
-  .version("2.0.2");
+  .description("Dance of Tal - Type-Safe AI Behavior Engine")
+  .version("2.0.3");
 
 program
   .command("init")
@@ -39,7 +38,7 @@ program
 
 program
   .command("install <package>")
-  .description("Install a Tal, Dance, Act, or Combo (e.g. dot install combo/@dot-presets/gpt-architecture-review)")
+  .description("Install a Tal, Dance, Act, or Combo (e.g. dot install combo/@acme/pr-review)")
   .action(async (pkg: string) => {
     try {
       await runInstall(pkg);
@@ -70,7 +69,6 @@ program.addCommand(agentsCmd);
 program.addCommand(searchCmd);
 program.addCommand(listCmd);
 program.addCommand(useCmd);
-program.addCommand(quickstartCmd);
 program.addCommand(createCmd);
 program.addCommand(launchCmd);
 

@@ -4,9 +4,9 @@ import path from "path";
 import { ui } from "../utils/ui.js";
 import { getDotDir, assetFilePath } from "../../lib/registry.js";
 import { getAuthUser } from "./login.js";
+import { CREATABLE_ASSET_KINDS, CreatableAssetKind, isCreatableAssetKind } from "../../lib/kinds.js";
 
-const VALID_CATEGORIES = ["tal", "dance", "act"] as const;
-type CreateCategory = typeof VALID_CATEGORIES[number];
+const CREATABLE_KIND_HELP = CREATABLE_ASSET_KINDS.join(", ");
 
 function buildTalTemplate(author: string, slug: string, name: string, description: string): Record<string, unknown> {
     return {
@@ -14,7 +14,6 @@ function buildTalTemplate(author: string, slug: string, name: string, descriptio
         slug,
         name,
         description,
-        category: "Custom",
         tags: [],
         featuredScore: 0,
         createdAt: new Date().toISOString().split("T")[0],
@@ -28,7 +27,7 @@ function buildDanceTemplate(author: string, slug: string, name: string, descript
         slug,
         name,
         description,
-        category: "Custom",
+        tags: [],
         rules: "Tone:\n- ...\nStructure:\n- ...\nFormatting:\n- ...\nForbidden:\n- ..."
     };
 }
@@ -51,7 +50,7 @@ function buildActTemplate(slug: string, name: string, description: string, autho
 
 export const createCmd = new Command("create")
     .description("Create a new asset locally (publish later with: dot publish)")
-    .requiredOption("--category <category>", "Asset type: tal, dance, act")
+    .requiredOption("--kind <kind>", `Asset type: ${CREATABLE_KIND_HELP}`)
     .requiredOption("--name <slug>", "Asset slug (e.g. my-custom-tal)")
     .option("--author <author>", "Author namespace (defaults to logged-in GitHub username)")
     .option("--display-name <displayName>", "Human-readable name")
@@ -60,10 +59,11 @@ export const createCmd = new Command("create")
         console.log(ui.title("Creating Asset"));
 
         try {
-            const category = options.category as CreateCategory;
-            if (!VALID_CATEGORIES.includes(category)) {
-                throw new Error(`Invalid category '${category}'. Must be one of: ${VALID_CATEGORIES.join(", ")}`);
+            const kind = options.kind as string;
+            if (!isCreatableAssetKind(kind)) {
+                throw new Error(`Invalid kind '${kind}'. Must be one of: ${CREATABLE_ASSET_KINDS.join(", ")}`);
             }
+            const typedKind: CreatableAssetKind = kind;
 
             const slug = options.name as string;
             if (!/^[a-z0-9][a-z0-9._-]{1,98}[a-z0-9]$/.test(slug)) {
@@ -82,7 +82,7 @@ export const createCmd = new Command("create")
                     throw new Error(
                         `No author specified.\n` +
                         `  Option 1: dot login  (uses your GitHub username automatically)\n` +
-                        `  Option 2: dot create --author <name> --category ${category} --name ${slug}`
+                        `  Option 2: dot create --author <name> --kind ${typedKind} --name ${slug}`
                     );
                 }
             }
@@ -93,7 +93,7 @@ export const createCmd = new Command("create")
                 throw new Error("Workspace not initialised. Run 'dot init' first.");
             }
 
-            const urn = `${category}/@${author}/${slug}`;
+            const urn = `${typedKind}/@${author}/${slug}`;
             const filePath = assetFilePath(cwd, urn);
             if (fs.existsSync(filePath)) {
                 throw new Error(
@@ -106,8 +106,8 @@ export const createCmd = new Command("create")
             const description = options.description || `${displayName}`;
 
             let template: Record<string, unknown>;
-            if (category === "tal") template = buildTalTemplate(author, slug, displayName, description);
-            else if (category === "dance") template = buildDanceTemplate(author, slug, displayName, description);
+            if (typedKind === "tal") template = buildTalTemplate(author, slug, displayName, description);
+            else if (typedKind === "dance") template = buildDanceTemplate(author, slug, displayName, description);
             else template = buildActTemplate(slug, displayName, description, author);
 
             fs.mkdirSync(path.dirname(filePath), { recursive: true });
@@ -116,14 +116,14 @@ export const createCmd = new Command("create")
             console.log(ui.success(`\n✔ Created ${urn}`));
             console.log(ui.dim(`  Saved to: ${filePath}`));
             console.log(ui.dim(`\n  Edit the file to customise, then publish:`));
-            console.log(ui.dim(`    dot publish --category ${category} --name ${slug}`));
+            console.log(ui.dim(`    dot publish --kind ${typedKind} --name ${slug}`));
 
-            if (category === "tal" || category === "dance") {
+            if (typedKind === "tal" || typedKind === "dance") {
                 console.log(ui.dim(`\n  Or lock a combo immediately:`));
-                if (category === "tal") {
-                    console.log(ui.dim(`    dot lock --name my-combo --tal ${urn} --dance dance/@dot-presets/<slug>`));
+                if (typedKind === "tal") {
+                    console.log(ui.dim(`    dot lock --name my-combo --tal ${urn} --dance dance/@<author>/<slug>`));
                 } else {
-                    console.log(ui.dim(`    dot lock --name my-combo --tal tal/@dot-presets/<slug> --dance ${urn}`));
+                    console.log(ui.dim(`    dot lock --name my-combo --tal tal/@<author>/<slug> --dance ${urn}`));
                 }
             }
         } catch (err: any) {

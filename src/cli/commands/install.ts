@@ -2,6 +2,7 @@ import fs from "fs";
 import path from "path";
 import { ui } from "../utils/ui.js";
 import { getDotDir, assetFilePath } from "../../lib/registry.js";
+import { ASSET_KINDS, isAssetKind } from "../../lib/kinds.js";
 
 const REGISTRY_URL = process.env.DOT_REGISTRY_URL || "https://registry.dance-of-tal-v2.workers.dev";
 
@@ -45,30 +46,29 @@ async function installSingleAsset(pkg: string, force = false): Promise<void> {
 }
 
 export async function runInstall(pkg: string) {
-    // Validate URN format: category/@author/name
+    // Validate URN format: kind/@author/name
     const parts = pkg.split("/");
     if (parts.length !== 3 || !parts[1].startsWith("@")) {
         throw new Error(
             `Invalid URN format: '${pkg}'\n` +
-            `  Expected: <category>/@<author>/<name>\n` +
-            `  Example:  tal/@dot-presets/gpt-architecture-review`
+            `  Expected: <kind>/@<author>/<name>\n` +
+            `  Example:  tal/@acme/system-architect`
         );
     }
 
-    const [category] = parts;
-    const validCategories = ["tal", "dance", "act", "combo"];
-    if (!validCategories.includes(category)) {
-        throw new Error(`Invalid category: '${category}'. Allowed: ${validCategories.join(", ")}`);
+    const [kind] = parts;
+    if (!isAssetKind(kind)) {
+        throw new Error(`Invalid kind: '${kind}'. Allowed: ${ASSET_KINDS.join(", ")}`);
     }
 
     console.log(ui.title(`Installing package: ${pkg}`));
 
     try {
-        if (category === "combo" || category === "act") {
+        if (kind === "combo" || kind === "act") {
             // --- Cascading install ---
             // 1. Fetch the asset itself
             const url = `${REGISTRY_URL}/packages/${parts[0]}/${parts[1]}/${parts[2]}`;
-            console.log(ui.dim(`Fetching ${category} from ${url}...`));
+            console.log(ui.dim(`Fetching ${kind} from ${url}...`));
 
             const res = await fetch(url);
             if (!res.ok) {
@@ -89,9 +89,9 @@ export async function runInstall(pkg: string) {
             const filePath = assetFilePath(process.cwd(), pkg);
             fs.mkdirSync(path.dirname(filePath), { recursive: true });
             fs.writeFileSync(filePath, JSON.stringify(content, null, 2));
-            console.log(ui.success(`\n✔ Installed ${category}: ${pkg}`));
+            console.log(ui.success(`\n✔ Installed ${kind}: ${pkg}`));
 
-            if (category === "combo") {
+            if (kind === "combo") {
                 // 3. Cascading install for Combo: tal
                 const talUrn = typeof content.tal === "string" ? content.tal : null;
                 if (talUrn) {
@@ -124,7 +124,7 @@ export async function runInstall(pkg: string) {
                 console.log(ui.success(`\n✔ All dependencies installed for combo '${parts[2]}'.`));
                 console.log(ui.dim(`  To use this combo, run: dot switch ${parts[2]}`));
                 console.log(ui.dim(`  Or lock it: dot lock --tal ${talUrn ?? "<tal>"} --dance ${danceUrns.join(",")} --name ${parts[2]}`));
-            } else if (category === "act") {
+            } else if (kind === "act") {
                 // Cascading install for Act: iterate through nodes
                 const nodes = content.nodes as Record<string, any>;
                 if (nodes) {

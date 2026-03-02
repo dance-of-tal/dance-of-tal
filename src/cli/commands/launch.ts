@@ -2,15 +2,15 @@ import { Command } from "commander";
 import { ui } from "../utils/ui.js";
 import { runInit } from "./init.js";
 import { runInstall } from "./install.js";
-import { runSwitch, readConfig, writeConfig } from "./switch.js";
+import { runSwitch } from "./switch.js";
 import { lockCombo, assetFilePath, getDotDir } from "../../lib/registry.js";
 import { existsSync } from "fs";
 import fs from "fs/promises";
 import { exec } from "child_process";
 
 export const launchCmd = new Command("launch")
-    .description("Launch a combo or act in an IDE (e.g. dot launch act/@dot-presets/incident-response --editor cursor)")
-    .argument("<urn>", "Full URN (e.g. act/@dot-presets/threads-viral)")
+    .description("Launch a combo or act in an IDE (e.g. dot launch act/@acme/incident-response --editor cursor)")
+    .argument("<urn>", "Full URN (e.g. act/@acme/incident-response)")
     .option("--editor <editor>", "IDE to open: cursor, windsurf, or code", "cursor")
     .option("--name <alias>", "Local combo name to lock as (defaults to the asset slug)")
     .action(async (urn: string, options) => {
@@ -19,10 +19,10 @@ export const launchCmd = new Command("launch")
         try {
             const parts = urn.split("/");
             if (parts.length !== 3 || !parts[1].startsWith("@")) {
-                throw new Error(`Invalid URN format: '${urn}'. Expected: <category>/@<author>/<name>`);
+                throw new Error(`Invalid URN format: '${urn}'. Expected: <kind>/@<author>/<name>`);
             }
 
-            const category = parts[0];
+            const kind = parts[0];
             const slug = parts[2];
             const localName = options.name || slug;
             const cwd = process.cwd();
@@ -41,7 +41,7 @@ export const launchCmd = new Command("launch")
             // ── Step 3: Lock & Switch ─────────────────────────────────────
             console.log(ui.dim(`\nLocking local combo as: ${localName}…`));
 
-            if (category === "combo") {
+            if (kind === "combo") {
                 // If it's a combo, just lock its contents under the localName
                 const filePath = assetFilePath(cwd, urn);
                 const raw = await fs.readFile(filePath, "utf-8");
@@ -51,7 +51,7 @@ export const launchCmd = new Command("launch")
                     dance: content.dance,
                     act: content.act
                 });
-            } else if (category === "act") {
+            } else if (kind === "act") {
                 // If it's an act, lock a dedicated combo to play this act
                 const filePath = assetFilePath(cwd, urn);
                 const raw = await fs.readFile(filePath, "utf-8");
@@ -72,19 +72,14 @@ export const launchCmd = new Command("launch")
                     tal: nodeParams.tal,
                     dance: nodeParams.dance || []
                 });
-            } else if (category === "tal" || category === "dance") {
+            } else if (kind === "tal" || kind === "dance") {
                 // If it's just a single tal or dance, we lock it with a generic partner just to launch
-                throw new Error(`Launching bare ${category} is not supported. Use an 'act' or 'combo' URN.`);
+                throw new Error(`Launching bare ${kind} is not supported. Use an 'act' or 'combo' URN.`);
             } else {
-                throw new Error(`Unknown category: ${category}`);
+                throw new Error(`Unknown kind: ${kind}`);
             }
 
             await runSwitch(localName);
-
-            // Rewrite step config to ensure the IDE matches user choice
-            const config = await readConfig(dotDir);
-            config.activeStage = options.editor;
-            await writeConfig(dotDir, config);
 
             // ── Step 4: Launch IDE ────────────────────────────────────────
             console.log(ui.success(`\n✔ Ready! Active combo: ${localName}`));

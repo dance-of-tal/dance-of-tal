@@ -6,7 +6,7 @@ export const compileCmd = new Command("compile")
     .description("Compile and validate a locked combo for Type-Safety")
     .argument("<comboName>", "The name of the locked combo")
     .action(async (comboName) => {
-        console.log(ui.title("Compiling V2 Combo"));
+        console.log(ui.title("Compiling Combo"));
 
         try {
             const combo = await getCombo(process.cwd(), comboName);

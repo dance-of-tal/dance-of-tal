@@ -27,11 +27,10 @@ export const runCmd = new Command("run")
 
             const compiled = await compileContext(combo, taskContext);
 
-            // In a full production implementation, we would pass `compiled.systemPrompt`
-            // and `compiled.schema` to an LLM provider (OpenAI, Anthropic) using local API keys.
-            // For the scope of this migration, we demonstrate the Execution Output:
+            // Pass `compiled.systemPrompt` and `compiled.schema` to your LLM provider
+            // (OpenAI, Anthropic, etc.) using local API keys.
 
-            console.log(ui.title("V2 Execution Mode: Compiled Payload"));
+            console.log(ui.title("Compiled Payload"));
             console.log(ui.dim("--- SYSTEM PROMPT (Sent to LLM) ---"));
             console.log(compiled.systemPrompt);
 

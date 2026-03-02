@@ -19,8 +19,8 @@ describe("identifiers safety", () => {
   });
 
   it("validates asset urn format", () => {
-    expect(() => assertSafeAssetUrn("tal/@dot-presets/system-architect")).not.toThrow();
-    expect(() => assertSafeAssetUrn("tal/@dot-presets/../bad")).toThrow();
+    expect(() => assertSafeAssetUrn("tal/@acme/system-architect")).not.toThrow();
+    expect(() => assertSafeAssetUrn("tal/@acme/../bad")).toThrow();
   });
 
   it("blocks path traversal attempts", () => {

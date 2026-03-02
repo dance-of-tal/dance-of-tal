@@ -15,7 +15,7 @@ function normaliseUrn(raw: string, prefix: "tal" | "dance" | "act"): string {
     if (VALID_URN_RE.test(raw)) {
         if (!raw.startsWith(`${prefix}/`)) {
             throw new Error(
-                `URN category mismatch: expected a '${prefix}' URN, got '${raw}'`
+                `URN kind mismatch: expected a '${prefix}' URN, got '${raw}'`
             );
         }
         return raw;
@@ -36,7 +36,7 @@ function normaliseUrn(raw: string, prefix: "tal" | "dance" | "act"): string {
 export const lockCmd = new Command("lock")
     .description("Lock a Type-Safe Dance of Tal combo for this project")
     .requiredOption("--name <comboName>", "The name for this combo")
-    .requiredOption("--tal <talUrn>", "Tal URN, e.g. tal/@dot-presets/system-architect (or shorthand @dot-presets/system-architect)")
+    .requiredOption("--tal <talUrn>", "Tal URN, e.g. tal/@acme/system-architect (or shorthand @acme/system-architect)")
     .requiredOption("--dance <danceUrns>", "Dance URN(s) — single or comma-separated for layering, e.g. dance/@base/ts,dance/@team/tdd")
     .option("--act <actUrn>", "Optional Act URN — e.g. act/@infra/hotfix-override")
     .action(async (options) => {

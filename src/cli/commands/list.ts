@@ -1,14 +1,14 @@
 import { Command } from "commander";
 import { ui } from "../utils/ui.js";
 import { getAuthUser } from "./login.js";
+import { ASSET_KINDS, isAssetKind } from "../../lib/kinds.js";
 
 const REGISTRY_URL = process.env.DOT_REGISTRY_URL || "https://registry.dance-of-tal-v2.workers.dev";
-
-const ALL_CATEGORIES = ["tal", "dance", "act", "combo"] as const;
+const ASSET_KIND_HELP = ASSET_KINDS.join(" | ");
 
 interface PackageMeta {
     urn: string;
-    category: string;
+    kind: string;
     name: string;
     author: string;
     version: string;
@@ -20,16 +20,15 @@ interface PackageMeta {
 export const listCmd = new Command("list")
     .description("List packages from the registry")
     .option("--mine", "Show only packages published by the logged-in user")
-    .option("--category <category>", "Filter by category: tal | dance | act | combo")
+    .option("--kind <kind>", `Filter by kind: ${ASSET_KIND_HELP}`)
     .action(async (options) => {
         try {
-            const categories = options.category
-                ? [options.category as string]
-                : [...ALL_CATEGORIES];
+            const kinds = options.kind
+                ? [options.kind as string]
+                : [...ASSET_KINDS];
 
-            const validCategories = [...ALL_CATEGORIES] as string[];
-            if (options.category && !validCategories.includes(options.category)) {
-                console.error(ui.error(`Invalid category. Must be one of: ${validCategories.join(", ")}`));
+            if (options.kind && !isAssetKind(options.kind)) {
+                console.error(ui.error(`Invalid kind. Must be one of: ${ASSET_KINDS.join(", ")}`));
                 process.exit(1);
             }
 
@@ -50,9 +49,9 @@ export const listCmd = new Command("list")
             const allPackages: PackageMeta[] = [];
 
             await Promise.all(
-                categories.map(async (category) => {
-                    const res = await fetch(`${REGISTRY_URL}/packages?category=${category}`);
-                    if (!res.ok) throw new Error(`Registry error for '${category}': ${res.statusText}`);
+                kinds.map(async (kind) => {
+                    const res = await fetch(`${REGISTRY_URL}/packages?kind=${kind}`);
+                    if (!res.ok) throw new Error(`Registry error for '${kind}': ${res.statusText}`);
                     const data: any = await res.json();
                     const packages: PackageMeta[] = (data.packages || []).filter(Boolean);
                     allPackages.push(...packages);
@@ -67,24 +66,24 @@ export const listCmd = new Command("list")
             if (filtered.length === 0) {
                 if (username) {
                     console.log(ui.warning(`\nNo packages found for @${username}.`));
-                    console.log(ui.dim("Publish your first asset with: dot publish --category tal --name <slug>"));
+                    console.log(ui.dim("Publish your first asset with: dot publish --kind tal --name <slug>"));
                 } else {
                     console.log(ui.warning("\nNo packages found in registry."));
                 }
                 return;
             }
 
-            // Group by category
-            const byCategory: Record<string, PackageMeta[]> = {};
+            // Group by asset kind
+            const byKind: Record<string, PackageMeta[]> = {};
             for (const pkg of filtered) {
-                if (!byCategory[pkg.category]) byCategory[pkg.category] = [];
-                byCategory[pkg.category].push(pkg);
+                if (!byKind[pkg.kind]) byKind[pkg.kind] = [];
+                byKind[pkg.kind].push(pkg);
             }
 
             console.log(ui.dim(`\n${filtered.length} package(s) found:\n`));
 
-            for (const [cat, pkgs] of Object.entries(byCategory)) {
-                console.log(ui.section(`  [${cat.toUpperCase()}]  (${pkgs.length})`));
+            for (const [kind, pkgs] of Object.entries(byKind)) {
+                console.log(ui.section(`  [${kind.toUpperCase()}]  (${pkgs.length})`));
                 for (const pkg of pkgs) {
                     const versionStr = pkg.version ? ui.dim(` v${pkg.version}`) : "";
                     console.log(`    ${ui.highlight(pkg.urn)}${versionStr}`);

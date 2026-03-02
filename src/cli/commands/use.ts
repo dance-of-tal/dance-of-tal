@@ -11,8 +11,8 @@ import { runSwitch } from "./switch.js";
  * Designed for vibe coders who just want to get started fast.
  *
  * Examples:
- *   dot use combo/@dot-presets/gpt-safe-investor
- *   dot use combo/@dot-presets/gpt-architecture-review --name my-arch
+ *   dot use combo/@acme/pr-review
+ *   dot use combo/@acme/pr-review --name my-arch
  */
 export const useCmd = new Command("use")
     .description("Install, lock, and activate a combo in one command (vibe coder shortcut)")
@@ -28,7 +28,7 @@ export const useCmd = new Command("use")
         ) {
             console.error(
                 ui.error(
-                    `Invalid combo URN: '${comboUrn}'\n  Expected: combo/@<author>/<name>\n  Example:  combo/@dot-presets/gpt-safe-investor`
+                    `Invalid combo URN: '${comboUrn}'\n  Expected: combo/@<author>/<name>\n  Example:  combo/@acme/pr-review`
                 )
             );
             process.exit(1);

@@ -20,7 +20,7 @@ import fs from "fs/promises";
 import path from "path";
 import { fileURLToPath } from "url";
 
-const SERVER_VERSION = "2.0.2";
+const SERVER_VERSION = "2.0.3";
 
 // ─── Tool Definitions ──────────────────────────────────────────────────────
 
@@ -32,7 +32,7 @@ const GET_PROJECT_STATUS_TOOL: Tool = {
     "ALWAYS call this first before init_run or get_run_context. " +
     "Returns: whether the workspace is initialized, which combos are locally available, " +
     "which agent roles are mapped (agents.json), and the currently active combo. " +
-    "If no combos are available, instruct the user to run 'dot use <combo-urn>' or 'dot quickstart'.",
+    "If no combos are available, instruct the user to run 'dot use <combo-urn>'.",
   inputSchema: {
     type: "object",
     properties: {},
@@ -171,7 +171,7 @@ export function createServer(): Server {
               type: "text",
               text: JSON.stringify({
                 initialized: false,
-                message: "Workspace not initialized. Ask the user to run 'dot init' or 'dot quickstart'.",
+                message: "Workspace not initialized. Ask the user to run 'dot init', then 'dot use <combo-urn>'.",
               }, null, 2),
             }],
           };
@@ -234,7 +234,7 @@ export function createServer(): Server {
                 _instruction: `This project is running an Act. Your FIRST message to the user MUST be exactly: "${actInitialPrompt}"`
               } : {}),
               hint: combos.length === 0
-                ? "No combos found. Ask the user to run 'dot use combo/@<author>/<name>' or 'dot quickstart'."
+                ? "No combos found. Ask the user to run 'dot use combo/@<author>/<name>'."
                 : `Use init_run with one of: ${combos.join(", ")}`,
             }, null, 2),
           }],
@@ -251,7 +251,7 @@ export function createServer(): Server {
               text: JSON.stringify({
                 combos: [],
                 agents: {},
-                message: "No combos found. Run 'dot use <combo-urn>' or 'dot quickstart' to get started.",
+                message: "No combos found. Run 'dot use <combo-urn>' to get started.",
               }, null, 2),
             }],
           };
@@ -327,7 +327,7 @@ export function createServer(): Server {
         assertSafeRunId(args.runId);
         const compiled = await startRunContext(cwd, args.runId, args.taskContext);
 
-        let responseText = `--- V2 ISOLATED CONTEXT [Run: ${args.runId}] ---\n\n`;
+        let responseText = `--- ISOLATED CONTEXT [Run: ${args.runId}] ---\n\n`;
         responseText += `[SYSTEM PROMPT]\n${compiled.systemPrompt}\n\n`;
 
         if (compiled.schema) {
@@ -370,7 +370,7 @@ export async function runServer(): Promise<void> {
   const server = createServer();
   const transport = new StdioServerTransport();
   await server.connect(transport);
-  console.error("Dance of Tal V2 - MCP Server running (tools: get_project_status, list_combos, init_run, get_run_context, clear_run)");
+  console.error("Dance of Tal MCP Server running (tools: get_project_status, list_combos, init_run, get_run_context, clear_run)");
 }
 
 function isMainModule(): boolean {

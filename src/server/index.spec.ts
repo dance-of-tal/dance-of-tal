@@ -41,31 +41,30 @@ describe.sequential("MCP server tool flow", () => {
   it("supports list -> init -> context -> clear flow with env project directory", async () => {
     await initRegistry(projectDir);
 
-    await writeJson(assetFilePath(projectDir, "tal/@dot-presets/system-architect"), {
-      type: "tal/@dot-presets/system-architect",
+    await writeJson(assetFilePath(projectDir, "tal/@acme/system-architect"), {
+      type: "tal/@acme/system-architect",
       slug: "system-architect",
       name: "System Architect",
       description: "Architect profile",
-      category: "engineering",
       tags: [],
       featuredScore: 0,
       createdAt: "2026-03-02T00:00:00.000Z",
       thinking: "Think in systems.",
     });
 
-    await writeJson(assetFilePath(projectDir, "dance/@dot-presets/json-structure"), {
-      type: "dance/@dot-presets/json-structure",
+    await writeJson(assetFilePath(projectDir, "dance/@acme/json-structure"), {
+      type: "dance/@acme/json-structure",
       slug: "json-structure",
       name: "JSON Structure",
       description: "Respond in JSON.",
-      category: "format",
+      tags: [],
       rules: "Always return valid JSON.",
       schema: { type: "object" },
     });
 
     await lockCombo(projectDir, "sprint", {
-      tal: "tal/@dot-presets/system-architect",
-      dance: "dance/@dot-presets/json-structure",
+      tal: "tal/@acme/system-architect",
+      dance: "dance/@acme/json-structure",
     });
 
     process.env.DANCE_OF_TAL_PROJECT_DIR = projectDir;
@@ -122,8 +121,8 @@ describe.sequential("MCP server tool flow", () => {
   it("returns warnings for malformed combo filenames instead of failing list_combos", async () => {
     await initRegistry(projectDir);
     await lockCombo(projectDir, "incident", {
-      tal: "tal/@dot-presets/system-architect",
-      dance: "dance/@dot-presets/json-structure",
+      tal: "tal/@acme/system-architect",
+      dance: "dance/@acme/json-structure",
     });
 
     const comboDir = path.join(projectDir, ".dance-of-tal", "combo");
@@ -163,4 +162,3 @@ describe.sequential("MCP server tool flow", () => {
     }
   });
 });
-

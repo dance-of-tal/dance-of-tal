@@ -17,20 +17,20 @@ describe("registry combo safety", () => {
 
   it("locks and reads a valid combo", async () => {
     await lockCombo(cwd, "sprint", {
-      tal: "tal/@dot-presets/system-architect",
-      dance: "dance/@dot-presets/json-structure",
+      tal: "tal/@acme/system-architect",
+      dance: "dance/@acme/json-structure",
     });
 
     const combo = await getCombo(cwd, "sprint");
     expect(combo).not.toBeNull();
-    expect(combo?.tal).toBe("tal/@dot-presets/system-architect");
+    expect(combo?.tal).toBe("tal/@acme/system-architect");
   });
 
   it("rejects unsafe combo names", async () => {
     await expect(
       lockCombo(cwd, "../escape", {
-        tal: "tal/@dot-presets/system-architect",
-        dance: "dance/@dot-presets/json-structure",
+        tal: "tal/@acme/system-architect",
+        dance: "dance/@acme/json-structure",
       })
     ).rejects.toThrow("Invalid combo name");
 
@@ -39,8 +39,8 @@ describe("registry combo safety", () => {
 
   it("lists valid locked combos and skips malformed filenames", async () => {
     await lockCombo(cwd, "incident", {
-      tal: "tal/@dot-presets/system-architect",
-      dance: "dance/@dot-presets/json-structure",
+      tal: "tal/@acme/system-architect",
+      dance: "dance/@acme/json-structure",
     });
 
     const combosDir = path.join(cwd, ".dance-of-tal", "combo");

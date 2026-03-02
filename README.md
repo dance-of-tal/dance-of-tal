@@ -39,9 +39,9 @@ Picture a newly onboarded senior engineer at your company.
 
 ## V2 Architecture: The Four Asset Types
 
-All assets use strict **URN notation**: `<category>/@<author>/<name>`
+All assets use strict **URN notation**: `<kind>/@<author>/<name>`
 
-> **Note:** Stage (platform adapters for Cursor, Windsurf, Claude API) is CLI-internal and is **not** a registry asset.
+> **Note:** Host environment integration (Cursor, Windsurf, Claude, Codex, etc.) is configuration-level behavior, not a registry asset type.
 
 ### 1. `Tal` — Intelligence Persona
 
@@ -68,6 +68,7 @@ Encodes the _output layer_: structural rules, formatting discipline, and JSON Sc
   "type": "dance/@acme-platform/pr-review-standard",
   "version": "1.0.0",
   "description": "ACME standard for AI-assisted PR reviews.",
+  "tags": ["review", "backend", "security"],
   "rules": "Structure every review as: SUMMARY, RISKS (severity: low|medium|high|critical), REQUIRED CHANGES, OPTIONAL SUGGESTIONS. Flag any code touching payment flows with PAYMENT RISK. Never approve a PR that lacks unit tests on business logic paths.",
   "schema": {
     "type": "object",
@@ -302,13 +303,13 @@ Each runs under its own Combo, isolated in .dance-of-tal/runs/{uuid}/
 | `dot login`                                                   | GitHub OAuth → `~/.dance-of-tal/auth.json`                                                        |
 | `dot install <urn>`                                           | Download asset by URN → saved locally. Combo URNs trigger cascading install of all tal/dance deps |
 | `dot search <keyword>`                                        | Search global registry by keyword (matches name, author, description, tags)                       |
-| `dot list [--mine] [--category <cat>]`                        | List registry packages; `--mine` filters to logged-in user's packages                             |
-| `dot create --category <cat> --name <slug>`                   | Scaffold a new asset locally under your namespace (login auto-sets author; or pass `--author`)    |
+| `dot list [--mine] [--kind <kind>]`                           | List registry packages; `--mine` filters to logged-in user's packages                             |
+| `dot create --kind <kind> --name <slug>`                      | Scaffold a new asset locally under your namespace (login auto-sets author; or pass `--author`)    |
 | `dot lock --tal <urn> --dance <urn>[,<urn>...] --name <name>` | Lock Combo (single or layered Dance)                                                              |
 | `dot compile <name>`                                          | Validate all locked assets exist and are type-correct                                             |
 | `dot run <name> --task <string>`                              | Compile and print assembled context                                                               |
 | `dot switch <name>`                                           | Switch active combo                                                                               |
-| `dot publish --category <cat> --name <slug> --tags <tags>`    | Publish local asset to registry (requires `dot login`)                                            |
+| `dot publish --kind <kind> --name <slug> --tags <tags>`       | Publish local asset to registry (requires `dot login`)                                            |
 | `dot agents set --role <name> --combo <comboName>`            | Assign a combo to an agent role (saved in `.dance-of-tal/agents.json`)                            |
 | `dot agents list`                                             | List all agent role → combo mappings                                                              |
 | `dot agents remove --role <name>`                             | Remove an agent role from the manifest                                                            |
@@ -316,13 +317,13 @@ Each runs under its own Combo, isolated in .dance-of-tal/runs/{uuid}/
 ### URN Format
 
 ```
-<category>/@<author>/<name>
+<kind>/@<author>/<name>
 
 tal/@acme-platform/senior-backend-engineer
 dance/@acme-security/gdpr-awareness
 act/@acme-platform/incident-response
 
-# Shorthand (category inferred from flag):
+# Shorthand (kind inferred from flag):
 @acme-platform/senior-backend-engineer
 ```
 
@@ -370,11 +371,11 @@ dot login
 # Your GitHub username becomes your protected namespace
 
 # Create a new asset locally
-dot create --category tal --name my-persona --display-name "My Persona"
+dot create --kind tal --name my-persona --display-name "My Persona"
 # → .dance-of-tal/tal/@yourusername/my-persona.json  (local file, not yet in registry)
 
 # Edit the generated template, then publish
-dot publish --category tal --name my-persona --tags "backend,kotlin,platform"
+dot publish --kind tal --name my-persona --tags "backend,kotlin,platform"
 # → Live at: tal/@yourusername/my-persona
 ```
 
@@ -385,7 +386,7 @@ No `--author` needed — your GitHub login is the namespace. The create → edit
 ### Publishing rules
 
 - **Namespace protection** — Your URN namespace is your GitHub username. Nobody can publish under `@yourusername`.
-- **Schema enforcement** — Registry validates payload shape per category.
+- **Schema enforcement** — Registry validates payload shape per asset kind.
 - **Semver** — `version` field must follow `MAJOR.MINOR.PATCH`.
 
 ---
@@ -396,9 +397,9 @@ No `--author` needed — your GitHub login is the namespace. The create → edit
 
 | Endpoint                                   | Description                               |
 | ------------------------------------------ | ----------------------------------------- |
-| `GET /packages?category=tal`               | List all assets for a category            |
-| `GET /packages?category=tal&tier=verified` | List only verified (official) assets      |
-| `GET /packages/:category/:username/:name`  | Fetch asset by URN                        |
+| `GET /packages?kind=tal`                   | List all assets for an asset kind         |
+| `GET /packages?kind=tal&tier=verified`     | List only verified (official) assets      |
+| `GET /packages/:kind/:username/:name`      | Fetch asset by URN                        |
 | `POST /publish`                            | Publish (`Authorization: Bearer <token>`) |
 | `POST /auth/device/code`                   | Start GitHub Device Flow                  |
 | `POST /auth/device/poll`                   | Poll for access token                     |
@@ -407,7 +408,7 @@ No `--author` needed — your GitHub login is the namespace. The create → edit
 
 | Tier        | Namespace                       | Who can publish         | Description                        |
 | ----------- | ------------------------------- | ----------------------- | ---------------------------------- |
-| `verified`  | `@dot-presets`, `@dot-official` | System (admin token)    | Curated official assets            |
+| `verified`  | `@dot-official`                  | System (admin token)    | Curated official assets            |
 | `community` | `@yourusername`                 | Anyone with `dot login` | GitHub-namespaced community assets |
 
 Assets you create with `dot create` live only on your local disk until you run `dot publish`. There is no separate "local tier" — unpublished assets are just local files, identical to how npm treats packages before `npm publish`.

@@ -36,30 +36,29 @@ describe("runs safety and context compilation", () => {
   });
 
   it("includes act workflow information in compiled context", async () => {
-    await writeJson(assetFilePath(cwd, "tal/@dot-presets/system-architect"), {
-      type: "tal/@dot-presets/system-architect",
+    await writeJson(assetFilePath(cwd, "tal/@acme/system-architect"), {
+      type: "tal/@acme/system-architect",
       slug: "system-architect",
       name: "System Architect",
       description: "Architect profile",
-      category: "engineering",
       tags: [],
       featuredScore: 0,
       createdAt: "2026-03-01T00:00:00.000Z",
       thinking: "Think in systems.",
     });
 
-    await writeJson(assetFilePath(cwd, "dance/@dot-presets/json-structure"), {
-      type: "dance/@dot-presets/json-structure",
+    await writeJson(assetFilePath(cwd, "dance/@acme/json-structure"), {
+      type: "dance/@acme/json-structure",
       slug: "json-structure",
       name: "JSON Structure",
       description: "Respond in JSON.",
-      category: "format",
+      tags: [],
       rules: "Always return valid JSON.",
       schema: { type: "object" },
     });
 
-    await writeJson(assetFilePath(cwd, "act/@dot-presets/incident-response"), {
-      type: "act/@dot-presets/incident-response",
+    await writeJson(assetFilePath(cwd, "act/@acme/incident-response"), {
+      type: "act/@acme/incident-response",
       slug: "incident-response",
       name: "Incident Response",
       description: "Incident workflow",
@@ -67,16 +66,15 @@ describe("runs safety and context compilation", () => {
     });
 
     await lockCombo(cwd, "incident", {
-      tal: "tal/@dot-presets/system-architect",
-      dance: "dance/@dot-presets/json-structure",
-      act: "act/@dot-presets/incident-response",
+      tal: "tal/@acme/system-architect",
+      dance: "dance/@acme/json-structure",
+      act: "act/@acme/incident-response",
     });
 
     await initRun(cwd, "run-incident", "incident");
     const compiled = await startRunContext(cwd, "run-incident", "Handle P0 outage");
 
-    expect(compiled.systemPrompt).toContain("[WORKFLOW ACT: act/@dot-presets/incident-response]");
+    expect(compiled.systemPrompt).toContain("[WORKFLOW ACT: act/@acme/incident-response]");
     expect(compiled.systemPrompt).toContain("Steps: triage -> hotfix -> postmortem");
   });
 });
-

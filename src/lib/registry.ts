@@ -8,7 +8,7 @@ import {
 
 /**
  * Returns the root `.dance-of-tal` directory for the active project.
- * Always local to the project — enforces V2 multi-agent isolation.
+ * Always local to the project — enforces multi-agent isolation.
  */
 export function getDotDir(cwd: string = process.cwd()): string {
     return path.join(cwd, ".dance-of-tal");
@@ -17,24 +17,24 @@ export function getDotDir(cwd: string = process.cwd()): string {
 /**
  * Resolves the on-disk path for an installed asset from its URN.
  *
- * URN structure:  <category>/@<author>/<name>
- * File structure: .dance-of-tal/<category>/@<author>/<name>.json
+ * URN structure:  <kind>/@<author>/<name>
+ * File structure: .dance-of-tal/<kind>/@<author>/<name>.json
  *
  * Example:
- *   tal/@dot-presets/system-architect
- *   → .dance-of-tal/tal/@dot-presets/system-architect.json
+ *   tal/@acme/system-architect
+ *   → .dance-of-tal/tal/@acme/system-architect.json
  */
 export function assetFilePath(cwd: string, urn: string): string {
     assertSafeAssetUrn(urn);
-    const [category, author, name] = urn.split("/");
+    const [kind, author, name] = urn.split("/");
     const dotDir = path.resolve(getDotDir(cwd));
-    const filePath = path.resolve(dotDir, category, author, `${name}.json`);
+    const filePath = path.resolve(dotDir, kind, author, `${name}.json`);
     assertPathInside(dotDir, filePath, "asset");
     return filePath;
 }
 
 /**
- * Ensures the V2 filesystem layout exists.
+ * Ensures the workspace filesystem layout exists.
  * Only creates folders that are actively used.
  */
 export async function initRegistry(cwd: string = process.cwd()): Promise<void> {

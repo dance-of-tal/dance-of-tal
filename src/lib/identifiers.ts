@@ -1,10 +1,10 @@
 import path from "path";
+import { isAssetKind } from "./kinds.js";
 
 const COMBO_NAME_RE = /^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$/;
 const RUN_ID_RE = /^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$/;
 const ASSET_NAME_RE = /^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$/;
 const AUTHOR_RE = /^@[A-Za-z0-9_-]{1,64}$/;
-const CATEGORY_RE = /^(tal|dance|act|combo)$/;
 
 export function assertSafeComboName(name: string): void {
   if (!COMBO_NAME_RE.test(name)) {
@@ -25,13 +25,13 @@ export function assertSafeRunId(runId: string): void {
 export function assertSafeAssetUrn(urn: string): void {
   const parts = urn.split("/");
   if (parts.length !== 3) {
-    throw new Error(`Invalid URN '${urn}'. Expected: <category>/@<author>/<name>.`);
+    throw new Error(`Invalid URN '${urn}'. Expected: <kind>/@<author>/<name>.`);
   }
 
-  const [category, author, name] = parts;
+  const [kind, author, name] = parts;
 
-  if (!CATEGORY_RE.test(category)) {
-    throw new Error(`Invalid category in URN '${urn}'.`);
+  if (!isAssetKind(kind)) {
+    throw new Error(`Invalid kind in URN '${urn}'.`);
   }
   if (!AUTHOR_RE.test(author)) {
     throw new Error(`Invalid author in URN '${urn}'. Expected '@<author>'.`);

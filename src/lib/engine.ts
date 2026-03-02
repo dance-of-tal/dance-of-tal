@@ -19,7 +19,7 @@ export function normaliseCombo(combo: Combo): { tal: string; dances: string[]; a
 
 /**
  * Loads a locally installed asset by URN.
- * Path: .dance-of-tal/<category>/@<author>/<name>.json
+ * Path: .dance-of-tal/<kind>/@<author>/<name>.json
  */
 async function loadAsset(cwd: string, urn: string): Promise<any> {
     const filePath = assetFilePath(cwd, urn);
