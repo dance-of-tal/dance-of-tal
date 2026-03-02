@@ -3,21 +3,24 @@ import { ui } from "../utils/ui.js";
 import { runInstall } from "./install.js";
 import { lockCombo } from "../../lib/registry.js";
 import { runSwitch } from "./switch.js";
+import { applyStage, isStageType } from "../stages/index.js";
 
 /**
- * dot use <combo-urn> [--name <alias>]
+ * dot use <combo-urn> [--name <alias>] [--stage <environment>]
  *
- * One-command shortcut: install + lock + switch.
+ * One-command shortcut: install + lock + switch + (optional) stage.
  * Designed for vibe coders who just want to get started fast.
  *
  * Examples:
  *   dot use combo/@acme/pr-review
  *   dot use combo/@acme/pr-review --name my-arch
+ *   dot use combo/@acme/pr-review --stage antigravity
  */
 export const useCmd = new Command("use")
     .description("Install, lock, and activate a combo in one command (vibe coder shortcut)")
     .argument("<combo-urn>", "Full combo URN: combo/@<author>/<name>")
     .option("--name <alias>", "Custom local name for the lockfile (defaults to the combo slug)")
+    .option("--stage <environment>", "Generate host-native files: antigravity, cursor, windsurf, codex, openclaw, opencode, claude")
     .action(async (comboUrn: string, options) => {
         // Validate URN
         const parts = comboUrn.split("/");
@@ -30,6 +33,14 @@ export const useCmd = new Command("use")
                 ui.error(
                     `Invalid combo URN: '${comboUrn}'\n  Expected: combo/@<author>/<name>\n  Example:  combo/@acme/pr-review`
                 )
+            );
+            process.exit(1);
+        }
+
+        // Validate --stage early
+        if (options.stage && !isStageType(options.stage)) {
+            console.error(
+                ui.error(`Invalid stage: '${options.stage}'. Must be one of: antigravity, cursor, windsurf, codex, openclaw, opencode, claude`)
             );
             process.exit(1);
         }
@@ -71,6 +82,20 @@ export const useCmd = new Command("use")
             // 3. Switch active combo
             console.log(ui.dim("\nStep 3/3 — Switching active combo...\n"));
             await runSwitch(localName);
+
+            // 3.5. Apply stage adapter (optional)
+            if (options.stage) {
+                console.log(ui.dim(`\nApplying stage: ${options.stage}…`));
+                const danceUrns = Array.isArray(comboRaw.dance)
+                    ? comboRaw.dance
+                    : [comboRaw.dance];
+                await applyStage(options.stage, cwd, {
+                    talUrn: comboRaw.tal,
+                    danceUrns,
+                    actUrn: comboRaw.act,
+                    comboName: localName,
+                });
+            }
 
             console.log(
                 "\n" +

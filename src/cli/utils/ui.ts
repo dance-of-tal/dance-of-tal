@@ -23,7 +23,7 @@ export const printUsage = () => {
         ["dot switch <comboName>", "Switch active combo"],
         ["dot compile <comboName>", "Validate combo asset existence and URN format"],
         ["dot run <comboName> --task \"...\"", "Compile and print system prompt payload"],
-        ["dot launch <urn> --editor cursor|windsurf|code", "Install and open IDE with active combo"],
+        ["dot launch <urn> --editor cursor|windsurf|code|codex|openclaw|opencode|claude", "Install and open IDE with active combo"],
         ["dot create --kind tal|dance|act --name <slug>", "Create local asset template"],
         ["dot publish --kind ... --name ...", "Publish local asset/combo to registry"],
         ["dot search <keyword>", "Search registry packages"],

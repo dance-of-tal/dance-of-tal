@@ -50,7 +50,7 @@ export const listCmd = new Command("list")
 
             await Promise.all(
                 kinds.map(async (kind) => {
-                    const res = await fetch(`${REGISTRY_URL}/packages?kind=${kind}`);
+                    const res = await fetch(`${REGISTRY_URL}/registry?kind=${kind}`);
                     if (!res.ok) throw new Error(`Registry error for '${kind}': ${res.statusText}`);
                     const data: any = await res.json();
                     const packages: PackageMeta[] = (data.packages || []).filter(Boolean);

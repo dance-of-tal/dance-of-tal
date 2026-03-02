@@ -26,7 +26,7 @@ async function installSingleAsset(pkg: string, force = false): Promise<void> {
         return;
     }
 
-    const url = `${REGISTRY_URL}/packages/${parts[0]}/${parts[1]}/${parts[2]}`;
+    const url = `${REGISTRY_URL}/registry/${parts[0]}/${parts[1]}/${parts[2]}`;
     console.log(ui.dim(`  Fetching ${url}...`));
 
     const res = await fetch(url);
@@ -67,7 +67,7 @@ export async function runInstall(pkg: string) {
         if (kind === "combo" || kind === "act") {
             // --- Cascading install ---
             // 1. Fetch the asset itself
-            const url = `${REGISTRY_URL}/packages/${parts[0]}/${parts[1]}/${parts[2]}`;
+            const url = `${REGISTRY_URL}/registry/${parts[0]}/${parts[1]}/${parts[2]}`;
             console.log(ui.dim(`Fetching ${kind} from ${url}...`));
 
             const res = await fetch(url);

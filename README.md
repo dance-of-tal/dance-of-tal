@@ -1,6 +1,6 @@
 # Dance of Tal (DOT)
 
-> **The npm for Vibe Coding.** — Modular, versioned, type-safe AI context management for the Agentic AI era.
+> **Agent Manager for Agentic AI.** — Modular, versioned, type-safe AI context management for the Agentic AI era.
 
 [![npm version](https://img.shields.io/npm/v/dance-of-tal)](https://www.npmjs.com/package/dance-of-tal)
 [![License: MIT](https://img.shields.io/badge/License-MIT-white.svg)](LICENSE)
@@ -10,7 +10,7 @@
 
 ## Why DOT Exists
 
-Modern AI-powered development relies on system prompts that have quietly grown into unmaintainable monsters: 1 000-line `AGENTS.md` monoliths copy-pasted across every repo, hardcoded into IDE configs, and impossible to debug when something breaks.
+Modern AI-powered development relies on system prompts that have quietly grown into unmaintainable monsters: 1 000-line `AGENTS.md` monoliths copy-pasted across every repo, hardcoded into AI tool configs, and impossible to debug when something breaks.
 
 **The real cost:** When your AI starts hallucinating test files or violating your security review checklist, you don't know which part of that blob is responsible. There is no diff, no versioning, no owner, no rollback.
 
@@ -33,7 +33,7 @@ Picture a newly onboarded senior engineer at your company.
 - Their **Tal** is their _professional mindset_ — the thinking framework your company expects. Do they prioritise correctness or delivery speed? Do they design for GDPR compliance by default? This is the **who** of the AI.
 - Their **Dance** is their _working methodology_ — the rules they follow on every task. Always write tests first. Always output structured JSON. Always flag security implications. This is the **how** of the AI.
 - A **Combo** locks a Tal + one or more Dances together — a frozen, versioned snapshot that everyone on the team installs.
-- An **Act** is a _workflow choreographer_ — a DAG that switches AI behaviour based on context (e.g. normal sprint → incident response mode).
+- An **Act** _(advanced, experimental)_ is a _context router_ — a DAG that switches AI persona and rules based on runtime conditions (e.g. normal sprint → incident response mode). Most workflows are handled by Dance Skills; Act is for multi-phase orchestration where the AI's entire identity changes.
 
 ---
 
@@ -58,9 +58,9 @@ Encodes the _thinking layer_: how the AI reasons, what it prioritises, and its p
 }
 ```
 
-### 2. `Dance` — Format Constraints
+### 2. `Dance` — Rules & Skills
 
-Encodes the _output layer_: structural rules, formatting discipline, and JSON Schema enforcement.
+Encodes the _behavior and capability layer_: structural rules, formatting discipline, JSON Schema enforcement, and executable skills.
 
 ```jsonc
 // dance/@acme-platform/pr-review-standard
@@ -99,9 +99,9 @@ Pins a Tal + one **or more** Dances. Multiple Dances are layered in order — ru
 }
 ```
 
-### 4. `Act` — Dynamic Workflow (DAG)
+### 4. `Act` — Context Router _(Advanced / Experimental)_
 
-Routes between different Tal+Dance pairs conditionally. Production examples: normal sprint vs. incident response, design review vs. implementation.
+Routes between different Tal+Dance pairs conditionally. Use this when the AI's entire persona or ruleset needs to switch mid-task. For most workflows, Dance Skills are sufficient.
 
 ```jsonc
 // act/@acme-platform/incident-response
@@ -158,7 +158,7 @@ Routes between different Tal+Dance pairs conditionally. Production examples: nor
                      │
            ┌─────────┴─────────┐
       CLI Mode             MCP Mode
-   (dot run sprint)   (IDE calls MCP tools)
+   (dot run sprint)   (AI tool calls MCP tools)
    Prints compiled     Returns compiled
    system prompt       context on demand
 ```
@@ -187,7 +187,7 @@ Your GitHub username becomes your protected registry namespace.
 
 ```bash
 dot login
-# Opens browser for GitHub Device Flow OAuth
+# Opens browser for Supabase PKCE OAuth (GitHub provider)
 # Token + username saved to ~/.dance-of-tal/auth.json
 ```
 
@@ -333,7 +333,7 @@ act/@acme-platform/incident-response
 
 DOT implements the **Model Context Protocol (MCP)**, so AI IDEs can pull the exact compiled context on demand — no copy-pasting prompts.
 
-**Supported:** Cursor · Windsurf · Claude Desktop · Antigravity · Codex
+**Supported:** Cursor · Windsurf · Claude Desktop · Antigravity · Codex · OpenCode · Claude
 
 ```jsonc
 // .cursor/mcp.json (or Windsurf equivalent)
@@ -397,12 +397,10 @@ No `--author` needed — your GitHub login is the namespace. The create → edit
 
 | Endpoint                                   | Description                               |
 | ------------------------------------------ | ----------------------------------------- |
-| `GET /packages?kind=tal`                   | List all assets for an asset kind         |
-| `GET /packages?kind=tal&tier=verified`     | List only verified (official) assets      |
-| `GET /packages/:kind/:username/:name`      | Fetch asset by URN                        |
+| `GET /registry?kind=tal`                   | List all assets for an asset kind         |
+| `GET /registry?kind=tal&tier=verified`     | List only verified (official) assets      |
+| `GET /registry/:kind/:username/:name`      | Fetch asset by URN                        |
 | `POST /publish`                            | Publish (`Authorization: Bearer <token>`) |
-| `POST /auth/device/code`                   | Start GitHub Device Flow                  |
-| `POST /auth/device/poll`                   | Poll for access token                     |
 
 ### Registry Tiers
 

@@ -48,7 +48,7 @@ export const searchCmd = new Command("search")
 
             await Promise.all(
                 kinds.map(async (kind) => {
-                    const url = `${REGISTRY_URL}/packages?kind=${kind}`;
+                    const url = `${REGISTRY_URL}/registry?kind=${kind}`;
                     const res = await fetch(url);
                     if (!res.ok) throw new Error(`Registry error for kind '${kind}': ${res.statusText}`);
                     const data: any = await res.json();

@@ -1,7 +1,7 @@
 {
   "name": "dance-of-tal",
   "version": "2.0.3",
-  "description": "MCP server and CLI for Tal x Dance persona composition",
+  "description": "Dance of Tal — Agent Manager for Agentic AI. MCP server and CLI for managing AI agent personas, rules, and workflows.",
   "license": "MIT",
   "author": "monarchjuno",
   "repository": {
@@ -20,6 +20,8 @@
   "keywords": [
     "mcp",
     "model-context-protocol",
+    "agent-manager",
+    "agentic-ai",
     "persona",
     "prompt-engineering"
   ],
