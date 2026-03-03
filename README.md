@@ -85,18 +85,24 @@ Encodes the _behavior and capability layer_: structural rules, formatting discip
 
 ### 3. `Combo` — The Lockfile
 
-Pins a Tal + one **or more** Dances. Multiple Dances are layered in order — rules concatenate, schemas deep-merge — like CSS classes.
+Pins a Tal and/or Dances. Multiple Dances are layered in order — rules concatenate, schemas deep-merge — like CSS classes. **Both tal and dance are optional** (at least one required), enabling tal-only, dance-only, or full combo compositions.
 
 ```jsonc
-// Layered Dances: base coding standard → security layer → output format
+// Full combo: tal + layered dances
 {
   "tal": "tal/@acme-platform/senior-backend-engineer",
   "dance": [
-    "dance/@acme-platform/kotlin-style-guide", // base: language standards
-    "dance/@acme-security/gdpr-awareness", // layer: data handling rules
-    "dance/@acme-platform/pr-review-standard", // layer: output format
+    "dance/@acme-platform/kotlin-style-guide",
+    "dance/@acme-security/gdpr-awareness",
+    "dance/@acme-platform/pr-review-standard",
   ],
 }
+
+// Tal-only: persona without rules
+{ "tal": "tal/@acme-platform/senior-backend-engineer" }
+
+// Dance-only: rules without persona
+{ "dance": "dance/@acme-platform/pr-review-standard" }
 ```
 
 ### 4. `Act` — Context Router _(Advanced / Experimental)_
@@ -301,18 +307,18 @@ Each runs under its own Combo, isolated in .dance-of-tal/runs/{uuid}/
 | ------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
 | `dot init`                                                    | Scaffold `.dance-of-tal/` workspace                                                               |
 | `dot login`                                                   | GitHub OAuth → `~/.dance-of-tal/auth.json`                                                        |
-| `dot install <urn>`                                           | Download asset by URN → saved locally. Combo URNs trigger cascading install of all tal/dance deps |
-| `dot search <keyword>`                                        | Search global registry by keyword (matches name, author, description, tags)                       |
-| `dot list [--mine] [--kind <kind>]`                           | List registry packages; `--mine` filters to logged-in user's packages                             |
-| `dot create --kind <kind> --name <slug>`                      | Scaffold a new asset locally under your namespace (login auto-sets author; or pass `--author`)    |
-| `dot lock --tal <urn> --dance <urn>[,<urn>...] --name <name>` | Lock Combo (single or layered Dance)                                                              |
-| `dot compile <name>`                                          | Validate all locked assets exist and are type-correct                                             |
+| `dot install <urn>`                                           | Download asset by URN. Combo → cascading install + auto-lock (`--no-lock` to skip, `--stage` for host files) |
+| `dot search <keyword>`                                        | Search global registry by keyword                                                                 |
+| `dot list [--mine] [--kind <kind>]`                           | List registry packages                                                                            |
+| `dot create --kind <kind> --name <slug>`                      | Scaffold a new asset locally                                                                      |
+| `dot lock --tal <urn> --dance <urn>[,<urn>...] --name <name>` | Lock Combo (tal and/or dance — at least one required)                                             |
+| `dot compile <name>`                                          | Validate all locked assets are type-correct                                                       |
 | `dot run <name> --task <string>`                              | Compile and print assembled context                                                               |
-| `dot switch <name>`                                           | Switch active combo                                                                               |
 | `dot publish --kind <kind> --name <slug> --tags <tags>`       | Publish local asset to registry (requires `dot login`)                                            |
-| `dot agents set --role <name> --combo <comboName>`            | Assign a combo to an agent role (saved in `.dance-of-tal/agents.json`)                            |
-| `dot agents list`                                             | List all agent role → combo mappings                                                              |
-| `dot agents remove --role <name>`                             | Remove an agent role from the manifest                                                            |
+| `dot launch <urn> --editor <name>`                            | Install + lock + open IDE                                                                         |
+| `dot agents set --agent <name> --combo <comboName>`           | Assign a combo to an agent name (`.dance-of-tal/agents.json`)                                     |
+| `dot agents list`                                             | List all agent → combo mappings                                                                   |
+| `dot agents remove --agent <name>`                            | Remove an agent from the manifest                                                                 |
 
 ### URN Format
 
@@ -366,13 +372,16 @@ For deterministic project targeting (recommended when your MCP host starts outsi
 
 `DANCE_OF_TAL_PROJECT_DIR` is optional. It must point to the project root (not `.dance-of-tal`). If omitted, DOT uses the MCP process working directory and auto-discovers the nearest parent that contains `.dance-of-tal/combo`.
 
-### MCP Tools
+### MCP Tools (8 tools)
 
 | Tool              | Description                                    |
 | ----------------- | ---------------------------------------------- |
-| `get_project_status` | Check initialization, available combos, agent role mappings, and active combo |
-| `list_combos`     | List local combos with Tal/Dance/Act metadata plus `agents.json` mappings |
-| `init_run`        | Create an isolated sandbox for one agent run   |
+| `get_project_status` | Check workspace init status, combos, agent mappings |
+| `setup_workspace`    | Initialize `.dance-of-tal/` directory (MCP-driven, no CLI needed) |
+| `search_registry`    | Search the DOT registry for packages |
+| `install_combo`      | Install a combo + all deps + auto-lock (MCP-driven) |
+| `list_combos`     | List local combos with mode (tal-only/dance-only/combo/act) |
+| `init_run`        | Create an isolated run (comboName OR agentName) |
 | `get_run_context` | Return the compiled system prompt for that run |
 | `clear_run`       | Clean up the sandbox after the run completes   |
 
@@ -433,12 +442,14 @@ Assets you create with `dot create` live only on your local disk until you run `
 dance-of-tal/
 ├── mcp/                  ← CLI (dot) + MCP Server — this package
 │   └── src/
-│       ├── cli/          ← init, install, lock, compile, run, publish, login, switch
-│       ├── lib/
+│       ├── cli/          ← thin CLI adapters (init, install, lock, compile, run, publish, login, agents, launch)
+│       ├── lib/          ← shared core (MCP + CLI both call these)
 │       │   ├── registry.ts  ← local file I/O + Combo type
-│       │   ├── engine.ts    ← Tal + Dance[] → compiled system prompt
-│       │   └── runs.ts      ← multi-agent run isolation
-│       └── server/index.ts  ← MCP server tools
+│       │   ├── installer.ts ← registry fetch + install + auto-lock
+│       │   ├── engine.ts    ← Tal? + Dance?[] → compiled system prompt
+│       │   ├── runs.ts      ← multi-agent run isolation + resolveComboName
+│       │   └── agents.ts    ← agents.json read/write
+│       └── server/index.ts  ← MCP server (8 tools)
 │
 ├── registry/             ← Cloudflare Worker (Hono + KV) — private
 └── front/                ← Next.js registry browser — private

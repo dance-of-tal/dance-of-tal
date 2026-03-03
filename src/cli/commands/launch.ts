@@ -2,7 +2,6 @@ import { Command } from "commander";
 import { ui } from "../utils/ui.js";
 import { runInit } from "./init.js";
 import { runInstall } from "./install.js";
-import { runSwitch } from "./switch.js";
 import { lockCombo, assetFilePath, getDotDir } from "../../lib/registry.js";
 import { applyStage, isStageType, ComboAssets } from "../stages/index.js";
 import { existsSync } from "fs";
@@ -43,7 +42,7 @@ export const launchCmd = new Command("launch")
 
             // ── Step 2: Install Package and Dependencies ──────────────────
             console.log(ui.dim("\nInstalling package and dependencies…\n"));
-            await runInstall(urn);
+            await runInstall(urn, { lock: false });
 
             // ── Step 3: Lock & Switch ─────────────────────────────────────
             console.log(ui.dim(`\nLocking local combo as: ${localName}…`));
@@ -88,8 +87,8 @@ export const launchCmd = new Command("launch")
 
                 await lockCombo(cwd, localName, {
                     act: urn,
-                    tal: nodeParams.tal,
-                    dance: nodeParams.dance || []
+                    ...(nodeParams.tal ? { tal: nodeParams.tal } : {}),
+                    ...(nodeParams.dance ? { dance: nodeParams.dance } : {}),
                 });
                 comboAssets = {
                     talUrn: nodeParams.tal,
@@ -104,7 +103,7 @@ export const launchCmd = new Command("launch")
                 throw new Error(`Unknown kind: ${kind}`);
             }
 
-            await runSwitch(localName);
+            // switch removed — no more activeCombo. Lockfile is enough.
 
             // ── Step 3.5: Apply Stage Adapter ─────────────────────────────
             if (options.stage && comboAssets) {

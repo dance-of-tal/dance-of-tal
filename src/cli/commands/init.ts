@@ -15,5 +15,5 @@ export async function runInit() {
     }
 
     console.log(ui.success("\nDOT setup complete!"));
-    console.log(ui.dim("    Next: dot use combo/@<author>/<name>"));
+    console.log(ui.dim("    Next: dot install combo/@<author>/<name>"));
 }

@@ -86,6 +86,9 @@ describe.sequential("MCP server tool flow", () => {
         "init_run",
         "get_run_context",
         "clear_run",
+        "setup_workspace",
+        "install_combo",
+        "search_registry",
       ]);
 
       const statusResult = await client.callTool({ name: "get_project_status", arguments: {} });
@@ -97,7 +100,9 @@ describe.sequential("MCP server tool flow", () => {
         name: "init_run",
         arguments: { runId: "run-e2e-001", comboName: "sprint" },
       });
-      expect(extractTextContent(initResult)).toContain("Successfully initialized run");
+      const initPayload = JSON.parse(extractTextContent(initResult));
+      expect(initPayload.success).toBe(true);
+      expect(initPayload.resolvedComboName).toBe("sprint");
 
       const contextResult = await client.callTool({
         name: "get_run_context",
@@ -234,7 +239,7 @@ describe.sequential("MCP server tool flow", () => {
       const result = await client.callTool({ name: "get_project_status", arguments: {} });
       const payload = JSON.parse(extractTextContent(result));
       expect(payload.initialized).toBe(false);
-      expect(payload.message).toContain("dot init");
+      expect(payload.setup_guide).toBeDefined();
     } finally {
       await Promise.allSettled([client.close(), server.close()]);
     }

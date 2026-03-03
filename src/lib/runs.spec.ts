@@ -26,9 +26,19 @@ describe("runs safety and context compilation", () => {
   });
 
   it("initializes and clears run state safely", async () => {
+    // V3: initRun now validates combo exists
+    const { initRegistry } = await import("./registry.js");
+    await initRegistry(cwd);
+    await lockCombo(cwd, "sprint", {
+      tal: "tal/@test/persona",
+      dance: "dance/@test/rules",
+    });
+
     await initRun(cwd, "run-1", "sprint");
     const state = await getRunState(cwd, "run-1");
     expect(state?.status).toBe("initialized");
+    expect(state?.resolvedComboName).toBe("sprint");
+    expect(state?.mode).toBeDefined();
 
     await clearRun(cwd, "run-1");
     const afterClear = await getRunState(cwd, "run-1");

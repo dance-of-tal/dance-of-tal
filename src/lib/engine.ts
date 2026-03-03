@@ -8,11 +8,13 @@ export interface CompiledContext {
     schema?: Record<string, any>;
 }
 
-/** Normalises dance field to always be an array. */
-export function normaliseCombo(combo: Combo): { tal: string; dances: string[]; act?: string } {
+/** Normalises combo fields, handling optional tal/dance. */
+export function normaliseCombo(combo: Combo): { tal: string | null; dances: string[]; act?: string } {
     return {
-        tal: combo.tal,
-        dances: Array.isArray(combo.dance) ? combo.dance : [combo.dance],
+        tal: combo.tal ?? null,
+        dances: combo.dance
+            ? (Array.isArray(combo.dance) ? combo.dance : [combo.dance])
+            : [],
         act: combo.act,
     };
 }
@@ -29,7 +31,7 @@ async function loadAsset(cwd: string, urn: string): Promise<any> {
     } catch (err: any) {
         if (err.code === "ENOENT") {
             throw new Error(
-                `Asset not found: ${urn}\n  Expected at: ${filePath}\n  Run 'dot install ${urn}' first.`
+                `Asset not found: ${urn}\n  Expected at: ${filePath}\n  Run 'dot install ${urn}' or use install_combo MCP tool.`
             );
         }
         throw err;
@@ -38,8 +40,15 @@ async function loadAsset(cwd: string, urn: string): Promise<any> {
 
 /**
  * Validates that all URNs in a Combo follow the strict 3-part format.
+ * At least one of tal or dance must be present.
  */
 export function validateCombo(combo: Combo): void {
+    const { tal, dances } = normaliseCombo(combo);
+
+    if (!tal && dances.length === 0) {
+        throw new Error("Invalid combo: at least one of 'tal' or 'dance' must be present.");
+    }
+
     const validateUrn = (urn: string, prefix: string) => {
         const parts = urn.split("/");
         if (parts.length !== 3 || parts[0] !== prefix || !parts[1].startsWith("@") || !parts[2]) {
@@ -47,8 +56,7 @@ export function validateCombo(combo: Combo): void {
         }
     };
 
-    const { tal, dances } = normaliseCombo(combo);
-    validateUrn(tal, "tal");
+    if (tal) validateUrn(tal, "tal");
     for (const d of dances) validateUrn(d, "dance");
     if (combo.act) validateUrn(combo.act, "act");
 }
@@ -59,17 +67,29 @@ export function validateCombo(combo: Combo): void {
 export async function validateComboFiles(cwd: string, combo: Combo): Promise<void> {
     validateCombo(combo);
     const { tal, dances } = normaliseCombo(combo);
-    await loadAsset(cwd, tal);
+    if (tal) await loadAsset(cwd, tal);
     for (const d of dances) await loadAsset(cwd, d);
     if (combo.act) await loadAsset(cwd, combo.act);
 }
 
 /**
- * Compiles a Tal + one-or-more Dances into an executable prompt payload.
+ * Determines the combo mode based on its composition.
+ */
+export function determineComboMode(combo: Combo): "tal-only" | "dance-only" | "combo" | "act" {
+    if (combo.act) return "act";
+    const { tal, dances } = normaliseCombo(combo);
+    if (tal && dances.length === 0) return "tal-only";
+    if (!tal && dances.length > 0) return "dance-only";
+    return "combo";
+}
+
+/**
+ * Compiles a Combo into an executable prompt payload.
  *
- * Dance layering:
- *  - rules   → concatenated in order (first = base, last = most specific)
- *  - schema  → deep-merged in order (later keys override earlier ones)
+ * - tal present  → [BEHAVIOR MODE] block included
+ * - dance present → [OUTPUT FORMATTING] block with merged rules/schema
+ * - act present  → [WORKFLOW ACT] block included
+ * - At least one of tal or dance must be present.
  */
 export async function compileContext(
     combo: Combo,
@@ -79,21 +99,38 @@ export async function compileContext(
     validateCombo(combo);
     const { tal: talUrn, dances } = normaliseCombo(combo);
 
-    const tal: Tal = await loadAsset(cwd, talUrn);
+    // Load tal (optional)
+    const tal: Tal | null = talUrn ? await loadAsset(cwd, talUrn) : null;
+
+    // Load dances (optional, may be empty)
     const danceAssets: Dance[] = await Promise.all(dances.map((d) => loadAsset(cwd, d)));
+
+    // Load act (optional)
     const actAsset: Act | null = combo.act ? await loadAsset(cwd, combo.act) : null;
 
-    // Merge Dance layers
-    const mergedRules = danceAssets
-        .map((d) => `[${d.type}]\n${d.rules || d.description}`)
-        .join("\n\n");
+    // Build system prompt blocks
+    const blocks: string[] = [];
 
+    // Tal block (optional)
+    if (tal) {
+        blocks.push(`[BEHAVIOR MODE: ${tal.type}]\n${tal.thinking || tal.description}`);
+    }
+
+    // Dance block (optional)
+    if (danceAssets.length > 0) {
+        const mergedRules = danceAssets
+            .map((d) => `[${d.type}]\n${d.rules || d.description}`)
+            .join("\n\n");
+        blocks.push(`[OUTPUT FORMATTING]\n${mergedRules}`);
+    }
+
+    // Merged schema from dances
     const mergedSchema = danceAssets.reduce<Record<string, any> | undefined>((acc, d) => {
         if (!d.schema) return acc;
         return acc ? deepMerge(acc, d.schema as Record<string, any>) : { ...(d.schema as Record<string, any>) };
     }, undefined);
 
-    let actContextBlock = "";
+    // Act block (optional)
     if (actAsset) {
         const actLines: string[] = [];
         if (actAsset.description) actLines.push(actAsset.description);
@@ -104,16 +141,14 @@ export async function compileContext(
             actLines.push(`Nodes: ${Object.keys(actAsset.nodes).join(", ")}`);
         }
         if (actLines.length > 0) {
-            actContextBlock = `[WORKFLOW ACT: ${actAsset.type || combo.act}]\n${actLines.join("\n")}\n\n`;
+            blocks.push(`[WORKFLOW ACT: ${actAsset.type || combo.act}]\n${actLines.join("\n")}`);
         }
     }
 
-    const systemPrompt =
-        `[BEHAVIOR MODE: ${tal.type}]\n${tal.thinking || tal.description}\n\n` +
-        `[OUTPUT FORMATTING]\n${mergedRules}\n\n` +
-        actContextBlock +
-        `[CURRENT TASK]\n${taskContext}`;
+    // Task context (always present)
+    blocks.push(`[CURRENT TASK]\n${taskContext}`);
 
+    const systemPrompt = blocks.join("\n\n");
     return { systemPrompt, schema: mergedSchema };
 }
 

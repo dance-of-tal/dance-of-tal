@@ -36,23 +36,36 @@ function normaliseUrn(raw: string, prefix: "tal" | "dance" | "act"): string {
 export const lockCmd = new Command("lock")
     .description("Lock a Type-Safe Dance of Tal combo for this project")
     .requiredOption("--name <comboName>", "The name for this combo")
-    .requiredOption("--tal <talUrn>", "Tal URN, e.g. tal/@acme/system-architect (or shorthand @acme/system-architect)")
-    .requiredOption("--dance <danceUrns>", "Dance URN(s) — single or comma-separated for layering, e.g. dance/@base/ts,dance/@team/tdd")
+    .option("--tal <talUrn>", "Tal URN, e.g. tal/@acme/system-architect (or shorthand @acme/system-architect)")
+    .option("--dance <danceUrns>", "Dance URN(s) — single or comma-separated for layering, e.g. dance/@base/ts,dance/@team/tdd")
     .option("--act <actUrn>", "Optional Act URN — e.g. act/@infra/hotfix-override")
     .action(async (options) => {
         console.log(ui.title("Locking Combo"));
 
         try {
-            const talUrn = normaliseUrn(options.tal, "tal");
+            if (!options.tal && !options.dance) {
+                throw new Error(
+                    "At least one of --tal or --dance must be provided.\n" +
+                    "  Examples:\n" +
+                    "    dot lock --tal tal/@acme/persona --name my-combo\n" +
+                    "    dot lock --dance dance/@acme/rules --name my-combo\n" +
+                    "    dot lock --tal tal/@acme/persona --dance dance/@acme/rules --name my-combo"
+                );
+            }
+
+            const talUrn = options.tal ? normaliseUrn(options.tal, "tal") : undefined;
 
             // Dance: comma-separated for layering, single URN for simple case
-            const rawDances = (options.dance as string).split(",").map((s: string) => s.trim()).filter(Boolean);
-            const danceUrns = rawDances.map((d: string) => normaliseUrn(d, "dance"));
+            let danceUrns: string[] | undefined;
+            if (options.dance) {
+                const rawDances = (options.dance as string).split(",").map((s: string) => s.trim()).filter(Boolean);
+                danceUrns = rawDances.map((d: string) => normaliseUrn(d, "dance"));
+            }
 
             const combo: Combo = {
-                tal: talUrn,
-                dance: danceUrns.length === 1 ? danceUrns[0] : danceUrns,
-                act: options.act ? normaliseUrn(options.act, "act") : undefined,
+                ...(talUrn ? { tal: talUrn } : {}),
+                ...(danceUrns ? { dance: danceUrns.length === 1 ? danceUrns[0] : danceUrns } : {}),
+                ...(options.act ? { act: normaliseUrn(options.act, "act") } : {}),
             };
 
             await lockCombo(process.cwd(), options.name, combo);

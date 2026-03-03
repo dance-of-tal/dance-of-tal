@@ -48,9 +48,10 @@ export async function initRegistry(cwd: string = process.cwd()): Promise<void> {
 }
 
 export type Combo = {
-    tal: string;            // Full Tal URN — tal/@author/name
-    dance: string | string[]; // Single or layered Dance URNs (applied in order)
-    act?: string;            // Optional Act URN — act/@author/name
+    tal?: string;              // Optional — dance-only combo possible
+    dance?: string | string[]; // Optional — tal-only combo possible
+    act?: string;              // Optional Act URN — act/@author/name
+    // Rule: at least one of tal or dance must be present (enforced at runtime)
 };
 
 export type LockedComboNameList = {

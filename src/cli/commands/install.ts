@@ -1,52 +1,15 @@
-import fs from "fs";
-import path from "path";
 import { ui } from "../utils/ui.js";
-import { getDotDir, assetFilePath } from "../../lib/registry.js";
-import { ASSET_KINDS, isAssetKind } from "../../lib/kinds.js";
-
-const REGISTRY_URL = process.env.DOT_REGISTRY_URL || "https://registry.dance-of-tal-v2.workers.dev";
+import { installAsset, installComboAndLock } from "../../lib/installer.js";
+import { isAssetKind } from "../../lib/kinds.js";
+import { applyStage, isStageType } from "../stages/index.js";
+import { assetFilePath, getDotDir } from "../../lib/registry.js";
+import fs from "fs";
 
 /**
- * Fetches a single asset from the registry and saves it locally.
- * Skips silently if already installed (unless `force` is true).
+ * CLI adapter for install.
+ * Delegates to shared core (lib/installer), adds console.log UX.
  */
-async function installSingleAsset(pkg: string, force = false): Promise<void> {
-    const parts = pkg.split("/");
-
-    const dotDir = getDotDir(process.cwd());
-    if (!fs.existsSync(dotDir)) {
-        throw new Error("Workspace not initialised. Run 'dot init' first.");
-    }
-
-    const filePath = assetFilePath(process.cwd(), pkg);
-
-    // Skip if already installed
-    if (!force && fs.existsSync(filePath)) {
-        console.log(ui.dim(`  ↳ Already installed, skipping: ${pkg}`));
-        return;
-    }
-
-    const url = `${REGISTRY_URL}/registry/${parts[0]}/${parts[1]}/${parts[2]}`;
-    console.log(ui.dim(`  Fetching ${url}...`));
-
-    const res = await fetch(url);
-    if (!res.ok) {
-        if (res.status === 404) throw new Error(`Package '${pkg}' not found in registry.`);
-        throw new Error(`Registry error: ${res.statusText}`);
-    }
-
-    const { success, package: pkgData } = (await res.json()) as any;
-    if (!success || !pkgData) throw new Error("Invalid response from registry.");
-
-    fs.mkdirSync(path.dirname(filePath), { recursive: true });
-    fs.writeFileSync(filePath, JSON.stringify(pkgData.content, null, 2));
-
-    console.log(ui.success(`  ✔ Installed ${pkg}`));
-    console.log(ui.dim(`    Saved to: ${filePath}`));
-}
-
-export async function runInstall(pkg: string) {
-    // Validate URN format: kind/@author/name
+export async function runInstall(pkg: string, options?: { lock?: boolean; stage?: string }) {
     const parts = pkg.split("/");
     if (parts.length !== 3 || !parts[1].startsWith("@")) {
         throw new Error(
@@ -58,114 +21,131 @@ export async function runInstall(pkg: string) {
 
     const [kind] = parts;
     if (!isAssetKind(kind)) {
-        throw new Error(`Invalid kind: '${kind}'. Allowed: ${ASSET_KINDS.join(", ")}`);
+        throw new Error(`Invalid kind: '${kind}'. Allowed: tal, dance, act, combo`);
     }
+
+    // Validate --stage early
+    if (options?.stage && !isStageType(options.stage)) {
+        throw new Error(
+            `Invalid stage: '${options.stage}'. Must be one of: antigravity, cursor, windsurf, codex, openclaw, opencode, claude`
+        );
+    }
+
+    const cwd = process.cwd();
 
     console.log(ui.title(`Installing package: ${pkg}`));
 
-    try {
-        if (kind === "combo" || kind === "act") {
-            // --- Cascading install ---
-            // 1. Fetch the asset itself
-            const url = `${REGISTRY_URL}/registry/${parts[0]}/${parts[1]}/${parts[2]}`;
-            console.log(ui.dim(`Fetching ${kind} from ${url}...`));
+    if (kind === "combo") {
+        // Combo: cascading install + auto-lock (unless --no-lock)
+        const shouldLock = options?.lock !== false;
 
-            const res = await fetch(url);
-            if (!res.ok) {
-                if (res.status === 404) throw new Error(`Package '${pkg}' not found in registry.`);
-                throw new Error(`Registry error: ${res.statusText}`);
+        if (shouldLock) {
+            console.log(ui.dim("Installing combo with auto-lock...\n"));
+            const result = await installComboAndLock(cwd, pkg);
+
+            const newCount = result.installedAssets.filter(a => !a.skipped).length;
+            const skipCount = result.installedAssets.filter(a => a.skipped).length;
+
+            console.log(ui.success(`\n✔ Installed ${newCount} asset(s), skipped ${skipCount}.`));
+            console.log(ui.success(`✔ Lockfile created: .dance-of-tal/combo/${result.localName}.json`));
+
+            // Apply stage adapter (optional)
+            if (options?.stage) {
+                console.log(ui.dim(`\nApplying stage: ${options.stage}…`));
+                const filePath = assetFilePath(cwd, pkg);
+                const content = JSON.parse(fs.readFileSync(filePath, "utf-8"));
+                const danceUrns = Array.isArray(content.dance)
+                    ? content.dance
+                    : content.dance ? [content.dance] : [];
+                await applyStage(options.stage as any, cwd, {
+                    talUrn: content.tal,
+                    danceUrns,
+                    actUrn: content.act,
+                    comboName: result.localName,
+                });
             }
 
-            const { success, package: pkgData } = (await res.json()) as any;
-            if (!success || !pkgData) throw new Error("Invalid response from registry.");
-
-            const content = pkgData.content as Record<string, unknown>;
-
-            // 2. Save the file itself
-            const dotDir = getDotDir(process.cwd());
-            if (!fs.existsSync(dotDir)) {
-                throw new Error("Workspace not initialised. Run 'dot init' first.");
-            }
-            const filePath = assetFilePath(process.cwd(), pkg);
-            fs.mkdirSync(path.dirname(filePath), { recursive: true });
-            fs.writeFileSync(filePath, JSON.stringify(content, null, 2));
-            console.log(ui.success(`\n✔ Installed ${kind}: ${pkg}`));
-
-            if (kind === "combo") {
-                // 3. Cascading install for Combo: tal
-                const talUrn = typeof content.tal === "string" ? content.tal : null;
-                if (talUrn) {
-                    console.log(ui.dim(`\nInstalling tal dependency: ${talUrn}`));
-                    await installSingleAsset(talUrn);
-                }
-
-                // 4. Cascading install for Combo: dance (single or array)
-                const danceRaw = content.dance;
-                const danceUrns: string[] = Array.isArray(danceRaw)
-                    ? (danceRaw as unknown[]).filter((d): d is string => typeof d === "string")
-                    : typeof danceRaw === "string"
-                        ? [danceRaw]
-                        : [];
-
-                if (danceUrns.length > 0) {
-                    console.log(ui.dim(`\nInstalling dance dependenc${danceUrns.length > 1 ? "ies" : "y"}:`));
-                    for (const danceUrn of danceUrns) {
-                        await installSingleAsset(danceUrn);
-                    }
-                }
-
-                // 5. Cascading install for Combo: act (optional)
-                const actUrn = typeof content.act === "string" ? content.act : null;
-                if (actUrn) {
-                    console.log(ui.dim(`\nInstalling act dependency: ${actUrn}`));
-                    await installSingleAsset(actUrn);
-                }
-
-                console.log(ui.success(`\n✔ All dependencies installed for combo '${parts[2]}'.`));
-                console.log(ui.dim(`  To use this combo, run: dot switch ${parts[2]}`));
-                console.log(ui.dim(`  Or lock it: dot lock --tal ${talUrn ?? "<tal>"} --dance ${danceUrns.join(",")} --name ${parts[2]}`));
-            } else if (kind === "act") {
-                // Cascading install for Act: iterate through nodes
-                const nodes = content.nodes as Record<string, any>;
-                if (nodes) {
-                    let depCount = 0;
-                    const seen = new Set<string>();
-                    console.log(ui.dim(`\nInspecting act nodes for dependencies...`));
-
-                    for (const [nodeId, nodeValue] of Object.entries(nodes)) {
-                        const talUrn = typeof nodeValue.tal === "string" ? nodeValue.tal : null;
-                        const danceRaw = nodeValue.dance;
-                        const danceUrns: string[] = Array.isArray(danceRaw)
-                            ? (danceRaw as unknown[]).filter((d): d is string => typeof d === "string")
-                            : typeof danceRaw === "string"
-                                ? [danceRaw]
-                                : [];
-
-                        if (talUrn && !seen.has(talUrn)) {
-                            console.log(ui.dim(`\nNode [${nodeId}]: installing tal ${talUrn}`));
-                            await installSingleAsset(talUrn);
-                            seen.add(talUrn);
-                            depCount++;
-                        }
-
-                        for (const danceUrn of danceUrns) {
-                            if (!seen.has(danceUrn)) {
-                                console.log(ui.dim(`\nNode [${nodeId}]: installing dance ${danceUrn}`));
-                                await installSingleAsset(danceUrn);
-                                seen.add(danceUrn);
-                                depCount++;
-                            }
-                        }
-                    }
-                    console.log(ui.success(`\n✔ Installed ${depCount} unique dependencies for act '${parts[2]}'.`));
-                }
-            }
+            console.log(
+                "\n" +
+                ui.success(`✔ Ready! Combo locked as: ${ui.highlight(result.localName)}`) +
+                "\n"
+            );
+            console.log(ui.dim(`  MCP: init_run → get_run_context (uses combo '${result.localName}')`));
         } else {
-            // --- Non-combo/act: single asset install ---
-            await installSingleAsset(pkg);
-            console.log(ui.success(`\nSuccessfully installed ${pkg}`));
+            // --no-lock: install only, no lockfile
+            console.log(ui.dim("Installing combo (no lock)...\n"));
+            const result = await installAsset(cwd, pkg);
+            if (result.skipped) {
+                console.log(ui.dim(`  ↳ Already installed, skipping: ${pkg}`));
+            } else {
+                console.log(ui.success(`  ✔ Installed ${pkg}`));
+            }
+
+            // Cascading deps without lock
+            const filePath = assetFilePath(cwd, pkg);
+            const content = JSON.parse(fs.readFileSync(filePath, "utf-8"));
+            const talUrn = typeof content.tal === "string" ? content.tal : null;
+            const danceRaw = content.dance;
+            const danceUrns: string[] = Array.isArray(danceRaw)
+                ? danceRaw.filter((d: any): d is string => typeof d === "string")
+                : typeof danceRaw === "string" ? [danceRaw] : [];
+            const actUrn = typeof content.act === "string" ? content.act : null;
+
+            if (talUrn) {
+                const r = await installAsset(cwd, talUrn);
+                console.log(r.skipped ? ui.dim(`  ↳ Already installed: ${talUrn}`) : ui.success(`  ✔ Installed ${talUrn}`));
+            }
+            for (const d of danceUrns) {
+                const r = await installAsset(cwd, d);
+                console.log(r.skipped ? ui.dim(`  ↳ Already installed: ${d}`) : ui.success(`  ✔ Installed ${d}`));
+            }
+            if (actUrn) {
+                const r = await installAsset(cwd, actUrn);
+                console.log(r.skipped ? ui.dim(`  ↳ Already installed: ${actUrn}`) : ui.success(`  ✔ Installed ${actUrn}`));
+            }
+
+            console.log(ui.success(`\n✔ All dependencies installed. Use 'dot lock' to create a lockfile.`));
         }
-    } catch (error: any) {
-        throw new Error(`Install failed: ${error.message}`);
+    } else if (kind === "act") {
+        // Act: install + cascade (node deps)
+        const result = await installAsset(cwd, pkg);
+        console.log(result.skipped ? ui.dim(`  Already installed: ${pkg}`) : ui.success(`\n✔ Installed act: ${pkg}`));
+
+        // Browse nodes for deps
+        const filePath = assetFilePath(cwd, pkg);
+        const content = JSON.parse(fs.readFileSync(filePath, "utf-8"));
+        const nodes = content.nodes as Record<string, any> | undefined;
+        if (nodes) {
+            const seen = new Set<string>();
+            let depCount = 0;
+            for (const [nodeId, nodeValue] of Object.entries(nodes)) {
+                const talUrn = typeof nodeValue.tal === "string" ? nodeValue.tal : null;
+                const ds: string[] = Array.isArray(nodeValue.dance)
+                    ? nodeValue.dance.filter((d: any): d is string => typeof d === "string")
+                    : typeof nodeValue.dance === "string" ? [nodeValue.dance] : [];
+                if (talUrn && !seen.has(talUrn)) {
+                    const r = await installAsset(cwd, talUrn);
+                    if (!r.skipped) depCount++;
+                    seen.add(talUrn);
+                }
+                for (const d of ds) {
+                    if (!seen.has(d)) {
+                        const r = await installAsset(cwd, d);
+                        if (!r.skipped) depCount++;
+                        seen.add(d);
+                    }
+                }
+            }
+            console.log(ui.success(`\n✔ Installed ${depCount} unique dependencies for act.`));
+        }
+    } else {
+        // Single asset (tal, dance)
+        const result = await installAsset(cwd, pkg);
+        if (result.skipped) {
+            console.log(ui.dim(`  Already installed: ${pkg}`));
+        } else {
+            console.log(ui.success(`\n✔ Installed ${pkg}`));
+            console.log(ui.dim(`  Saved to: ${result.filePath}`));
+        }
     }
 }

@@ -1,14 +1,18 @@
 import fs from "fs/promises";
 import path from "path";
 import { getDotDir, getCombo } from "./registry.js";
-import { compileContext, CompiledContext } from "./engine.js";
+import { compileContext, CompiledContext, determineComboMode } from "./engine.js";
+import { readAgentManifest } from "./agents.js";
 import { assertPathInside, assertSafeRunId } from "./identifiers.js";
 
-// V2 Run State Isolation
+// V3 Run State — explicit combo resolution
 
 export interface RunState {
     runId: string;
-    comboName: string;
+    resolvedComboName: string;    // The combo actually bound to this run
+    agentName?: string;           // If resolved via agents.json
+    mode: "tal-only" | "dance-only" | "combo" | "act";
+    actUrn?: string;
     status: "initialized" | "running" | "completed" | "failed";
     createdAt: string;
     updatedAt: string;
@@ -28,19 +32,74 @@ export function getRunDir(cwd: string, runId: string): string {
 }
 
 /**
+ * Resolves the combo name from either comboName or agentName.
+ * Priority: comboName > agentName (via agents.json lookup).
+ */
+export async function resolveComboName(
+    cwd: string,
+    comboName?: string,
+    agentName?: string
+): Promise<{ resolvedComboName: string; agentName?: string }> {
+    if (comboName) {
+        return { resolvedComboName: comboName };
+    }
+
+    if (agentName) {
+        const manifest = await readAgentManifest(cwd);
+        const mapped = manifest[agentName];
+        if (!mapped) {
+            const available = Object.keys(manifest);
+            throw new Error(
+                `Agent '${agentName}' not found in agents.json.` +
+                (available.length > 0
+                    ? `\n  Available agents: ${available.join(", ")}`
+                    : `\n  No agents defined. Use 'dot agents set --agent <name> --combo <comboName>' to add one.`)
+            );
+        }
+        return { resolvedComboName: mapped, agentName };
+    }
+
+    throw new Error(
+        "Either 'comboName' or 'agentName' must be provided.\n" +
+        "  comboName: direct combo name (e.g. 'sprint')\n" +
+        "  agentName: agent name mapped in agents.json (e.g. 'reviewer')"
+    );
+}
+
+/**
  * Initializes a new run state for an agent
  */
-export async function initRun(cwd: string, runId: string, comboName: string): Promise<RunState> {
+export async function initRun(
+    cwd: string,
+    runId: string,
+    comboName?: string,
+    agentName?: string
+): Promise<RunState> {
+    const { resolvedComboName, agentName: resolvedAgent } =
+        await resolveComboName(cwd, comboName, agentName);
+
+    const combo = await getCombo(cwd, resolvedComboName);
+    if (!combo) {
+        throw new Error(
+            `Combo '${resolvedComboName}' not found. Call list_combos or get_project_status to see available options.`
+        );
+    }
+
+    const mode = determineComboMode(combo);
+
     const runDir = getRunDir(cwd, runId);
     await fs.mkdir(runDir, { recursive: true });
 
     const state: RunState = {
         runId,
-        comboName,
+        resolvedComboName,
+        ...(resolvedAgent ? { agentName: resolvedAgent } : {}),
+        mode,
+        ...(combo.act ? { actUrn: combo.act } : {}),
         status: "initialized",
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
-        logs: [`Run initialized for combo: ${comboName}`]
+        logs: [`Run initialized: combo=${resolvedComboName}, mode=${mode}${resolvedAgent ? `, agent=${resolvedAgent}` : ""}`],
     };
 
     await saveRunState(cwd, state);
@@ -91,9 +150,9 @@ export async function startRunContext(cwd: string, runId: string, taskContext: s
         throw new Error(`Run ${runId} not found. Please initialize it first.`);
     }
 
-    const combo = await getCombo(cwd, state.comboName);
+    const combo = await getCombo(cwd, state.resolvedComboName);
     if (!combo) {
-        throw new Error(`Combo '${state.comboName}' not found in registry.`);
+        throw new Error(`Combo '${state.resolvedComboName}' not found in registry.`);
     }
 
     const compiled = await compileContext(combo, taskContext, cwd);
@@ -105,3 +164,4 @@ export async function startRunContext(cwd: string, runId: string, taskContext: s
     await saveRunState(cwd, state);
     return compiled;
 }
+
