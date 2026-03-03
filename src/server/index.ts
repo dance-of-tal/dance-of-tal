@@ -15,12 +15,12 @@ import {
 } from "../lib/registry.js";
 import { readAgentManifest } from "../lib/agents.js";
 import { assertSafeComboName, assertSafeRunId } from "../lib/identifiers.js";
-import { existsSync, statSync } from "fs";
+import { existsSync, realpathSync, statSync } from "fs";
 import fs from "fs/promises";
 import path from "path";
 import { fileURLToPath } from "url";
 
-const SERVER_VERSION = "2.0.3";
+const SERVER_VERSION = "2.1.2";
 
 // ─── Tool Definitions ──────────────────────────────────────────────────────
 
@@ -115,9 +115,37 @@ const CLEAR_RUN_TOOL: Tool = {
   },
 };
 
+function isDirectory(targetPath: string): boolean {
+  try {
+    return statSync(targetPath).isDirectory();
+  } catch {
+    return false;
+  }
+}
+
+function hasWorkspaceLayout(cwd: string): boolean {
+  const dotDir = getDotDir(cwd);
+  const comboDir = path.join(dotDir, "combo");
+  return isDirectory(dotDir) && isDirectory(comboDir);
+}
+
+function findNearestWorkspaceRoot(startDir: string): string | null {
+  let current = path.resolve(startDir);
+
+  while (true) {
+    if (hasWorkspaceLayout(current)) return current;
+    const parent = path.dirname(current);
+    if (parent === current) return null;
+    current = parent;
+  }
+}
+
 function resolveProjectCwd(): string {
   const configured = process.env.DANCE_OF_TAL_PROJECT_DIR?.trim();
-  if (!configured) return process.cwd();
+  if (!configured) {
+    const discovered = findNearestWorkspaceRoot(process.cwd());
+    return discovered ?? process.cwd();
+  }
 
   const resolved = path.resolve(configured);
   if (!existsSync(resolved)) {
@@ -162,7 +190,7 @@ export function createServer(): Server {
       // ── get_project_status ──────────────────────────────────────────────
       if (request.params.name === "get_project_status") {
         const dotDir = getDotDir(cwd);
-        const initialized = existsSync(dotDir);
+        const initialized = hasWorkspaceLayout(cwd);
         const warnings: string[] = [];
 
         if (!initialized) {
@@ -243,8 +271,7 @@ export function createServer(): Server {
 
       // ── list_combos ─────────────────────────────────────────────────────
       if (request.params.name === "list_combos") {
-        const dotDir = getDotDir(cwd);
-        if (!existsSync(dotDir)) {
+        if (!hasWorkspaceLayout(cwd)) {
           return {
             content: [{
               type: "text",
@@ -376,7 +403,15 @@ export async function runServer(): Promise<void> {
 function isMainModule(): boolean {
   const entry = process.argv[1];
   if (!entry) return false;
-  return path.resolve(entry) === fileURLToPath(import.meta.url);
+  const modulePath = fileURLToPath(import.meta.url);
+
+  try {
+    // npx/npm bin shims often invoke the script through a symlink.
+    // Compare real paths so the main check works in both direct and shimmed execution.
+    return realpathSync(path.resolve(entry)) === realpathSync(modulePath);
+  } catch {
+    return path.resolve(entry) === path.resolve(modulePath);
+  }
 }
 
 if (isMainModule()) {

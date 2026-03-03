@@ -1,6 +1,6 @@
 {
   "name": "dance-of-tal",
-  "version": "2.1.0",
+  "version": "2.1.2",
   "description": "Dance of Tal — Agent Manager for Agentic AI. MCP server and CLI for managing AI agent personas, rules, and workflows.",
   "license": "MIT",
   "author": "monarchjuno",

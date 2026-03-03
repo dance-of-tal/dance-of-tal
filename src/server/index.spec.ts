@@ -23,10 +23,12 @@ function extractTextContent(result: any): string {
 describe.sequential("MCP server tool flow", () => {
   let projectDir: string;
   let originalProjectEnv: string | undefined;
+  let originalCwd: string;
 
   beforeEach(async () => {
     projectDir = await fs.mkdtemp(path.join(os.tmpdir(), "dot-mcp-server-"));
     originalProjectEnv = process.env.DANCE_OF_TAL_PROJECT_DIR;
+    originalCwd = process.cwd();
   });
 
   afterEach(async () => {
@@ -35,6 +37,7 @@ describe.sequential("MCP server tool flow", () => {
     } else {
       process.env.DANCE_OF_TAL_PROJECT_DIR = originalProjectEnv;
     }
+    process.chdir(originalCwd);
     await fs.rm(projectDir, { recursive: true, force: true });
   });
 
@@ -157,6 +160,81 @@ describe.sequential("MCP server tool flow", () => {
       const result = await client.callTool({ name: "get_project_status", arguments: {} });
       expect(result.isError).toBe(true);
       expect(extractTextContent(result)).toContain("DANCE_OF_TAL_PROJECT_DIR does not exist");
+    } finally {
+      await Promise.allSettled([client.close(), server.close()]);
+    }
+  });
+
+  it("auto-discovers project root from nested cwd when env is unset", async () => {
+    await initRegistry(projectDir);
+
+    await writeJson(assetFilePath(projectDir, "tal/@acme/system-architect"), {
+      type: "tal/@acme/system-architect",
+      slug: "system-architect",
+      name: "System Architect",
+      description: "Architect profile",
+      tags: [],
+      featuredScore: 0,
+      createdAt: "2026-03-02T00:00:00.000Z",
+      thinking: "Think in systems.",
+    });
+
+    await writeJson(assetFilePath(projectDir, "dance/@acme/json-structure"), {
+      type: "dance/@acme/json-structure",
+      slug: "json-structure",
+      name: "JSON Structure",
+      description: "Respond in JSON.",
+      tags: [],
+      rules: "Always return valid JSON.",
+      schema: { type: "object" },
+    });
+
+    await lockCombo(projectDir, "sprint", {
+      tal: "tal/@acme/system-architect",
+      dance: "dance/@acme/json-structure",
+    });
+
+    const nestedDir = path.join(projectDir, "packages", "app", "src");
+    await fs.mkdir(nestedDir, { recursive: true });
+    delete process.env.DANCE_OF_TAL_PROJECT_DIR;
+    process.chdir(nestedDir);
+
+    const server = createServer();
+    const client = new Client({ name: "dot-test-client", version: "1.0.0" });
+    const [serverTransport, clientTransport] = InMemoryTransport.createLinkedPair();
+    await Promise.all([server.connect(serverTransport), client.connect(clientTransport)]);
+
+    try {
+      const result = await client.callTool({ name: "list_combos", arguments: {} });
+      const payload = JSON.parse(extractTextContent(result));
+      expect(payload.combos.map((c: any) => c.name)).toContain("sprint");
+    } finally {
+      await Promise.allSettled([client.close(), server.close()]);
+    }
+  });
+
+  it("treats auth-only .dance-of-tal directories as uninitialized workspace", async () => {
+    const fakeProject = path.join(projectDir, "fake-project");
+    const fakeDotDir = path.join(fakeProject, ".dance-of-tal");
+    await fs.mkdir(fakeDotDir, { recursive: true });
+    await fs.writeFile(
+      path.join(fakeDotDir, "auth.json"),
+      JSON.stringify({ token: "dummy-token" }, null, 2),
+      "utf-8"
+    );
+
+    process.env.DANCE_OF_TAL_PROJECT_DIR = fakeProject;
+
+    const server = createServer();
+    const client = new Client({ name: "dot-test-client", version: "1.0.0" });
+    const [serverTransport, clientTransport] = InMemoryTransport.createLinkedPair();
+    await Promise.all([server.connect(serverTransport), client.connect(clientTransport)]);
+
+    try {
+      const result = await client.callTool({ name: "get_project_status", arguments: {} });
+      const payload = JSON.parse(extractTextContent(result));
+      expect(payload.initialized).toBe(false);
+      expect(payload.message).toContain("dot init");
     } finally {
       await Promise.allSettled([client.close(), server.close()]);
     }

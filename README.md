@@ -341,7 +341,21 @@ DOT implements the **Model Context Protocol (MCP)**, so AI IDEs can pull the exa
   "mcpServers": {
     "dance-of-tal": {
       "command": "npx",
-      "args": ["-y", "dance-of-tal"],
+      "args": ["-y", "dance-of-tal@latest"]
+    }
+  }
+}
+```
+
+For deterministic project targeting (recommended when your MCP host starts outside your repo), add an env override:
+
+```jsonc
+// .cursor/mcp.json (or Windsurf equivalent)
+{
+  "mcpServers": {
+    "dance-of-tal": {
+      "command": "npx",
+      "args": ["-y", "dance-of-tal@latest"],
       "env": {
         "DANCE_OF_TAL_PROJECT_DIR": "/absolute/path/to/your-repo"
       }
@@ -350,7 +364,7 @@ DOT implements the **Model Context Protocol (MCP)**, so AI IDEs can pull the exa
 }
 ```
 
-`DANCE_OF_TAL_PROJECT_DIR` is optional but recommended when your MCP host launches from a different working directory.
+`DANCE_OF_TAL_PROJECT_DIR` is optional. It must point to the project root (not `.dance-of-tal`). If omitted, DOT uses the MCP process working directory and auto-discovers the nearest parent that contains `.dance-of-tal/combo`.
 
 ### MCP Tools
 
