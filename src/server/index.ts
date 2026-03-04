@@ -20,10 +20,11 @@ import { determineComboMode } from "../lib/engine.js";
 import { installComboAndLock, searchRegistry } from "../lib/installer.js";
 import { existsSync, statSync, realpathSync } from "fs";
 import fs from "fs/promises";
+import os from "os";
 import path from "path";
 import { fileURLToPath } from "url";
 
-const SERVER_VERSION = "2.2.2";
+const SERVER_VERSION = "2.2.3";
 
 // ─── Tool Definitions ──────────────────────────────────────────────────────
 
@@ -37,7 +38,16 @@ const GET_PROJECT_STATUS_TOOL: Tool = {
     "If no combos exist, returns instructions for install_combo.",
   inputSchema: {
     type: "object",
-    properties: {},
+    properties: {
+      projectDir: {
+        type: "string",
+        description:
+          "Absolute path to the project root directory. " +
+          "AI agents: always pass your current workspace/project directory here. " +
+          "This ensures correct path resolution regardless of how the MCP server was launched. " +
+          "Once set, all subsequent tool calls in this session will use this path automatically.",
+      },
+    },
     required: [],
   },
 };
@@ -115,7 +125,15 @@ const SETUP_WORKSPACE_TOOL: Tool = {
     "This only creates the directory structure — use install_combo to add packages.",
   inputSchema: {
     type: "object",
-    properties: {},
+    properties: {
+      projectDir: {
+        type: "string",
+        description:
+          "Optional absolute path to the project root directory. " +
+          "Provide this when the auto-detected path is incorrect. " +
+          "Once set, all subsequent tool calls in this session will use this path.",
+      },
+    },
     required: [],
   },
 };
@@ -125,7 +143,7 @@ const INSTALL_COMBO_TOOL: Tool = {
   description:
     "Install a combo from the registry and auto-lock it. " +
     "Downloads the combo and all its dependencies (tal, dance, act), " +
-    "then creates a lockfile. Workspace must be initialized first (use setup_workspace). " +
+    "then creates a lockfile. Auto-initializes workspace if needed. " +
     "Example URN: combo/@dot-preset/code-consultant",
   inputSchema: {
     type: "object",
@@ -137,6 +155,12 @@ const INSTALL_COMBO_TOOL: Tool = {
       localName: {
         type: "string",
         description: "Optional local name for the lockfile (defaults to the combo slug).",
+      },
+      projectDir: {
+        type: "string",
+        description:
+          "Optional absolute path to the project root directory. " +
+          "Provide this when the auto-detected path is incorrect.",
       },
     },
     required: ["comboUrn"],
@@ -207,26 +231,54 @@ function findNearestWorkspaceRoot(startDir: string): string | null {
   }
 }
 
-function resolveProjectCwd(): string {
-  const configured = process.env.DANCE_OF_TAL_PROJECT_DIR?.trim();
-  if (configured) {
-    const resolved = path.resolve(configured);
-    if (!existsSync(resolved)) {
-      throw new Error(`DANCE_OF_TAL_PROJECT_DIR does not exist: ${resolved}`);
-    }
-    if (!isDirectory(resolved)) {
-      throw new Error(`DANCE_OF_TAL_PROJECT_DIR is not a directory: ${resolved}`);
-    }
-    return resolved;
-  }
+const SUSPICIOUS_PATHS = new Set(["/", "/tmp", "/private/tmp"]);
 
-  const nearest = findNearestWorkspaceRoot(process.cwd());
-  return nearest ?? process.cwd();
+function isSuspiciousCwd(dir: string): boolean {
+  return SUSPICIOUS_PATHS.has(dir) || dir === os.homedir();
 }
 
 // ─── Server ────────────────────────────────────────────────────────────────
 
 export function createServer(): Server {
+  let sessionProjectDir: string | null = null;
+
+  function resolveProjectCwd(overrideDir?: string): string {
+    // 1. Explicit override from tool call → store in session
+    if (overrideDir?.trim()) {
+      const resolved = path.resolve(overrideDir.trim());
+      if (!existsSync(resolved)) {
+        throw new Error(`Provided projectDir does not exist: ${resolved}`);
+      }
+      if (!isDirectory(resolved)) {
+        throw new Error(`Provided projectDir is not a directory: ${resolved}`);
+      }
+      sessionProjectDir = resolved;
+      return resolved;
+    }
+
+    // 2. Previously stored session override
+    if (sessionProjectDir) {
+      return sessionProjectDir;
+    }
+
+    // 3. Env variable
+    const configured = process.env.DANCE_OF_TAL_PROJECT_DIR?.trim();
+    if (configured) {
+      const resolved = path.resolve(configured);
+      if (!existsSync(resolved)) {
+        throw new Error(`DANCE_OF_TAL_PROJECT_DIR does not exist: ${resolved}`);
+      }
+      if (!isDirectory(resolved)) {
+        throw new Error(`DANCE_OF_TAL_PROJECT_DIR is not a directory: ${resolved}`);
+      }
+      return resolved;
+    }
+
+    // 4. Auto-discover upward from cwd
+    const nearest = findNearestWorkspaceRoot(process.cwd());
+    return nearest ?? process.cwd();
+  }
+
   const server = new Server(
     {
       name: "dance-of-tal",
@@ -256,12 +308,20 @@ export function createServer(): Server {
 
   server.setRequestHandler(CallToolRequestSchema, async (request) => {
     try {
-      const cwd = resolveProjectCwd();
+      const args = (request.params.arguments ?? {}) as any;
+      const cwd = resolveProjectCwd(args.projectDir);
 
       // ── get_project_status ──────────────────────────────────────────────
       if (request.params.name === "get_project_status") {
         const initialized = hasWorkspaceLayout(cwd);
         const warnings: string[] = [];
+
+        if (isSuspiciousCwd(cwd) && !args.projectDir) {
+          warnings.push(
+            `Resolved project directory is '${cwd}' which looks incorrect. ` +
+            `Provide 'projectDir' parameter with the absolute path to your project root.`
+          );
+        }
 
         if (!initialized) {
           return {
@@ -270,6 +330,7 @@ export function createServer(): Server {
               text: JSON.stringify({
                 initialized: false,
                 resolvedProjectDir: cwd,
+                ...(warnings.length > 0 ? { warnings } : {}),
                 setup_guide: {
                   step1: "Call setup_workspace to initialize the workspace.",
                   step2: "Call search_registry to find a combo.",
@@ -370,7 +431,6 @@ export function createServer(): Server {
 
       // ── init_run ────────────────────────────────────────────────────────
       if (request.params.name === "init_run") {
-        const args = request.params.arguments as any;
         assertSafeRunId(args.runId);
         if (args.comboName) assertSafeComboName(args.comboName);
 
@@ -394,7 +454,6 @@ export function createServer(): Server {
 
       // ── get_run_context ─────────────────────────────────────────────────
       if (request.params.name === "get_run_context") {
-        const args = request.params.arguments as any;
         assertSafeRunId(args.runId);
         const compiled = await startRunContext(cwd, args.runId, args.taskContext);
 
@@ -414,7 +473,6 @@ export function createServer(): Server {
 
       // ── clear_run ───────────────────────────────────────────────────────
       if (request.params.name === "clear_run") {
-        const args = request.params.arguments as any;
         assertSafeRunId(args.runId);
         await clearRun(cwd, args.runId);
         return {
@@ -453,7 +511,6 @@ export function createServer(): Server {
 
       // ── install_combo ───────────────────────────────────────────────────
       if (request.params.name === "install_combo") {
-        const args = request.params.arguments as any;
         if (!hasWorkspaceLayout(cwd)) {
           await initRegistry(cwd);
         }
@@ -478,7 +535,6 @@ export function createServer(): Server {
 
       // ── search_registry ─────────────────────────────────────────────────
       if (request.params.name === "search_registry") {
-        const args = request.params.arguments as any;
         const results = await searchRegistry(args.query || "", {
           kind: args.kind,
           limit: args.limit ?? 10,
