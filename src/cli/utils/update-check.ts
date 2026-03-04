@@ -1,6 +1,7 @@
 import fs from "fs";
 import path from "path";
 import os from "os";
+import { fileURLToPath } from "url";
 import { ui } from "./ui.js";
 
 const PACKAGE_NAME = "dance-of-tal";
@@ -30,12 +31,26 @@ function writeCache(cache: UpdateCache): void {
 }
 
 function getCurrentVersion(): string {
-    try {
-        const pkgPath = new URL("../../../package.json", import.meta.url);
-        return JSON.parse(fs.readFileSync(pkgPath, "utf-8")).version;
-    } catch {
-        return "0.0.0";
+    // Resolve robustly across source (tsx), bundled dist, and global npm install layouts.
+    // We walk up from this module location until we find package.json for dance-of-tal.
+    let dir = path.dirname(fileURLToPath(import.meta.url));
+    for (let i = 0; i < 8; i += 1) {
+        const pkgPath = path.join(dir, "package.json");
+        if (fs.existsSync(pkgPath)) {
+            try {
+                const pkg = JSON.parse(fs.readFileSync(pkgPath, "utf-8"));
+                if (pkg?.name === PACKAGE_NAME && typeof pkg?.version === "string") {
+                    return pkg.version;
+                }
+            } catch {
+                // ignore parse errors and continue walking up
+            }
+        }
+        const parent = path.dirname(dir);
+        if (parent === dir) break;
+        dir = parent;
     }
+    return "0.0.0";
 }
 
 async function fetchLatestVersion(): Promise<string | null> {

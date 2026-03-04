@@ -8,9 +8,9 @@ import http from "http";
 import crypto from "crypto";
 import readline from "readline";
 
-const SUPABASE_URL = "https://qbildcrfjencoqkngyfw.supabase.co";
+const SUPABASE_URL = process.env.DOT_SUPABASE_URL || "https://qbildcrfjencoqkngyfw.supabase.co";
 // The ANON key is intentionally public to allow client-side Supabase communication
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFiaWxkY3JmamVuY29xa25neWZ3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIyNjE5MzYsImV4cCI6MjA4NzgzNzkzNn0.9aI9FU-j20w3UIG7BuVtmpAPh3qClz7xTNXjcq7ofNQ";
+const SUPABASE_ANON_KEY = process.env.DOT_SUPABASE_ANON_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFiaWxkY3JmamVuY29xa25neWZ3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIyNjE5MzYsImV4cCI6MjA4NzgzNzkzNn0.9aI9FU-j20w3UIG7BuVtmpAPh3qClz7xTNXjcq7ofNQ";
 
 function getAuthFilePath() {
     const dotGlobalDir = path.join(os.homedir(), ".dance-of-tal");

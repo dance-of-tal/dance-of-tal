@@ -443,12 +443,17 @@ dance-of-tal/
 ├── mcp/                  ← CLI (dot) + MCP Server — this package
 │   └── src/
 │       ├── cli/          ← thin CLI adapters (init, install, lock, compile, run, publish, login, agents, launch)
+│       │   ├── commands/ ← individual CLI commands
+│       │   ├── stages/   ← IDE specific environment injection (Cursor, Antigravity, etc.)
+│       │   └── utils/    ← shared CLI utilities
 │       ├── lib/          ← shared core (MCP + CLI both call these)
 │       │   ├── registry.ts  ← local file I/O + Combo type
 │       │   ├── installer.ts ← registry fetch + install + auto-lock
 │       │   ├── engine.ts    ← Tal? + Dance?[] → compiled system prompt
 │       │   ├── runs.ts      ← multi-agent run isolation + resolveComboName
-│       │   └── agents.ts    ← agents.json read/write
+│       │   ├── agents.ts    ← agents.json read/write
+│       │   ├── identifiers.ts ← URN parsing and validation
+│       │   └── kinds.ts     ← type definitions for asset kinds
 │       └── server/index.ts  ← MCP server (8 tools)
 │
 ├── registry/             ← Cloudflare Worker (Hono + KV) — private
