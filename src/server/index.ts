@@ -23,7 +23,7 @@ import fs from "fs/promises";
 import path from "path";
 import { fileURLToPath } from "url";
 
-const SERVER_VERSION = "2.2.0";
+const SERVER_VERSION = "2.2.2";
 
 // ─── Tool Definitions ──────────────────────────────────────────────────────
 
@@ -269,6 +269,7 @@ export function createServer(): Server {
               type: "text",
               text: JSON.stringify({
                 initialized: false,
+                resolvedProjectDir: cwd,
                 setup_guide: {
                   step1: "Call setup_workspace to initialize the workspace.",
                   step2: "Call search_registry to find a combo.",
@@ -299,6 +300,7 @@ export function createServer(): Server {
                 "2) Call init_run with comboName or agentName. " +
                 "3) Call get_run_context to receive your system prompt.",
               initialized,
+              resolvedProjectDir: cwd,
               combos,
               agents: manifest,
               ...(warnings.length > 0 ? { warnings } : {}),
@@ -453,7 +455,7 @@ export function createServer(): Server {
       if (request.params.name === "install_combo") {
         const args = request.params.arguments as any;
         if (!hasWorkspaceLayout(cwd)) {
-          throw new Error("Workspace not initialized. Call setup_workspace first.");
+          await initRegistry(cwd);
         }
 
         const result = await installComboAndLock(cwd, args.comboUrn, args.localName);

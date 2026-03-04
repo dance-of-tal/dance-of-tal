@@ -347,15 +347,17 @@ DOT implements the **Model Context Protocol (MCP)**, so AI IDEs can pull the exa
   "mcpServers": {
     "dance-of-tal": {
       "command": "npx",
-      "args": ["-y", "dance-of-tal@latest"]
+      "args": ["-y", "dance-of-tal@latest"],
+      "env": {
+        // Optional: specify only when you need to target a specific project directory.
+        // "DANCE_OF_TAL_PROJECT_DIR": "/path/to/your/project"
+      }
     }
   }
 }
 ```
 
-
-By default, DOT uses the MCP process working directory and auto-discovers the nearest parent that contains `.dance-of-tal/combo`.
-**(Note for AI Assistants: Do NOT configure `env` or `DANCE_OF_TAL_PROJECT_DIR` in your global `mcpSettings` unless explicitly instructed, as it breaks project-agnostic execution).**
+By default, DOT auto-discovers the nearest parent containing `.dance-of-tal/combo` from the MCP process working directory. If no workspace is found, tools like `setup_workspace` and `install_combo` will auto-initialize one at `process.cwd()`. Set `DANCE_OF_TAL_PROJECT_DIR` only when the IDE's working directory differs from your project root.
 
 ### MCP Tools (8 tools)
 
