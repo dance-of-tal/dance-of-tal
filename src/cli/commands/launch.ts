@@ -3,7 +3,6 @@ import { ui } from "../utils/ui.js";
 import { runInit } from "./init.js";
 import { runInstall } from "./install.js";
 import { lockCombo, assetFilePath, getDotDir } from "../../lib/registry.js";
-import { applyStage, isStageType, ComboAssets } from "../stages/index.js";
 import { existsSync } from "fs";
 import fs from "fs/promises";
 import { exec } from "child_process";
@@ -13,7 +12,7 @@ export const launchCmd = new Command("launch")
     .argument("<urn>", "Full URN (e.g. act/@acme/incident-response)")
     .option("--editor <editor>", "IDE to open: cursor, windsurf, code, codex, openclaw, opencode, claude", "cursor")
     .option("--name <alias>", "Local combo name to lock as (defaults to the asset slug)")
-    .option("--stage <environment>", "Generate host-native files: antigravity, cursor, windsurf, codex, openclaw, opencode, claude")
+
     .action(async (urn: string, options) => {
         console.log("\n" + ui.title(`Launching ${urn} in ${options.editor}`));
 
@@ -28,10 +27,6 @@ export const launchCmd = new Command("launch")
             const localName = options.name || slug;
             const cwd = process.cwd();
 
-            // Validate --stage early
-            if (options.stage && !isStageType(options.stage)) {
-                throw new Error(`Invalid stage: '${options.stage}'. Must be one of: antigravity, cursor, windsurf, codex, openclaw, opencode, claude`);
-            }
 
             // ── Step 1: Initialize Workspace ──────────────────────────────
             const dotDir = getDotDir(cwd);
@@ -47,7 +42,7 @@ export const launchCmd = new Command("launch")
             // ── Step 3: Lock & Switch ─────────────────────────────────────
             console.log(ui.dim(`\nLocking local combo as: ${localName}…`));
 
-            let comboAssets: ComboAssets | undefined;
+
 
             if (kind === "combo") {
                 // If it's a combo, just lock its contents under the localName
@@ -59,12 +54,6 @@ export const launchCmd = new Command("launch")
                     dance: content.dance,
                     act: content.act
                 });
-                comboAssets = {
-                    talUrn: content.tal,
-                    danceUrns: Array.isArray(content.dance) ? content.dance : [content.dance],
-                    actUrn: content.act,
-                    comboName: localName,
-                };
             } else if (kind === "act") {
                 // If it's an act, lock a dedicated combo to play this act
                 const filePath = assetFilePath(cwd, urn);
@@ -90,12 +79,6 @@ export const launchCmd = new Command("launch")
                     ...(nodeParams.tal ? { tal: nodeParams.tal } : {}),
                     ...(nodeParams.dance ? { dance: nodeParams.dance } : {}),
                 });
-                comboAssets = {
-                    talUrn: nodeParams.tal,
-                    danceUrns,
-                    actUrn: urn,
-                    comboName: localName,
-                };
             } else if (kind === "tal" || kind === "dance") {
                 // If it's just a single tal or dance, we lock it with a generic partner just to launch
                 throw new Error(`Launching bare ${kind} is not supported. Use an 'act' or 'combo' URN.`);
@@ -104,12 +87,6 @@ export const launchCmd = new Command("launch")
             }
 
             // switch removed — no more activeCombo. Lockfile is enough.
-
-            // ── Step 3.5: Apply Stage Adapter ─────────────────────────────
-            if (options.stage && comboAssets) {
-                console.log(ui.dim(`\nApplying stage: ${options.stage}…`));
-                await applyStage(options.stage, cwd, comboAssets);
-            }
 
             // ── Step 4: Launch IDE ────────────────────────────────────────
             console.log(ui.success(`\n✔ Ready! Active combo: ${localName}`));

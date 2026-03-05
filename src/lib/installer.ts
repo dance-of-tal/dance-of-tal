@@ -77,7 +77,7 @@ export async function installAsset(
     if (!success || !pkgData) throw new Error("Invalid response from registry.");
 
     fs.mkdirSync(path.dirname(filePath), { recursive: true });
-    fs.writeFileSync(filePath, JSON.stringify(pkgData.content, null, 2));
+    fs.writeFileSync(filePath, JSON.stringify(pkgData.payload, null, 2));
 
     return { urn, filePath, skipped: false };
 }

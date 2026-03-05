@@ -52,7 +52,7 @@ describe.sequential("MCP server tool flow", () => {
       tags: [],
       featuredScore: 0,
       createdAt: "2026-03-02T00:00:00.000Z",
-      thinking: "Think in systems.",
+      content: "Think in systems.",
     });
 
     await writeJson(assetFilePath(projectDir, "dance/@acme/json-structure"), {
@@ -61,7 +61,7 @@ describe.sequential("MCP server tool flow", () => {
       name: "JSON Structure",
       description: "Respond in JSON.",
       tags: [],
-      rules: "Always return valid JSON.",
+      content: "Always return valid JSON.",
       schema: { type: "object" },
     });
 
@@ -181,7 +181,7 @@ describe.sequential("MCP server tool flow", () => {
       tags: [],
       featuredScore: 0,
       createdAt: "2026-03-02T00:00:00.000Z",
-      thinking: "Think in systems.",
+      content: "Think in systems.",
     });
 
     await writeJson(assetFilePath(projectDir, "dance/@acme/json-structure"), {
@@ -190,7 +190,7 @@ describe.sequential("MCP server tool flow", () => {
       name: "JSON Structure",
       description: "Respond in JSON.",
       tags: [],
-      rules: "Always return valid JSON.",
+      content: "Always return valid JSON.",
       schema: { type: "object" },
     });
 

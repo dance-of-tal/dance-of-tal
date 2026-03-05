@@ -53,7 +53,7 @@ Encodes the _thinking layer_: how the AI reasons, what it prioritises, and its p
   "type": "tal/@acme-platform/senior-backend-engineer",
   "version": "3.1.0",
   "description": "Backend engineer mindset for ACME's platform team.",
-  "thinking": "You are a senior backend engineer at ACME. You build for correctness, observability, and horizontal scale. You always consider failure modes before writing implementation. You default to Kotlin/Spring Boot, PostgreSQL, and Kafka. You never suggest solutions that don't have a rollback path.",
+  "content": "You are a senior backend engineer at ACME. You build for correctness, observability, and horizontal scale. You always consider failure modes before writing implementation. You default to Kotlin/Spring Boot, PostgreSQL, and Kafka. You never suggest solutions that don't have a rollback path.",
   "tags": ["backend", "kotlin", "spring", "platform"],
 }
 ```
@@ -69,7 +69,7 @@ Encodes the _behavior and capability layer_: structural rules, formatting discip
   "version": "1.0.0",
   "description": "ACME standard for AI-assisted PR reviews.",
   "tags": ["review", "backend", "security"],
-  "rules": "Structure every review as: SUMMARY, RISKS (severity: low|medium|high|critical), REQUIRED CHANGES, OPTIONAL SUGGESTIONS. Flag any code touching payment flows with PAYMENT RISK. Never approve a PR that lacks unit tests on business logic paths.",
+  "content": "Structure every review as: SUMMARY, RISKS (severity: low|medium|high|critical), REQUIRED CHANGES, OPTIONAL SUGGESTIONS. Flag any code touching payment flows with PAYMENT RISK. Never approve a PR that lacks unit tests on business logic paths.",
   "schema": {
     "type": "object",
     "required": ["summary", "risks", "requiredChanges"],
@@ -307,7 +307,7 @@ Each runs under its own Combo, isolated in .dance-of-tal/runs/{uuid}/
 | ------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
 | `dot init`                                                    | Scaffold `.dance-of-tal/` workspace                                                               |
 | `dot login`                                                   | GitHub OAuth → `~/.dance-of-tal/auth.json`                                                        |
-| `dot install <urn>`                                           | Download asset by URN. Combo → cascading install + auto-lock (`--no-lock` to skip, `--stage` for host files) |
+| `dot install <urn>`                                           | Download asset by URN. Combo → cascading install + auto-lock (`--no-lock` to skip) |
 | `dot search <keyword>`                                        | Search global registry by keyword                                                                 |
 | `dot list [--mine] [--kind <kind>]`                           | List registry packages                                                                            |
 | `dot create --kind <kind> --name <slug>`                      | Scaffold a new asset locally                                                                      |
@@ -431,7 +431,6 @@ dance-of-tal/
 │   └── src/
 │       ├── cli/          ← thin CLI adapters (init, install, lock, compile, run, publish, login, agents, launch)
 │       │   ├── commands/ ← individual CLI commands
-│       │   ├── stages/   ← IDE specific environment injection (Cursor, Antigravity, etc.)
 │       │   └── utils/    ← shared CLI utilities
 │       ├── lib/          ← shared core (MCP + CLI both call these)
 │       │   ├── registry.ts  ← local file I/O + Combo type

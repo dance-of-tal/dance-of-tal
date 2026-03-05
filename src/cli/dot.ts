@@ -42,7 +42,6 @@ program
   .command("install <package>")
   .description("Install a Tal, Dance, Act, or Combo (e.g. dot install combo/@acme/pr-review)")
   .option("--no-lock", "Skip auto-locking when installing a combo")
-  .option("--stage <environment>", "Generate host-native files: antigravity, cursor, windsurf, codex, openclaw, opencode, claude")
   .action(async (pkg: string, options) => {
     try {
       await runInstall(pkg, options);

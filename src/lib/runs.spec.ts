@@ -54,7 +54,7 @@ describe("runs safety and context compilation", () => {
       tags: [],
       featuredScore: 0,
       createdAt: "2026-03-01T00:00:00.000Z",
-      thinking: "Think in systems.",
+      content: "Think in systems.",
     });
 
     await writeJson(assetFilePath(cwd, "dance/@acme/json-structure"), {
@@ -63,7 +63,7 @@ describe("runs safety and context compilation", () => {
       name: "JSON Structure",
       description: "Respond in JSON.",
       tags: [],
-      rules: "Always return valid JSON.",
+      content: "Always return valid JSON.",
       schema: { type: "object" },
     });
 

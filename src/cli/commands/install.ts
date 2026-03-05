@@ -1,7 +1,6 @@
 import { ui } from "../utils/ui.js";
 import { installAsset, installComboAndLock } from "../../lib/installer.js";
 import { isAssetKind } from "../../lib/kinds.js";
-import { applyStage, isStageType } from "../stages/index.js";
 import { assetFilePath, getDotDir } from "../../lib/registry.js";
 import fs from "fs";
 
@@ -9,7 +8,7 @@ import fs from "fs";
  * CLI adapter for install.
  * Delegates to shared core (lib/installer), adds console.log UX.
  */
-export async function runInstall(pkg: string, options?: { lock?: boolean; stage?: string }) {
+export async function runInstall(pkg: string, options?: { lock?: boolean }) {
     const parts = pkg.split("/");
     if (parts.length !== 3 || !parts[1].startsWith("@")) {
         throw new Error(
@@ -24,12 +23,6 @@ export async function runInstall(pkg: string, options?: { lock?: boolean; stage?
         throw new Error(`Invalid kind: '${kind}'. Allowed: tal, dance, act, combo`);
     }
 
-    // Validate --stage early
-    if (options?.stage && !isStageType(options.stage)) {
-        throw new Error(
-            `Invalid stage: '${options.stage}'. Must be one of: antigravity, cursor, windsurf, codex, openclaw, opencode, claude`
-        );
-    }
 
     const cwd = process.cwd();
 
@@ -48,22 +41,6 @@ export async function runInstall(pkg: string, options?: { lock?: boolean; stage?
 
             console.log(ui.success(`\n✔ Installed ${newCount} asset(s), skipped ${skipCount}.`));
             console.log(ui.success(`✔ Lockfile created: .dance-of-tal/combo/${result.localName}.json`));
-
-            // Apply stage adapter (optional)
-            if (options?.stage) {
-                console.log(ui.dim(`\nApplying stage: ${options.stage}…`));
-                const filePath = assetFilePath(cwd, pkg);
-                const content = JSON.parse(fs.readFileSync(filePath, "utf-8"));
-                const danceUrns = Array.isArray(content.dance)
-                    ? content.dance
-                    : content.dance ? [content.dance] : [];
-                await applyStage(options.stage as any, cwd, {
-                    talUrn: content.tal,
-                    danceUrns,
-                    actUrn: content.act,
-                    comboName: result.localName,
-                });
-            }
 
             console.log(
                 "\n" +

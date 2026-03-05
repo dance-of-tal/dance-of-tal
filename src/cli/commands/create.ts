@@ -17,7 +17,7 @@ function buildTalTemplate(author: string, slug: string, name: string, descriptio
         tags: [],
         featuredScore: 0,
         createdAt: new Date().toISOString().split("T")[0],
-        thinking: "Add your thinking model here.\n\nCore principles:\n- ...\n\nDo:\n- ...\n\nDo not:\n- ..."
+        content: "Add your thinking model here.\n\nCore principles:\n- ...\n\nDo:\n- ...\n\nDo not:\n- ..."
     };
 }
 
@@ -28,7 +28,7 @@ function buildDanceTemplate(author: string, slug: string, name: string, descript
         name,
         description,
         tags: [],
-        rules: "Tone:\n- ...\nStructure:\n- ...\nFormatting:\n- ...\nForbidden:\n- ..."
+        content: "Tone:\n- ...\nStructure:\n- ...\nFormatting:\n- ...\nForbidden:\n- ..."
     };
 }
 

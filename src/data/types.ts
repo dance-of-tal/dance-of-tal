@@ -7,7 +7,7 @@ export type Tal = {
   tags: string[];
   featuredScore: number;
   createdAt: string;
-  thinking: string;
+  content: string;
 };
 
 export type ActNode = {
@@ -58,7 +58,7 @@ export type Dance = {
   name: string;
   description: string;
   tags: string[];
-  rules: string;
+  content: string;
   schema?: Record<string, any>; // V2: JSON Schema definition for type safety
   exemplarSet?: DanceExemplarSet;
 };

@@ -87,7 +87,7 @@ export function determineComboMode(combo: Combo): "tal-only" | "dance-only" | "c
  * Compiles a Combo into an executable prompt payload.
  *
  * - tal present  → [BEHAVIOR MODE] block included
- * - dance present → [OUTPUT FORMATTING] block with merged rules/schema
+ * - dance present → [OUTPUT FORMATTING] block with merged content/schema
  * - act present  → [WORKFLOW ACT] block included
  * - At least one of tal or dance must be present.
  */
@@ -113,13 +113,13 @@ export async function compileContext(
 
     // Tal block (optional)
     if (tal) {
-        blocks.push(`[BEHAVIOR MODE: ${tal.type}]\n${tal.thinking || tal.description}`);
+        blocks.push(`[BEHAVIOR MODE: ${tal.type}]\n${tal.content || tal.description}`);
     }
 
     // Dance block (optional)
     if (danceAssets.length > 0) {
         const mergedRules = danceAssets
-            .map((d) => `[${d.type}]\n${d.rules || d.description}`)
+            .map((d) => `[${d.type}]\n${d.content || d.description}`)
             .join("\n\n");
         blocks.push(`[OUTPUT FORMATTING]\n${mergedRules}`);
     }
