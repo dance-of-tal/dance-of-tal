@@ -1,6 +1,6 @@
 export type Tal = {
-  type: string; // V2: URN literal type (e.g. 'tal/system-architect')
-  extends?: string; // V2: Inheritance
+  type: string; // URN literal type (e.g. 'tal/system-architect')
+  extends?: string; // Inheritance
   slug: string;
   name: string;
   description: string;
@@ -10,29 +10,36 @@ export type Tal = {
   content: string;
 };
 
-export type ActNode = {
-  tal: string;
-  dance: string;
+export type Performer = {
+  type?: string;
+  slug?: string;
+  name?: string;
+  description?: string;
+  tags?: string[];
+  tal?: string;
+  dance?: string | string[];
+  act?: string;
+  model?: string;
+  mcp_config?: Record<string, any>;
 };
 
 export type ActEdge = {
   from: string;
-  to: string | string[];
-  condition?: string; // Optional conditional logic
+  to: string; // $next, $exit, or performerId
+  condition?: 'always' | 'on_success' | 'on_fail';
 };
 
 export type Act = {
-  type: string; // V2 URN (e.g. 'act/linear-review')
+  type: string;
   slug: string;
   name: string;
   description: string;
-  master?: {
-    tal: string;
-    dance: string;
-  };
-  steps?: string[];
-  nodes?: Record<string, ActNode>; // V2: DAG nodes
-  edges?: ActEdge[]; // V2: DAG edges
+  tags: string[];
+  entryPerformerId: string;
+  exitPerformerId: string;
+  performers: Record<string, Performer>;
+  edges: ActEdge[];
+  maxIterations?: number;
 };
 
 export type DanceStyleExample = {
@@ -52,14 +59,14 @@ export type DanceExemplarSet = {
 };
 
 export type Dance = {
-  type: string; // V2: URN literal type (e.g. 'dance/json-schema')
+  type: string; // URN literal type (e.g. 'dance/json-schema')
   extends?: string;
   slug: string;
   name: string;
   description: string;
   tags: string[];
   content: string;
-  schema?: Record<string, any>; // V2: JSON Schema definition for type safety
+  schema?: Record<string, any>; // JSON Schema definition for type safety
   exemplarSet?: DanceExemplarSet;
 };
 

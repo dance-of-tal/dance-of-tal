@@ -1,6 +1,7 @@
 import { Command } from "commander";
 import { ui } from "../utils/ui.js";
-import { lockCombo, Combo } from "../../lib/registry.js";
+import { lockPerformer } from "../../lib/registry.js";
+import { Performer } from "../../data/types.js";
 
 const VALID_URN_RE = /^(tal|dance|act)\/@[A-Za-z0-9_-]+\/[A-Za-z0-9._-]+$/;
 
@@ -34,26 +35,29 @@ function normaliseUrn(raw: string, prefix: "tal" | "dance" | "act"): string {
 }
 
 export const lockCmd = new Command("lock")
-    .description("Lock a Type-Safe Dance of Tal combo for this project")
-    .requiredOption("--name <comboName>", "The name for this combo")
+    .description("Lock a Type-Safe Dance of Tal performer for this project")
+    .requiredOption("--name <performerName>", "The name for this performer")
     .option("--tal <talUrn>", "Tal URN, e.g. tal/@acme/system-architect (or shorthand @acme/system-architect)")
     .option("--dance <danceUrns>", "Dance URN(s) — single or comma-separated for layering, e.g. dance/@base/ts,dance/@team/tdd")
-    .option("--act <actUrn>", "Optional Act URN — e.g. act/@infra/hotfix-override")
+    .option("--act <actUrn>", "Act URN for workflow state machine, e.g. act/@acme/incident-response")
+    .option("--model <modelId>", "Optional Model ID — e.g. provider/model-name")
     .action(async (options) => {
-        console.log(ui.title("Locking Combo"));
+        console.log(ui.title("Locking Performer"));
 
         try {
-            if (!options.tal && !options.dance) {
+            if (!options.tal && !options.dance && !options.act) {
                 throw new Error(
-                    "At least one of --tal or --dance must be provided.\n" +
+                    "At least one of --tal, --dance, or --act must be provided.\n" +
                     "  Examples:\n" +
-                    "    dot lock --tal tal/@acme/persona --name my-combo\n" +
-                    "    dot lock --dance dance/@acme/rules --name my-combo\n" +
-                    "    dot lock --tal tal/@acme/persona --dance dance/@acme/rules --name my-combo"
+                    "    dot lock --tal tal/@acme/persona --name my-performer\n" +
+                    "    dot lock --dance dance/@acme/rules --name my-performer\n" +
+                    "    dot lock --tal tal/@acme/persona --dance dance/@acme/rules --name my-performer\n" +
+                    "    dot lock --act act/@acme/workflow --name my-performer"
                 );
             }
 
             const talUrn = options.tal ? normaliseUrn(options.tal, "tal") : undefined;
+            const actUrn = options.act ? normaliseUrn(options.act, "act") : undefined;
 
             // Dance: comma-separated for layering, single URN for simple case
             let danceUrns: string[] | undefined;
@@ -62,20 +66,21 @@ export const lockCmd = new Command("lock")
                 danceUrns = rawDances.map((d: string) => normaliseUrn(d, "dance"));
             }
 
-            const combo: Combo = {
+            const performer = {
                 ...(talUrn ? { tal: talUrn } : {}),
                 ...(danceUrns ? { dance: danceUrns.length === 1 ? danceUrns[0] : danceUrns } : {}),
-                ...(options.act ? { act: normaliseUrn(options.act, "act") } : {}),
-            };
+                ...(actUrn ? { act: actUrn } : {}),
+                ...(options.model ? { model: options.model } : {}),
+            } as Performer;
 
-            await lockCombo(process.cwd(), options.name, combo);
+            await lockPerformer(process.cwd(), options.name, performer);
 
-            console.log(ui.success(`Successfully locked combo: ${options.name}`));
-            console.log(ui.dim(JSON.stringify(combo, null, 2)));
-            console.log(ui.dim("\nTo compile and verify this combo, run:"));
+            console.log(ui.success(`Successfully locked performer: ${options.name}`));
+            console.log(ui.dim(JSON.stringify(performer, null, 2)));
+            console.log(ui.dim("\nTo compile and verify this performer, run:"));
             console.log(ui.dim(`  dot compile ${options.name}`));
         } catch (err: any) {
-            console.error(ui.error(`Failed to lock combo: ${err.message}`));
+            console.error(ui.error(`Failed to lock performer: ${err.message}`));
             process.exit(1);
         }
     });

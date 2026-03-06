@@ -3,7 +3,7 @@ import path from "path";
 import { getDotDir } from "./registry.js";
 
 /**
- * Mapping of agent role name → local combo name.
+ * Mapping of agent role name → local performer name.
  * Stored at .dance-of-tal/agents.json
  *
  * Example:

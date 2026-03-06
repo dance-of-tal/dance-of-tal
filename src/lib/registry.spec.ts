@@ -2,9 +2,9 @@ import fs from "fs/promises";
 import os from "os";
 import path from "path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { getCombo, listLockedComboNames, lockCombo } from "./registry.js";
+import { getPerformer, listLockedPerformerNames, lockPerformer } from "./registry.js";
 
-describe("registry combo safety", () => {
+describe("registry performer safety", () => {
   let cwd: string;
 
   beforeEach(async () => {
@@ -15,39 +15,39 @@ describe("registry combo safety", () => {
     await fs.rm(cwd, { recursive: true, force: true });
   });
 
-  it("locks and reads a valid combo", async () => {
-    await lockCombo(cwd, "sprint", {
+  it("locks and reads a valid performer", async () => {
+    await lockPerformer(cwd, "sprint", {
       tal: "tal/@acme/system-architect",
       dance: "dance/@acme/json-structure",
-    });
+    } as any);
 
-    const combo = await getCombo(cwd, "sprint");
-    expect(combo).not.toBeNull();
-    expect(combo?.tal).toBe("tal/@acme/system-architect");
+    const performer = await getPerformer(cwd, "sprint");
+    expect(performer).not.toBeNull();
+    expect(performer?.tal).toBe("tal/@acme/system-architect");
   });
 
-  it("rejects unsafe combo names", async () => {
+  it("rejects unsafe performer names", async () => {
     await expect(
-      lockCombo(cwd, "../escape", {
+      lockPerformer(cwd, "../escape", {
         tal: "tal/@acme/system-architect",
         dance: "dance/@acme/json-structure",
-      })
-    ).rejects.toThrow("Invalid combo name");
+      } as any)
+    ).rejects.toThrow("Invalid performer name");
 
-    await expect(getCombo(cwd, "../../leak")).rejects.toThrow("Invalid combo name");
+    await expect(getPerformer(cwd, "../../leak")).rejects.toThrow("Invalid performer name");
   });
 
-  it("lists valid locked combos and skips malformed filenames", async () => {
-    await lockCombo(cwd, "incident", {
+  it("lists valid locked performers and skips malformed filenames", async () => {
+    await lockPerformer(cwd, "incident", {
       tal: "tal/@acme/system-architect",
       dance: "dance/@acme/json-structure",
-    });
+    } as any);
 
-    const combosDir = path.join(cwd, ".dance-of-tal", "combo");
-    await fs.mkdir(combosDir, { recursive: true });
-    await fs.writeFile(path.join(combosDir, "bad name.json"), "{}", "utf-8");
+    const performersDir = path.join(cwd, ".dance-of-tal", "performer");
+    await fs.mkdir(performersDir, { recursive: true });
+    await fs.writeFile(path.join(performersDir, "bad name.json"), "{}", "utf-8");
 
-    const result = await listLockedComboNames(cwd);
+    const result = await listLockedPerformerNames(cwd);
     expect(result.names).toEqual(["incident"]);
     expect(result.skipped.length).toBe(1);
     expect(result.skipped[0]?.file).toBe("bad name.json");

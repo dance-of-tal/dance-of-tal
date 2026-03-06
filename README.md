@@ -19,9 +19,9 @@ Modern AI-powered development relies on system prompts that have quietly grown i
 | Software principle                   | DOT equivalent                                                     |
 | ------------------------------------ | ------------------------------------------------------------------ |
 | Dependency Injection                 | Context assembled from discrete, typed components                  |
-| `package.json` → `package-lock.json` | Combo locks exact Tal + Dance versions                             |
+| `package.json` → `package-lock.json` | Performer locks exact Tal + Dance versions                             |
 | npm registry                         | Global Cloudflare KV registry                                      |
-| Multiple CSS classes on one element  | Multiple Dances layered in one Combo                               |
+| Multiple CSS classes on one element  | Multiple Dances layered in one Performer                               |
 | CI/CD pipeline                       | Every engineer on every machine runs the **exact** same AI persona |
 
 ---
@@ -32,7 +32,7 @@ Picture a newly onboarded senior engineer at your company.
 
 - Their **Tal** is their _professional mindset_ — the thinking framework your company expects. Do they prioritise correctness or delivery speed? Do they design for GDPR compliance by default? This is the **who** of the AI.
 - Their **Dance** is their _working methodology_ — the rules they follow on every task. Always write tests first. Always output structured JSON. Always flag security implications. This is the **how** of the AI.
-- A **Combo** locks a Tal + one or more Dances together — a frozen, versioned snapshot that everyone on the team installs.
+- A **Performer** locks a Tal + one or more Dances together — a frozen, versioned snapshot that everyone on the team installs.
 - An **Act** _(advanced, experimental)_ is a _context router_ — a DAG that switches AI persona and rules based on runtime conditions (e.g. normal sprint → incident response mode). Most workflows are handled by Dance Skills; Act is for multi-phase orchestration where the AI's entire identity changes.
 
 ---
@@ -83,12 +83,12 @@ Encodes the _behavior and capability layer_: structural rules, formatting discip
 }
 ```
 
-### 3. `Combo` — The Lockfile
+### 3. `Performer` — The Lockfile
 
-Pins a Tal and/or Dances. Multiple Dances are layered in order — rules concatenate, schemas deep-merge — like CSS classes. **Both tal and dance are optional** (at least one required), enabling tal-only, dance-only, or full combo compositions.
+Pins a Tal and/or Dances. Multiple Dances are layered in order — rules concatenate, schemas deep-merge — like CSS classes. **Both tal and dance are optional** (at least one required), enabling tal-only, dance-only, or full performer compositions.
 
 ```jsonc
-// Full combo: tal + layered dances
+// Full performer: tal + layered dances
 {
   "tal": "tal/@acme-platform/senior-backend-engineer",
   "dance": [
@@ -158,7 +158,7 @@ Routes between different Tal+Dance pairs conditionally. Use this when the AI's e
 │  ├── tal/@acme-platform/senior-backend-engineer.json     │
 │  ├── dance/@acme-platform/kotlin-style-guide.json        │
 │  ├── dance/@acme-security/gdpr-awareness.json            │
-│  ├── combo/sprint.json           ← locked Combo          │
+│  ├── performer/sprint.json           ← locked Performer          │
 │  └── runs/{uuid}/                ← per-agent sandboxes   │
 └────────────────────┬─────────────────────────────────────┘
                      │
@@ -184,7 +184,7 @@ npm install -g dance-of-tal
 ```bash
 cd your-repo
 dot init
-# Creates .dance-of-tal/combo/, .dance-of-tal/runs/
+# Creates .dance-of-tal/performer/, .dance-of-tal/runs/
 ```
 
 ### 3. Login with GitHub
@@ -206,7 +206,7 @@ dot install dance/@acme-security/gdpr-awareness
 dot install dance/@acme-platform/pr-review-standard
 ```
 
-### 5. Lock a Combo
+### 5. Lock a Performer
 
 ```bash
 # Daily sprint profile: backend persona + company style + security layer
@@ -276,7 +276,7 @@ Instead of sending a Confluence doc with "our AI prompting standards," you send 
 # Install the P0 ACT workflow
 dot install act/@acme-platform/incident-response
 
-# Lock a combo that includes the incident routing workflow
+# Lock a performer that includes the incident routing workflow
 dot lock \
   --tal   @acme-platform/senior-backend-engineer \
   --dance @acme-platform/kotlin-style-guide \
@@ -296,7 +296,7 @@ Agent A (run-uuid-001): reviews security implications
 Agent B (run-uuid-002): generates test cases
 Agent C (run-uuid-003): writes the implementation
 
-Each runs under its own Combo, isolated in .dance-of-tal/runs/{uuid}/
+Each runs under its own Performer, isolated in .dance-of-tal/runs/{uuid}/
 ```
 
 ---
@@ -307,17 +307,17 @@ Each runs under its own Combo, isolated in .dance-of-tal/runs/{uuid}/
 | ------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
 | `dot init`                                                    | Scaffold `.dance-of-tal/` workspace                                                               |
 | `dot login`                                                   | GitHub OAuth → `~/.dance-of-tal/auth.json`                                                        |
-| `dot install <urn>`                                           | Download asset by URN. Combo → cascading install + auto-lock (`--no-lock` to skip) |
+| `dot install <urn>`                                           | Download asset by URN. Performer → cascading install + auto-lock (`--no-lock` to skip) |
 | `dot search <keyword>`                                        | Search global registry by keyword                                                                 |
 | `dot list [--mine] [--kind <kind>]`                           | List registry packages                                                                            |
 | `dot create --kind <kind> --name <slug>`                      | Scaffold a new asset locally                                                                      |
-| `dot lock --tal <urn> --dance <urn>[,<urn>...] --name <name>` | Lock Combo (tal and/or dance — at least one required)                                             |
+| `dot lock --tal <urn> --dance <urn>[,<urn>...] --name <name>` | Lock Performer (tal and/or dance — at least one required)                                             |
 | `dot compile <name>`                                          | Validate all locked assets are type-correct                                                       |
 | `dot run <name> --task <string>`                              | Compile and print assembled context                                                               |
 | `dot publish --kind <kind> --name <slug> --tags <tags>`       | Publish local asset to registry (requires `dot login`)                                            |
 | `dot launch <urn> --editor <name>`                            | Install + lock + open IDE                                                                         |
-| `dot agents set --agent <name> --combo <comboName>`           | Assign a combo to an agent name (`.dance-of-tal/agents.json`)                                     |
-| `dot agents list`                                             | List all agent → combo mappings                                                                   |
+| `dot agents set --agent <name> --performer <performerName>`           | Assign a performer to an agent name (`.dance-of-tal/agents.json`)                                     |
+| `dot agents list`                                             | List all agent → performer mappings                                                                   |
 | `dot agents remove --agent <name>`                            | Remove an agent from the manifest                                                                 |
 
 ### URN Format
@@ -357,18 +357,18 @@ DOT implements the **Model Context Protocol (MCP)**, so AI IDEs can pull the exa
 }
 ```
 
-By default, DOT auto-discovers the nearest parent containing `.dance-of-tal/combo` from the MCP process working directory. If no workspace is found, tools like `setup_workspace` and `install_combo` will auto-initialize one at `process.cwd()`. Set `DANCE_OF_TAL_PROJECT_DIR` only when the IDE's working directory differs from your project root.
+By default, DOT auto-discovers the nearest parent containing `.dance-of-tal/performer` from the MCP process working directory. If no workspace is found, tools like `setup_workspace` and `install_performer` will auto-initialize one at `process.cwd()`. Set `DANCE_OF_TAL_PROJECT_DIR` only when the IDE's working directory differs from your project root.
 
 ### MCP Tools (8 tools)
 
 | Tool              | Description                                    |
 | ----------------- | ---------------------------------------------- |
-| `get_project_status` | Check workspace init status, combos, agent mappings |
+| `get_project_status` | Check workspace init status, performers, agent mappings |
 | `setup_workspace`    | Initialize `.dance-of-tal/` directory (MCP-driven, no CLI needed) |
 | `search_registry`    | Search the DOT registry for packages |
-| `install_combo`      | Install a combo + all deps + auto-lock (MCP-driven) |
-| `list_combos`     | List local combos with mode (tal-only/dance-only/combo/act) |
-| `init_run`        | Create an isolated run (comboName OR agentName) |
+| `install_performer`      | Install a performer + all deps + auto-lock (MCP-driven) |
+| `list_performers`     | List local performers with mode (tal-only/dance-only/performer/act) |
+| `init_run`        | Create an isolated run (performerName OR agentName) |
 | `get_run_context` | Return the compiled system prompt for that run |
 | `clear_run`       | Clean up the sandbox after the run completes   |
 
@@ -433,10 +433,10 @@ dance-of-tal/
 │       │   ├── commands/ ← individual CLI commands
 │       │   └── utils/    ← shared CLI utilities
 │       ├── lib/          ← shared core (MCP + CLI both call these)
-│       │   ├── registry.ts  ← local file I/O + Combo type
+│       │   ├── registry.ts  ← local file I/O + Performer type
 │       │   ├── installer.ts ← registry fetch + install + auto-lock
 │       │   ├── engine.ts    ← Tal? + Dance?[] → compiled system prompt
-│       │   ├── runs.ts      ← multi-agent run isolation + resolveComboName
+│       │   ├── runs.ts      ← multi-agent run isolation + resolvePerformerName
 │       │   ├── agents.ts    ← agents.json read/write
 │       │   ├── identifiers.ts ← URN parsing and validation
 │       │   └── kinds.ts     ← type definitions for asset kinds

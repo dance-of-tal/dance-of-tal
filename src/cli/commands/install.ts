@@ -1,5 +1,5 @@
 import { ui } from "../utils/ui.js";
-import { installAsset, installComboAndLock } from "../../lib/installer.js";
+import { installAsset, installPerformerAndLock } from "../../lib/installer.js";
 import { isAssetKind } from "../../lib/kinds.js";
 import { assetFilePath, getDotDir } from "../../lib/registry.js";
 import fs from "fs";
@@ -20,7 +20,7 @@ export async function runInstall(pkg: string, options?: { lock?: boolean }) {
 
     const [kind] = parts;
     if (!isAssetKind(kind)) {
-        throw new Error(`Invalid kind: '${kind}'. Allowed: tal, dance, act, combo`);
+        throw new Error(`Invalid kind: '${kind}'. Allowed: tal, dance, act, performer`);
     }
 
 
@@ -28,29 +28,29 @@ export async function runInstall(pkg: string, options?: { lock?: boolean }) {
 
     console.log(ui.title(`Installing package: ${pkg}`));
 
-    if (kind === "combo") {
-        // Combo: cascading install + auto-lock (unless --no-lock)
+    if (kind === "performer") {
+        // Performer: cascading install + auto-lock (unless --no-lock)
         const shouldLock = options?.lock !== false;
 
         if (shouldLock) {
-            console.log(ui.dim("Installing combo with auto-lock...\n"));
-            const result = await installComboAndLock(cwd, pkg);
+            console.log(ui.dim("Installing performer with auto-lock...\n"));
+            const result = await installPerformerAndLock(cwd, pkg);
 
             const newCount = result.installedAssets.filter(a => !a.skipped).length;
             const skipCount = result.installedAssets.filter(a => a.skipped).length;
 
             console.log(ui.success(`\n✔ Installed ${newCount} asset(s), skipped ${skipCount}.`));
-            console.log(ui.success(`✔ Lockfile created: .dance-of-tal/combo/${result.localName}.json`));
+            console.log(ui.success(`✔ Lockfile created: .dance-of-tal/performer/${result.localName}.json`));
 
             console.log(
                 "\n" +
-                ui.success(`✔ Ready! Combo locked as: ${ui.highlight(result.localName)}`) +
+                ui.success(`✔ Ready! Performer locked as: ${ui.highlight(result.localName)}`) +
                 "\n"
             );
-            console.log(ui.dim(`  MCP: init_run → get_run_context (uses combo '${result.localName}')`));
+            console.log(ui.dim("  MCP: setup_workspace → install_asset/list_assets (tal/dance-focused flow)"));
         } else {
             // --no-lock: install only, no lockfile
-            console.log(ui.dim("Installing combo (no lock)...\n"));
+            console.log(ui.dim("Installing performer (no lock)...\n"));
             const result = await installAsset(cwd, pkg);
             if (result.skipped) {
                 console.log(ui.dim(`  ↳ Already installed, skipping: ${pkg}`));
@@ -66,7 +66,6 @@ export async function runInstall(pkg: string, options?: { lock?: boolean }) {
             const danceUrns: string[] = Array.isArray(danceRaw)
                 ? danceRaw.filter((d: any): d is string => typeof d === "string")
                 : typeof danceRaw === "string" ? [danceRaw] : [];
-            const actUrn = typeof content.act === "string" ? content.act : null;
 
             if (talUrn) {
                 const r = await installAsset(cwd, talUrn);
@@ -76,9 +75,8 @@ export async function runInstall(pkg: string, options?: { lock?: boolean }) {
                 const r = await installAsset(cwd, d);
                 console.log(r.skipped ? ui.dim(`  ↳ Already installed: ${d}`) : ui.success(`  ✔ Installed ${d}`));
             }
-            if (actUrn) {
-                const r = await installAsset(cwd, actUrn);
-                console.log(r.skipped ? ui.dim(`  ↳ Already installed: ${actUrn}`) : ui.success(`  ✔ Installed ${actUrn}`));
+            if (content.model) {
+                console.log(ui.dim(`  ↳ Model identified: ${content.model} (no file installation required)`));
             }
 
             console.log(ui.success(`\n✔ All dependencies installed. Use 'dot lock' to create a lockfile.`));
@@ -88,14 +86,14 @@ export async function runInstall(pkg: string, options?: { lock?: boolean }) {
         const result = await installAsset(cwd, pkg);
         console.log(result.skipped ? ui.dim(`  Already installed: ${pkg}`) : ui.success(`\n✔ Installed act: ${pkg}`));
 
-        // Browse nodes for deps
+        // Browse performers for deps
         const filePath = assetFilePath(cwd, pkg);
         const content = JSON.parse(fs.readFileSync(filePath, "utf-8"));
-        const nodes = content.nodes as Record<string, any> | undefined;
-        if (nodes) {
+        const performers = content.performers as Record<string, any> | undefined;
+        if (performers) {
             const seen = new Set<string>();
             let depCount = 0;
-            for (const [nodeId, nodeValue] of Object.entries(nodes)) {
+            for (const [nodeId, nodeValue] of Object.entries(performers)) {
                 const talUrn = typeof nodeValue.tal === "string" ? nodeValue.tal : null;
                 const ds: string[] = Array.isArray(nodeValue.dance)
                     ? nodeValue.dance.filter((d: any): d is string => typeof d === "string")

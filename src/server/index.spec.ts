@@ -1,16 +1,11 @@
 import fs from "fs/promises";
 import os from "os";
 import path from "path";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
 import { createServer } from "./index.js";
-import { assetFilePath, initRegistry, lockCombo } from "../lib/registry.js";
-
-async function writeJson(filePath: string, data: unknown): Promise<void> {
-  await fs.mkdir(path.dirname(filePath), { recursive: true });
-  await fs.writeFile(filePath, JSON.stringify(data, null, 2), "utf-8");
-}
+import { assetFilePath } from "../lib/registry.js";
 
 function extractTextContent(result: any): string {
   const text = result?.content?.find((item: any) => item?.type === "text")?.text;
@@ -20,7 +15,7 @@ function extractTextContent(result: any): string {
   return text;
 }
 
-describe.sequential("MCP server tool flow", () => {
+describe.sequential("MCP server minimal tool flow", () => {
   let projectDir: string;
   let originalProjectEnv: string | undefined;
   let originalCwd: string;
@@ -32,6 +27,7 @@ describe.sequential("MCP server tool flow", () => {
   });
 
   afterEach(async () => {
+    vi.restoreAllMocks();
     if (originalProjectEnv === undefined) {
       delete process.env.DANCE_OF_TAL_PROJECT_DIR;
     } else {
@@ -41,37 +37,7 @@ describe.sequential("MCP server tool flow", () => {
     await fs.rm(projectDir, { recursive: true, force: true });
   });
 
-  it("supports list -> init -> context -> clear flow with env project directory", async () => {
-    await initRegistry(projectDir);
-
-    await writeJson(assetFilePath(projectDir, "tal/@acme/system-architect"), {
-      type: "tal/@acme/system-architect",
-      slug: "system-architect",
-      name: "System Architect",
-      description: "Architect profile",
-      tags: [],
-      featuredScore: 0,
-      createdAt: "2026-03-02T00:00:00.000Z",
-      content: "Think in systems.",
-    });
-
-    await writeJson(assetFilePath(projectDir, "dance/@acme/json-structure"), {
-      type: "dance/@acme/json-structure",
-      slug: "json-structure",
-      name: "JSON Structure",
-      description: "Respond in JSON.",
-      tags: [],
-      content: "Always return valid JSON.",
-      schema: { type: "object" },
-    });
-
-    await lockCombo(projectDir, "sprint", {
-      tal: "tal/@acme/system-architect",
-      dance: "dance/@acme/json-structure",
-    });
-
-    process.env.DANCE_OF_TAL_PROJECT_DIR = projectDir;
-
+  it("exposes only setup/install/list MCP tools", async () => {
     const server = createServer();
     const client = new Client({ name: "dot-test-client", version: "1.0.0" });
     const [serverTransport, clientTransport] = InMemoryTransport.createLinkedPair();
@@ -80,74 +46,88 @@ describe.sequential("MCP server tool flow", () => {
     try {
       const tools = await client.listTools();
       const toolNames = tools.tools.map((tool) => tool.name);
-      expect(toolNames).toEqual([
-        "get_project_status",
-        "list_combos",
-        "init_run",
-        "get_run_context",
-        "clear_run",
-        "setup_workspace",
-        "install_combo",
-        "search_registry",
-      ]);
-
-      const statusResult = await client.callTool({ name: "get_project_status", arguments: {} });
-      const statusPayload = JSON.parse(extractTextContent(statusResult));
-      expect(statusPayload.initialized).toBe(true);
-      expect(statusPayload.combos).toContain("sprint");
-
-      const initResult = await client.callTool({
-        name: "init_run",
-        arguments: { runId: "run-e2e-001", comboName: "sprint" },
-      });
-      const initPayload = JSON.parse(extractTextContent(initResult));
-      expect(initPayload.success).toBe(true);
-      expect(initPayload.resolvedComboName).toBe("sprint");
-
-      const contextResult = await client.callTool({
-        name: "get_run_context",
-        arguments: { runId: "run-e2e-001", taskContext: "Write regression tests" },
-      });
-      const contextText = extractTextContent(contextResult);
-      expect(contextText).toContain("[SYSTEM PROMPT]");
-      expect(contextText).toContain("[CURRENT TASK]");
-
-      const clearResult = await client.callTool({
-        name: "clear_run",
-        arguments: { runId: "run-e2e-001" },
-      });
-      expect(extractTextContent(clearResult)).toContain("cleared");
-
-      await expect(
-        fs.access(path.join(projectDir, ".dance-of-tal", "runs", "run-e2e-001"))
-      ).rejects.toThrow();
+      expect(toolNames).toEqual(["setup_workspace", "install_asset", "list_assets"]);
     } finally {
       await Promise.allSettled([client.close(), server.close()]);
     }
   });
 
-  it("returns warnings for malformed combo filenames instead of failing list_combos", async () => {
-    await initRegistry(projectDir);
-    await lockCombo(projectDir, "incident", {
-      tal: "tal/@acme/system-architect",
-      dance: "dance/@acme/json-structure",
-    });
+  it("supports setup -> install tal -> list assets", async () => {
+    process.env.DANCE_OF_TAL_PROJECT_DIR = projectDir;
 
-    const comboDir = path.join(projectDir, ".dance-of-tal", "combo");
-    await fs.writeFile(path.join(comboDir, "bad name.json"), "{}", "utf-8");
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          success: true,
+          package: {
+            payload: {
+              type: "tal/@acme/system-architect",
+              slug: "system-architect",
+              name: "System Architect",
+              description: "Architect profile",
+              tags: [],
+              featuredScore: 0,
+              createdAt: "2026-03-06T00:00:00.000Z",
+              content: "Think in systems.",
+            },
+          },
+        }),
+        { status: 200, headers: { "Content-Type": "application/json" } }
+      )
+    );
+
+    const server = createServer();
+    const client = new Client({ name: "dot-test-client", version: "1.0.0" });
+    const [serverTransport, clientTransport] = InMemoryTransport.createLinkedPair();
+
+    await Promise.all([server.connect(serverTransport), client.connect(clientTransport)]);
+    try {
+      const setupResult = await client.callTool({
+        name: "setup_workspace",
+        arguments: {},
+      });
+      const setupPayload = JSON.parse(extractTextContent(setupResult));
+      expect(setupPayload.success).toBe(true);
+
+      const urn = "tal/@acme/system-architect";
+      const installResult = await client.callTool({
+        name: "install_asset",
+        arguments: { urn },
+      });
+      const installPayload = JSON.parse(extractTextContent(installResult));
+      expect(installPayload.success).toBe(true);
+      expect(installPayload.kind).toBe("tal");
+      expect(installPayload.urn).toBe(urn);
+      expect(installPayload.skipped).toBe(false);
+
+      const expectedPath = assetFilePath(projectDir, urn);
+      await expect(fs.access(expectedPath)).resolves.toBeUndefined();
+
+      const listResult = await client.callTool({ name: "list_assets", arguments: {} });
+      const listPayload = JSON.parse(extractTextContent(listResult));
+      expect(listPayload.count).toBe(1);
+      expect(listPayload.assets[0].urn).toBe(urn);
+      expect(listPayload.assets[0].kind).toBe("tal");
+    } finally {
+      await Promise.allSettled([client.close(), server.close()]);
+    }
+  });
+
+  it("rejects non-tal/dance kinds for install_asset", async () => {
     process.env.DANCE_OF_TAL_PROJECT_DIR = projectDir;
 
     const server = createServer();
     const client = new Client({ name: "dot-test-client", version: "1.0.0" });
     const [serverTransport, clientTransport] = InMemoryTransport.createLinkedPair();
-    await Promise.all([server.connect(serverTransport), client.connect(clientTransport)]);
 
+    await Promise.all([server.connect(serverTransport), client.connect(clientTransport)]);
     try {
-      const result = await client.callTool({ name: "list_combos", arguments: {} });
-      const payload = JSON.parse(extractTextContent(result));
-      expect(payload.combos.map((c: any) => c.name)).toContain("incident");
-      expect(Array.isArray(payload.warnings)).toBe(true);
-      expect(payload.warnings.length).toBeGreaterThan(0);
+      const result = await client.callTool({
+        name: "install_asset",
+        arguments: { urn: "performer/@acme/reviewer" },
+      });
+      expect(result.isError).toBe(true);
+      expect(extractTextContent(result)).toContain("Only 'tal' and 'dance' assets");
     } finally {
       await Promise.allSettled([client.close(), server.close()]);
     }
@@ -162,84 +142,9 @@ describe.sequential("MCP server tool flow", () => {
     await Promise.all([server.connect(serverTransport), client.connect(clientTransport)]);
 
     try {
-      const result = await client.callTool({ name: "get_project_status", arguments: {} });
+      const result = await client.callTool({ name: "list_assets", arguments: {} });
       expect(result.isError).toBe(true);
       expect(extractTextContent(result)).toContain("DANCE_OF_TAL_PROJECT_DIR does not exist");
-    } finally {
-      await Promise.allSettled([client.close(), server.close()]);
-    }
-  });
-
-  it("auto-discovers project root from nested cwd when env is unset", async () => {
-    await initRegistry(projectDir);
-
-    await writeJson(assetFilePath(projectDir, "tal/@acme/system-architect"), {
-      type: "tal/@acme/system-architect",
-      slug: "system-architect",
-      name: "System Architect",
-      description: "Architect profile",
-      tags: [],
-      featuredScore: 0,
-      createdAt: "2026-03-02T00:00:00.000Z",
-      content: "Think in systems.",
-    });
-
-    await writeJson(assetFilePath(projectDir, "dance/@acme/json-structure"), {
-      type: "dance/@acme/json-structure",
-      slug: "json-structure",
-      name: "JSON Structure",
-      description: "Respond in JSON.",
-      tags: [],
-      content: "Always return valid JSON.",
-      schema: { type: "object" },
-    });
-
-    await lockCombo(projectDir, "sprint", {
-      tal: "tal/@acme/system-architect",
-      dance: "dance/@acme/json-structure",
-    });
-
-    const nestedDir = path.join(projectDir, "packages", "app", "src");
-    await fs.mkdir(nestedDir, { recursive: true });
-    delete process.env.DANCE_OF_TAL_PROJECT_DIR;
-    process.chdir(nestedDir);
-
-    const server = createServer();
-    const client = new Client({ name: "dot-test-client", version: "1.0.0" });
-    const [serverTransport, clientTransport] = InMemoryTransport.createLinkedPair();
-    await Promise.all([server.connect(serverTransport), client.connect(clientTransport)]);
-
-    try {
-      const result = await client.callTool({ name: "list_combos", arguments: {} });
-      const payload = JSON.parse(extractTextContent(result));
-      expect(payload.combos.map((c: any) => c.name)).toContain("sprint");
-    } finally {
-      await Promise.allSettled([client.close(), server.close()]);
-    }
-  });
-
-  it("treats auth-only .dance-of-tal directories as uninitialized workspace", async () => {
-    const fakeProject = path.join(projectDir, "fake-project");
-    const fakeDotDir = path.join(fakeProject, ".dance-of-tal");
-    await fs.mkdir(fakeDotDir, { recursive: true });
-    await fs.writeFile(
-      path.join(fakeDotDir, "auth.json"),
-      JSON.stringify({ token: "dummy-token" }, null, 2),
-      "utf-8"
-    );
-
-    process.env.DANCE_OF_TAL_PROJECT_DIR = fakeProject;
-
-    const server = createServer();
-    const client = new Client({ name: "dot-test-client", version: "1.0.0" });
-    const [serverTransport, clientTransport] = InMemoryTransport.createLinkedPair();
-    await Promise.all([server.connect(serverTransport), client.connect(clientTransport)]);
-
-    try {
-      const result = await client.callTool({ name: "get_project_status", arguments: {} });
-      const payload = JSON.parse(extractTextContent(result));
-      expect(payload.initialized).toBe(false);
-      expect(payload.setup_guide).toBeDefined();
     } finally {
       await Promise.allSettled([client.close(), server.close()]);
     }

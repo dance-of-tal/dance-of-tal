@@ -1,15 +1,15 @@
 import path from "path";
 import { isAssetKind } from "./kinds.js";
 
-const COMBO_NAME_RE = /^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$/;
+const PERFORMER_NAME_RE = /^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$/;
 const RUN_ID_RE = /^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$/;
 const ASSET_NAME_RE = /^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$/;
 const AUTHOR_RE = /^@[A-Za-z0-9_-]{1,64}$/;
 
-export function assertSafeComboName(name: string): void {
-  if (!COMBO_NAME_RE.test(name)) {
+export function assertSafePerformerName(name: string): void {
+  if (!PERFORMER_NAME_RE.test(name)) {
     throw new Error(
-      `Invalid combo name '${name}'. Allowed pattern: ${COMBO_NAME_RE.toString()}`
+      `Invalid performer name '${name}'. Allowed pattern: ${PERFORMER_NAME_RE.toString()}`
     );
   }
 }

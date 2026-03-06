@@ -1,29 +1,31 @@
 import { Command } from "commander";
 import { ui } from "../utils/ui.js";
-import { getCombo } from "../../lib/registry.js";
+import { getPerformer } from "../../lib/registry.js";
 
 export const compileCmd = new Command("compile")
-    .description("Compile and validate a locked combo for Type-Safety")
-    .argument("<comboName>", "The name of the locked combo")
-    .action(async (comboName) => {
-        console.log(ui.title("Compiling Combo"));
+    .description("Compile and validate a locked performer for Type-Safety")
+    .argument("<performerName>", "The name of the locked performer")
+    .action(async (performerName) => {
+        console.log(ui.title("Compiling Performer"));
 
         try {
-            const combo = await getCombo(process.cwd(), comboName);
-            if (!combo) {
-                throw new Error(`Combo '${comboName}' not found in registry.`);
+            const performer = await getPerformer(process.cwd(), performerName);
+            if (!performer) {
+                throw new Error(`Performer '${performerName}' not found in registry.`);
             }
 
-            console.log(ui.dim(`Found combo: ${comboName}`));
-            console.log(ui.dim(`  Tal:   ${combo.tal}`));
-            console.log(ui.dim(`  Dance: ${combo.dance}`));
-            if (combo.act) {
-                console.log(ui.dim(`  Act:   ${combo.act}`));
+            console.log(ui.dim(`Found performer: ${performerName}`));
+            console.log(ui.dim(`  Tal:   ${performer.tal}`));
+            if (performer.dance) {
+                console.log(ui.dim(`  Dance: ${performer.dance}`));
+            }
+            if (performer.model) {
+                console.log(ui.dim(`  Model: ${performer.model}`));
             }
 
             console.log(ui.success("\nType-Safety validation running..."));
-            const { validateComboFiles } = await import("../../lib/engine.js");
-            await validateComboFiles(process.cwd(), combo);
+            const { validatePerformerFiles } = await import("../../lib/engine.js");
+            await validatePerformerFiles(process.cwd(), performer);
             console.log(ui.success("✔ Compilation sequence completed without errors."));
 
         } catch (err: any) {

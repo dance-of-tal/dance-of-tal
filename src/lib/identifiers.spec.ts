@@ -3,18 +3,18 @@ import { describe, expect, it } from "vitest";
 import {
   assertPathInside,
   assertSafeAssetUrn,
-  assertSafeComboName,
+  assertSafePerformerName,
   assertSafeRunId,
 } from "./identifiers.js";
 
 describe("identifiers safety", () => {
-  it("accepts valid combo and run identifiers", () => {
-    expect(() => assertSafeComboName("pr-review_v2")).not.toThrow();
+  it("accepts valid performer and run identifiers", () => {
+    expect(() => assertSafePerformerName("pr-review_v2")).not.toThrow();
     expect(() => assertSafeRunId("run-20260301:agent-a")).not.toThrow();
   });
 
-  it("rejects unsafe combo and run identifiers", () => {
-    expect(() => assertSafeComboName("../escape")).toThrow("Invalid combo name");
+  it("rejects unsafe performer and run identifiers", () => {
+    expect(() => assertSafePerformerName("../escape")).toThrow("Invalid performer name");
     expect(() => assertSafeRunId("../../etc")).toThrow("Invalid runId");
   });
 

@@ -1,18 +1,17 @@
 import fs from "fs/promises";
 import path from "path";
-import { getDotDir, getCombo } from "./registry.js";
-import { compileContext, CompiledContext, determineComboMode } from "./engine.js";
+import { getDotDir, getPerformer } from "./registry.js";
+import { compileContext, CompiledContext, determinePerformerMode } from "./engine.js";
 import { readAgentManifest } from "./agents.js";
 import { assertPathInside, assertSafeRunId } from "./identifiers.js";
 
-// V3 Run State — explicit combo resolution
+// V3 Run State — explicit performer resolution
 
 export interface RunState {
     runId: string;
-    resolvedComboName: string;    // The combo actually bound to this run
+    resolvedPerformerName: string;    // The performer actually bound to this run
     agentName?: string;           // If resolved via agents.json
-    mode: "tal-only" | "dance-only" | "combo" | "act";
-    actUrn?: string;
+    mode: "tal-only" | "dance-only" | "performer";
     status: "initialized" | "running" | "completed" | "failed";
     createdAt: string;
     updatedAt: string;
@@ -32,16 +31,16 @@ export function getRunDir(cwd: string, runId: string): string {
 }
 
 /**
- * Resolves the combo name from either comboName or agentName.
- * Priority: comboName > agentName (via agents.json lookup).
+ * Resolves the performer name from either performerName or agentName.
+ * Priority: performerName > agentName (via agents.json lookup).
  */
-export async function resolveComboName(
+export async function resolvePerformerName(
     cwd: string,
-    comboName?: string,
+    performerName?: string,
     agentName?: string
-): Promise<{ resolvedComboName: string; agentName?: string }> {
-    if (comboName) {
-        return { resolvedComboName: comboName };
+): Promise<{ resolvedPerformerName: string; agentName?: string }> {
+    if (performerName) {
+        return { resolvedPerformerName: performerName };
     }
 
     if (agentName) {
@@ -53,15 +52,15 @@ export async function resolveComboName(
                 `Agent '${agentName}' not found in agents.json.` +
                 (available.length > 0
                     ? `\n  Available agents: ${available.join(", ")}`
-                    : `\n  No agents defined. Use 'dot agents set --agent <name> --combo <comboName>' to add one.`)
+                    : `\n  No agents defined. Use 'dot agents set --agent <name> --performer <performerName>' to add one.`)
             );
         }
-        return { resolvedComboName: mapped, agentName };
+        return { resolvedPerformerName: mapped, agentName };
     }
 
     throw new Error(
-        "Either 'comboName' or 'agentName' must be provided.\n" +
-        "  comboName: direct combo name (e.g. 'sprint')\n" +
+        "Either 'performerName' or 'agentName' must be provided.\n" +
+        "  performerName: direct performer name (e.g. 'sprint')\n" +
         "  agentName: agent name mapped in agents.json (e.g. 'reviewer')"
     );
 }
@@ -72,34 +71,33 @@ export async function resolveComboName(
 export async function initRun(
     cwd: string,
     runId: string,
-    comboName?: string,
+    performerName?: string,
     agentName?: string
 ): Promise<RunState> {
-    const { resolvedComboName, agentName: resolvedAgent } =
-        await resolveComboName(cwd, comboName, agentName);
+    const { resolvedPerformerName, agentName: resolvedAgent } =
+        await resolvePerformerName(cwd, performerName, agentName);
 
-    const combo = await getCombo(cwd, resolvedComboName);
-    if (!combo) {
+    const performer = await getPerformer(cwd, resolvedPerformerName);
+    if (!performer) {
         throw new Error(
-            `Combo '${resolvedComboName}' not found. Call list_combos or get_project_status to see available options.`
+            `Performer '${resolvedPerformerName}' not found locally. Ensure the lockfile exists under .dance-of-tal/performer/.`
         );
     }
 
-    const mode = determineComboMode(combo);
+    const mode = determinePerformerMode(performer);
 
     const runDir = getRunDir(cwd, runId);
     await fs.mkdir(runDir, { recursive: true });
 
     const state: RunState = {
         runId,
-        resolvedComboName,
+        resolvedPerformerName,
         ...(resolvedAgent ? { agentName: resolvedAgent } : {}),
         mode,
-        ...(combo.act ? { actUrn: combo.act } : {}),
         status: "initialized",
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
-        logs: [`Run initialized: combo=${resolvedComboName}, mode=${mode}${resolvedAgent ? `, agent=${resolvedAgent}` : ""}`],
+        logs: [`Run initialized: performer=${resolvedPerformerName}, mode=${mode}${resolvedAgent ? `, agent=${resolvedAgent}` : ""}`],
     };
 
     await saveRunState(cwd, state);
@@ -150,12 +148,12 @@ export async function startRunContext(cwd: string, runId: string, taskContext: s
         throw new Error(`Run ${runId} not found. Please initialize it first.`);
     }
 
-    const combo = await getCombo(cwd, state.resolvedComboName);
-    if (!combo) {
-        throw new Error(`Combo '${state.resolvedComboName}' not found in registry.`);
+    const performer = await getPerformer(cwd, state.resolvedPerformerName);
+    if (!performer) {
+        throw new Error(`Performer '${state.resolvedPerformerName}' not found in registry.`);
     }
 
-    const compiled = await compileContext(combo, taskContext, cwd);
+    const compiled = await compileContext(performer, taskContext, cwd);
 
     state.status = "running";
     state.context = compiled;
@@ -164,4 +162,3 @@ export async function startRunContext(cwd: string, runId: string, taskContext: s
     await saveRunState(cwd, state);
     return compiled;
 }
-

@@ -1,11 +1,11 @@
 import { Command } from "commander";
 import { ui } from "../utils/ui.js";
 import { getAuthUser } from "./login.js";
-import { getCombo, assetFilePath } from "../../lib/registry.js";
+import { getPerformer, assetFilePath } from "../../lib/registry.js";
 import fs from "fs/promises";
 import { ASSET_KINDS, isAssetKind } from "../../lib/kinds.js";
 
-const REGISTRY_URL = process.env.DOT_REGISTRY_URL || "https://registry.dance-of-tal-v2.workers.dev";
+const REGISTRY_URL = process.env.DOT_REGISTRY_URL || "https://registry.dance-of-tal.workers.dev";
 const ASSET_KIND_HELP = ASSET_KINDS.join(", ");
 
 /**
@@ -47,7 +47,7 @@ async function loadLocalAsset(
 }
 
 export const publishCmd = new Command("publish")
-    .description("Publish a Type-Safe Dance of Tal asset or combo to the remote registry")
+    .description("Publish a Type-Safe Dance of Tal asset or performer to the remote registry")
     .requiredOption("--kind <kind>", `The type of asset: ${ASSET_KIND_HELP}`)
     .requiredOption(
         "--name <name>",
@@ -72,14 +72,14 @@ export const publishCmd = new Command("publish")
             let payload: Record<string, unknown>;
 
             // 2. Load the actual content to publish
-            if (options.kind === "combo") {
-                // Combo name is always a plain slug (no author prefix)
+            if (options.kind === "performer") {
+                // Performer name is always a plain slug (no author prefix)
                 const slug = options.name.includes("/") ? options.name.split("/").pop()! : options.name;
-                const combo = await getCombo(cwd, slug);
-                if (!combo) {
-                    throw new Error(`Combo '${slug}' not found locally. Did you run 'dot lock'?`);
+                const performer = await getPerformer(cwd, slug);
+                if (!performer) {
+                    throw new Error(`Performer '${slug}' not found locally. Did you run 'dot lock'?`);
                 }
-                payload = combo as unknown as Record<string, unknown>;
+                payload = performer as unknown as Record<string, unknown>;
             } else {
                 payload = await loadLocalAsset(cwd, options.kind, options.name, auth.username);
             }

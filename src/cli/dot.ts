@@ -21,7 +21,7 @@ const program = new Command();
 program
   .name("dot")
   .description("Dance of Tal — Agent Manager for Agentic AI")
-  .version("2.2.0")
+  .version("3.0.0")
   .hook("postAction", async () => {
     await checkForUpdates();
   });
@@ -40,8 +40,8 @@ program
 
 program
   .command("install <package>")
-  .description("Install a Tal, Dance, Act, or Combo (e.g. dot install combo/@acme/pr-review)")
-  .option("--no-lock", "Skip auto-locking when installing a combo")
+  .description("Install a Tal, Dance, Act, or Performer (e.g. dot install performer/@acme/pr-review)")
+  .option("--no-lock", "Skip auto-locking when installing a performer")
   .action(async (pkg: string, options) => {
     try {
       await runInstall(pkg, options);

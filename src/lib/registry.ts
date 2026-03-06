@@ -3,8 +3,9 @@ import path from "path";
 import {
     assertPathInside,
     assertSafeAssetUrn,
-    assertSafeComboName,
+    assertSafePerformerName,
 } from "./identifiers.js";
+import { Performer } from "../data/types.js";
 
 /**
  * Returns the root `.dance-of-tal` directory for the active project.
@@ -39,58 +40,51 @@ export function assetFilePath(cwd: string, urn: string): string {
  */
 export async function initRegistry(cwd: string = process.cwd()): Promise<void> {
     const dotDir = getDotDir(cwd);
-    const combosDir = path.join(dotDir, "combo");
+    const performersDir = path.join(dotDir, "performer");
     const runsDir = path.join(dotDir, "runs");
 
     await fs.mkdir(dotDir, { recursive: true });
-    await fs.mkdir(combosDir, { recursive: true });
+    await fs.mkdir(performersDir, { recursive: true });
     await fs.mkdir(runsDir, { recursive: true });
 }
 
-export type Combo = {
-    tal?: string;              // Optional — dance-only combo possible
-    dance?: string | string[]; // Optional — tal-only combo possible
-    act?: string;              // Optional Act URN — act/@author/name
-    // Rule: at least one of tal or dance must be present (enforced at runtime)
-};
-
-export type LockedComboNameList = {
+export type LockedPerformerNameList = {
     names: string[];
     skipped: Array<{ file: string; reason: string }>;
 };
 
 /**
- * Locks a Combo to disk.
- * File: .dance-of-tal/combo/<name>.json
+ * Locks a Performer to disk.
+ * File: .dance-of-tal/performer/<name>.json
  */
-export async function lockCombo(
+export async function lockPerformer(
     cwd: string,
     name: string,
-    combo: Combo
+    performer: Performer
 ): Promise<void> {
-    assertSafeComboName(name);
-    const combosDir = path.resolve(getDotDir(cwd), "combo");
-    await fs.mkdir(combosDir, { recursive: true });
-    const filepath = path.resolve(combosDir, `${name}.json`);
-    assertPathInside(combosDir, filepath, "combo");
-    await fs.writeFile(filepath, JSON.stringify(combo, null, 2), "utf-8");
+    assertSafePerformerName(name);
+    const performersDir = path.resolve(getDotDir(cwd), "performer");
+    await fs.mkdir(performersDir, { recursive: true });
+    const filepath = path.resolve(performersDir, `${name}.json`);
+    assertPathInside(performersDir, filepath, "performer");
+    await fs.writeFile(filepath, JSON.stringify(performer, null, 2), "utf-8");
 }
 
 /**
- * Loads a locked Combo from disk.
- * Returns null if the combo does not exist.
+ * Loads a locked Performer from disk.
+ * Returns null if the performer does not exist.
  */
-export async function getCombo(
+export async function getPerformer(
     cwd: string,
     name: string
-): Promise<Combo | null> {
-    assertSafeComboName(name);
-    const combosDir = path.resolve(getDotDir(cwd), "combo");
-    const filepath = path.resolve(combosDir, `${name}.json`);
-    assertPathInside(combosDir, filepath, "combo");
+): Promise<Performer | null> {
+    assertSafePerformerName(name);
+    const performersDir = path.resolve(getDotDir(cwd), "performer");
+    const filepath = path.resolve(performersDir, `${name}.json`);
+    assertPathInside(performersDir, filepath, "performer");
     try {
         const raw = await fs.readFile(filepath, "utf-8");
-        return JSON.parse(raw) as Combo;
+        return JSON.parse(raw) as Performer;
     } catch (err: any) {
         if (err.code === "ENOENT") return null;
         throw err;
@@ -98,15 +92,15 @@ export async function getCombo(
 }
 
 /**
- * Lists top-level locked combo files from `.dance-of-tal/combo/*.json`.
+ * Lists top-level locked performer files from `.dance-of-tal/performer/*.json`.
  * Invalid filenames are skipped and returned as warnings.
  */
-export async function listLockedComboNames(cwd: string): Promise<LockedComboNameList> {
-    const combosDir = path.resolve(getDotDir(cwd), "combo");
+export async function listLockedPerformerNames(cwd: string): Promise<LockedPerformerNameList> {
+    const performersDir = path.resolve(getDotDir(cwd), "performer");
 
     let entries: Array<{ name: string; isFile: () => boolean }>;
     try {
-        entries = await fs.readdir(combosDir, { withFileTypes: true });
+        entries = await fs.readdir(performersDir, { withFileTypes: true });
     } catch (err: any) {
         if (err.code === "ENOENT") return { names: [], skipped: [] };
         throw err;
@@ -120,7 +114,7 @@ export async function listLockedComboNames(cwd: string): Promise<LockedComboName
 
         const name = entry.name.replace(/\.json$/, "");
         try {
-            assertSafeComboName(name);
+            assertSafePerformerName(name);
             names.push(name);
         } catch (err: any) {
             skipped.push({ file: entry.name, reason: err.message });

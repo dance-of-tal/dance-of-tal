@@ -3,7 +3,7 @@ import { ui } from "../utils/ui.js";
 import { getAuthUser } from "./login.js";
 import { ASSET_KINDS, isAssetKind } from "../../lib/kinds.js";
 
-const REGISTRY_URL = process.env.DOT_REGISTRY_URL || "https://registry.dance-of-tal-v2.workers.dev";
+const REGISTRY_URL = process.env.DOT_REGISTRY_URL || "https://registry.dance-of-tal.workers.dev";
 const ASSET_KIND_HELP = ASSET_KINDS.join(" | ");
 
 interface PackageMeta {

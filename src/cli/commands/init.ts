@@ -7,7 +7,7 @@ export async function runInit() {
     try {
         await initRegistry(process.cwd());
         console.log(ui.success("Created workspace directory structure:"));
-        console.log(ui.dim("  .dance-of-tal/combo/    ← locked Combo files"));
+        console.log(ui.dim("  .dance-of-tal/performer/    ← locked Performer files"));
         console.log(ui.dim("  .dance-of-tal/runs/     ← isolated agent run sandboxes"));
         console.log(ui.dim("  (assets saved to tal/@author/name.json on dot install)"));
     } catch (err: any) {
@@ -15,5 +15,5 @@ export async function runInit() {
     }
 
     console.log(ui.success("\nDOT setup complete!"));
-    console.log(ui.dim("    Next: dot install combo/@<author>/<name>"));
+    console.log(ui.dim("    Next: dot install performer/@<author>/<name>"));
 }

@@ -7,11 +7,12 @@
  */
 import fs from "fs";
 import path from "path";
-import { getDotDir, assetFilePath, lockCombo, type Combo } from "./registry.js";
+import { getDotDir, assetFilePath, lockPerformer } from "./registry.js";
+import { Performer } from "../data/types.js";
 import { isAssetKind } from "./kinds.js";
 
 const REGISTRY_URL =
-    process.env.DOT_REGISTRY_URL || "https://registry.dance-of-tal-v2.workers.dev";
+    process.env.DOT_REGISTRY_URL || "https://registry.dance-of-tal.workers.dev";
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
@@ -21,8 +22,8 @@ export interface InstalledAsset {
     skipped: boolean; // true = already existed
 }
 
-export interface InstallComboResult {
-    comboUrn: string;
+export interface InstallPerformerResult {
+    performerUrn: string;
     localName: string;
     lockfilePath: string;
     installedAssets: InstalledAsset[];
@@ -49,7 +50,7 @@ export async function installAsset(
 
     const [kind] = parts;
     if (!isAssetKind(kind)) {
-        throw new Error(`Invalid kind: '${kind}'. Allowed: tal, dance, act, combo`);
+        throw new Error(`Invalid kind: '${kind}'. Allowed: tal, dance, act, performer`);
     }
 
     const dotDir = getDotDir(cwd);
@@ -82,24 +83,24 @@ export async function installAsset(
     return { urn, filePath, skipped: false };
 }
 
-// ── Cascading combo install ────────────────────────────────────────────────
+// ── Cascading performer install ────────────────────────────────────────────────
 
 /**
- * Installs a combo and ALL its dependencies (tal, dance[], act?),
- * then auto-locks the combo file.
+ * Installs a performer and ALL its dependencies (tal, dance[], model?),
+ * then auto-locks the performer file.
  *
- * Returns { comboUrn, localName, lockfilePath, installedAssets }.
+ * Returns { performerUrn, localName, lockfilePath, installedAssets }.
  */
-export async function installComboAndLock(
+export async function installPerformerAndLock(
     cwd: string,
-    comboUrn: string,
+    performerUrn: string,
     localName?: string,
     force = false
-): Promise<InstallComboResult> {
-    const parts = comboUrn.split("/");
-    if (parts.length !== 3 || parts[0] !== "combo" || !parts[1].startsWith("@")) {
+): Promise<InstallPerformerResult> {
+    const parts = performerUrn.split("/");
+    if (parts.length !== 3 || parts[0] !== "performer" || !parts[1].startsWith("@")) {
         throw new Error(
-            `Invalid combo URN: '${comboUrn}'. Expected: combo/@<author>/<name>`
+            `Invalid performer URN: '${performerUrn}'. Expected: performer/@<author>/<name>`
         );
     }
 
@@ -107,12 +108,12 @@ export async function installComboAndLock(
     const name = localName ?? slug;
     const installed: InstalledAsset[] = [];
 
-    // 1. Fetch and save the combo asset itself
-    const comboAsset = await installAsset(cwd, comboUrn, force);
-    installed.push(comboAsset);
+    // 1. Fetch and save the performer asset itself
+    const performerAsset = await installAsset(cwd, performerUrn, force);
+    installed.push(performerAsset);
 
-    // 2. Read the combo content to discover dependencies
-    const filePath = assetFilePath(cwd, comboUrn);
+    // 2. Read the performer content to discover dependencies
+    const filePath = assetFilePath(cwd, performerUrn);
     const content = JSON.parse(fs.readFileSync(filePath, "utf-8")) as Record<string, unknown>;
 
     // 3. Install tal (if present)
@@ -132,23 +133,24 @@ export async function installComboAndLock(
         installed.push(await installAsset(cwd, danceUrn, force));
     }
 
-    // 5. Install act (if present)
-    const actUrn = typeof content.act === "string" ? content.act : null;
-    if (actUrn) {
-        installed.push(await installAsset(cwd, actUrn, force));
-    }
+    // 5. Model (no file to install, just preserved)
+    const modelStr = typeof content.model === "string" ? content.model : null;
 
-    // 6. Auto-lock the combo
-    const combo: Combo = {
+    // 6. MCP Config (no file to install, just preserved)
+    const mcpConfig = typeof content.mcp_config === "object" && content.mcp_config !== null ? content.mcp_config : null;
+
+    // 7. Auto-lock the performer
+    const performer: Performer = {
         ...(talUrn ? { tal: talUrn } : {}),
         ...(danceUrns.length > 0 ? { dance: danceUrns.length === 1 ? danceUrns[0] : danceUrns } : {}),
-        ...(actUrn ? { act: actUrn } : {}),
-    };
-    await lockCombo(cwd, name, combo);
+        ...(modelStr ? { model: modelStr } : {}),
+        ...(mcpConfig ? { mcp_config: mcpConfig } : {}),
+    } as Performer;
+    await lockPerformer(cwd, name, performer);
 
-    const lockfilePath = path.resolve(getDotDir(cwd), "combo", `${name}.json`);
+    const lockfilePath = path.resolve(getDotDir(cwd), "performer", `${name}.json`);
 
-    return { comboUrn, localName: name, lockfilePath, installedAssets: installed };
+    return { performerUrn, localName: name, lockfilePath, installedAssets: installed };
 }
 
 // ── Search ─────────────────────────────────────────────────────────────────

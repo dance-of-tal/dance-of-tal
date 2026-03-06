@@ -119,11 +119,11 @@ export const createCmd = new Command("create")
             console.log(ui.dim(`    dot publish --kind ${typedKind} --name ${slug}`));
 
             if (typedKind === "tal" || typedKind === "dance") {
-                console.log(ui.dim(`\n  Or lock a combo immediately:`));
+                console.log(ui.dim(`\n  Or lock a performer immediately:`));
                 if (typedKind === "tal") {
-                    console.log(ui.dim(`    dot lock --name my-combo --tal ${urn} --dance dance/@<author>/<slug>`));
+                    console.log(ui.dim(`    dot lock --name my-performer --tal ${urn} --dance dance/@<author>/<slug>`));
                 } else {
-                    console.log(ui.dim(`    dot lock --name my-combo --tal tal/@<author>/<slug> --dance ${urn}`));
+                    console.log(ui.dim(`    dot lock --name my-performer --tal tal/@<author>/<slug> --dance ${urn}`));
                 }
             }
         } catch (err: any) {

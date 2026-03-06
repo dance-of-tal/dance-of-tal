@@ -2,16 +2,16 @@ import { Command } from "commander";
 import { ui } from "../utils/ui.js";
 import { runInit } from "./init.js";
 import { runInstall } from "./install.js";
-import { lockCombo, assetFilePath, getDotDir } from "../../lib/registry.js";
+import { lockPerformer, assetFilePath, getDotDir } from "../../lib/registry.js";
 import { existsSync } from "fs";
 import fs from "fs/promises";
 import { exec } from "child_process";
 
 export const launchCmd = new Command("launch")
-    .description("Launch a combo or act in an IDE (e.g. dot launch act/@acme/incident-response --editor cursor)")
+    .description("Launch a performer or act in an IDE (e.g. dot launch act/@acme/incident-response --editor cursor)")
     .argument("<urn>", "Full URN (e.g. act/@acme/incident-response)")
     .option("--editor <editor>", "IDE to open: cursor, windsurf, code, codex, openclaw, opencode, claude", "cursor")
-    .option("--name <alias>", "Local combo name to lock as (defaults to the asset slug)")
+    .option("--name <alias>", "Local performer name to lock as (defaults to the asset slug)")
 
     .action(async (urn: string, options) => {
         console.log("\n" + ui.title(`Launching ${urn} in ${options.editor}`));
@@ -40,56 +40,57 @@ export const launchCmd = new Command("launch")
             await runInstall(urn, { lock: false });
 
             // ── Step 3: Lock & Switch ─────────────────────────────────────
-            console.log(ui.dim(`\nLocking local combo as: ${localName}…`));
+            console.log(ui.dim(`\nLocking local performer as: ${localName}…`));
 
 
 
-            if (kind === "combo") {
-                // If it's a combo, just lock its contents under the localName
+            if (kind === "performer") {
+                // If it's a performer, just lock its contents under the localName
                 const filePath = assetFilePath(cwd, urn);
                 const raw = await fs.readFile(filePath, "utf-8");
                 const content = JSON.parse(raw);
-                await lockCombo(cwd, localName, {
+                await lockPerformer(cwd, localName, {
                     tal: content.tal,
                     dance: content.dance,
-                    act: content.act
-                });
+                    model: content.model,
+                    mcp_config: content.mcp_config
+                } as any);
             } else if (kind === "act") {
-                // If it's an act, lock a dedicated combo to play this act
+                // If it's an act, lock a dedicated performer to play this act
                 const filePath = assetFilePath(cwd, urn);
                 const raw = await fs.readFile(filePath, "utf-8");
                 const content = JSON.parse(raw);
 
-                // Extract tal/dance from the act's start node
-                const nodes = content.nodes || {};
-                const startNodes = Object.entries(nodes);
-                if (startNodes.length === 0) {
-                    throw new Error(`Act '${urn}' has no nodes defined.`);
+                // Extract tal/dance from the act's start performer
+                const performers = content.performers || {};
+                const startPerformers = Object.entries(performers);
+                if (startPerformers.length === 0) {
+                    throw new Error(`Act '${urn}' has no performers defined.`);
                 }
-                // Pick the first node listed (or could analyze edges to find real root)
-                const [, firstNodeParams] = startNodes[0];
-                const nodeParams = firstNodeParams as { tal: string; dance?: string | string[] };
+                // Pick the first performer listed (or could analyze edges to find real root)
+                const [, firstPerformerParams] = startPerformers[0];
+                const performerParams = firstPerformerParams as { tal: string; dance?: string | string[]; model?: string };
 
-                const danceUrns = nodeParams.dance
-                    ? (Array.isArray(nodeParams.dance) ? nodeParams.dance : [nodeParams.dance])
+                const danceUrns = performerParams.dance
+                    ? (Array.isArray(performerParams.dance) ? performerParams.dance : [performerParams.dance])
                     : [];
 
-                await lockCombo(cwd, localName, {
-                    act: urn,
-                    ...(nodeParams.tal ? { tal: nodeParams.tal } : {}),
-                    ...(nodeParams.dance ? { dance: nodeParams.dance } : {}),
-                });
+                await lockPerformer(cwd, localName, {
+                    ...(performerParams.tal ? { tal: performerParams.tal } : {}),
+                    ...(performerParams.dance ? { dance: performerParams.dance } : {}),
+                    ...(performerParams.model ? { model: performerParams.model } : {}),
+                } as any);
             } else if (kind === "tal" || kind === "dance") {
                 // If it's just a single tal or dance, we lock it with a generic partner just to launch
-                throw new Error(`Launching bare ${kind} is not supported. Use an 'act' or 'combo' URN.`);
+                throw new Error(`Launching bare ${kind} is not supported. Use an 'act' or 'performer' URN.`);
             } else {
                 throw new Error(`Unknown kind: ${kind}`);
             }
 
-            // switch removed — no more activeCombo. Lockfile is enough.
+            // switch removed — no more activePerformer. Lockfile is enough.
 
             // ── Step 4: Launch IDE ────────────────────────────────────────
-            console.log(ui.success(`\n✔ Ready! Active combo: ${localName}`));
+            console.log(ui.success(`\n✔ Ready! Active performer: ${localName}`));
             console.log(ui.dim(`Launching ${options.editor}...`));
 
             const launchCommand = `${options.editor} .`;

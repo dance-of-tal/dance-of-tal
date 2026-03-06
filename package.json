@@ -1,6 +1,6 @@
 {
   "name": "dance-of-tal",
-  "version": "2.2.3",
+  "version": "3.0.0",
   "description": "Dance of Tal — Agent Manager for Agentic AI. MCP server and CLI for managing AI agent personas, rules, and workflows.",
   "license": "MIT",
   "author": "monarchjuno",
@@ -26,13 +26,19 @@
     "prompt-engineering"
   ],
   "type": "module",
+  "exports": {
+    ".": "./dist/server/index.js",
+    "./lib/engine": "./dist/lib/engine.js",
+    "./lib/registry": "./dist/lib/registry.js",
+    "./data/types": "./dist/data/types.js"
+  },
   "bin": {
     "dance-of-tal": "dist/server/index.js",
     "dot": "dist/cli/dot.js"
   },
   "scripts": {
     "dev": "tsx src/server/index.ts",
-    "build": "tsup src/server/index.ts src/cli/dot.ts --format esm --out-dir dist --clean",
+    "build": "tsup src/server/index.ts src/cli/dot.ts src/lib/engine.ts src/lib/registry.ts src/data/types.ts --format esm --out-dir dist --dts --clean",
     "release": "npm run build && npm publish",
     "test": "vitest run",
     "lint": "eslint 'src/**/*.{ts,tsx}'",

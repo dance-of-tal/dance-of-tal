@@ -17,18 +17,18 @@ export const ui = {
 export const printUsage = () => {
     const commandRows: Array<[string, string]> = [
         ["dot init", "Initialize .dance-of-tal workspace"],
-        ["dot install <urn>", "Install tal|dance|act|combo asset from registry"],
-        ["dot use combo/@author/name", "Install + lock + switch combo in one step"],
-        ["dot lock --name <n> --tal ... --dance ...", "Create local combo lockfile"],
-        ["dot switch <comboName>", "Switch active combo"],
-        ["dot compile <comboName>", "Validate combo asset existence and URN format"],
-        ["dot run <comboName> --task \"...\"", "Compile and print system prompt payload"],
-        ["dot launch <urn> --editor cursor|windsurf|code|codex|openclaw|opencode|claude", "Install and open IDE with active combo"],
+        ["dot install <urn>", "Install tal|dance|act|performer asset from registry"],
+        ["dot use performer/@author/name", "Install + lock + switch performer in one step"],
+        ["dot lock --name <n> --tal ... --dance ...", "Create local performer lockfile"],
+        ["dot switch <performerName>", "Switch active performer"],
+        ["dot compile <performerName>", "Validate performer asset existence and URN format"],
+        ["dot run <performerName> --task \"...\"", "Compile and print system prompt payload"],
+        ["dot launch <urn> --editor cursor|windsurf|code|codex|openclaw|opencode|claude", "Install and open IDE with active performer"],
         ["dot create --kind tal|dance|act --name <slug>", "Create local asset template"],
-        ["dot publish --kind ... --name ...", "Publish local asset/combo to registry"],
+        ["dot publish --kind ... --name ...", "Publish local asset/performer to registry"],
         ["dot search <keyword>", "Search registry packages"],
         ["dot list [--kind ...] [--mine]", "List registry packages"],
-        ["dot agents set|list|remove", "Manage role -> combo mappings in agents.json"],
+        ["dot agents set|list|remove", "Manage role -> performer mappings in agents.json"],
         ["dot login", "Authenticate with GitHub for publish operations"]
     ];
 
@@ -42,11 +42,11 @@ export const printUsage = () => {
             ui.dim("================"),
             "",
             ui.section("Purpose"),
-            "  Build and activate reproducible Tal + Dance combos for MCP/CLI workflows.",
+            "  Build and activate reproducible Tal + Dance performers for MCP/CLI workflows.",
             "",
             ui.section("Quick Start"),
             `  1) ${ui.command("dot init")}`,
-            `  2) ${ui.command("dot use combo/@acme/pr-review --name pr-review")}`,
+            `  2) ${ui.command("dot use performer/@acme/pr-review --name pr-review")}`,
             `  3) ${ui.command('dot run pr-review --task "Review my API design"')}`,
             "",
             ui.section("Commands"),
@@ -59,8 +59,8 @@ export const printUsage = () => {
             `  ${ui.command('dot run sprint --task "Implement OAuth callback endpoint"')}`,
             "",
             ui.section("Project Config"),
-            "  Active combo: .dance-of-tal/combo.config.json",
-            "  Combos:       .dance-of-tal/combo/<name>.json",
+            "  Active performer: .dance-of-tal/performer.config.json",
+            "  Performers:       .dance-of-tal/performer/<name>.json",
             "  Runs:         .dance-of-tal/runs/<runId>/state.json",
             ""
         ].join("\n")

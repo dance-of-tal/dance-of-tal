@@ -2,7 +2,7 @@ import fs from "fs/promises";
 import os from "os";
 import path from "path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { assetFilePath, lockCombo } from "./registry.js";
+import { assetFilePath, lockPerformer } from "./registry.js";
 import { clearRun, getRunDir, getRunState, initRun, startRunContext } from "./runs.js";
 
 async function writeJson(filePath: string, data: unknown): Promise<void> {
@@ -26,18 +26,18 @@ describe("runs safety and context compilation", () => {
   });
 
   it("initializes and clears run state safely", async () => {
-    // V3: initRun now validates combo exists
+    // V3: initRun now validates performer exists
     const { initRegistry } = await import("./registry.js");
     await initRegistry(cwd);
-    await lockCombo(cwd, "sprint", {
+    await lockPerformer(cwd, "sprint", {
       tal: "tal/@test/persona",
       dance: "dance/@test/rules",
-    });
+    } as any);
 
     await initRun(cwd, "run-1", "sprint");
     const state = await getRunState(cwd, "run-1");
     expect(state?.status).toBe("initialized");
-    expect(state?.resolvedComboName).toBe("sprint");
+    expect(state?.resolvedPerformerName).toBe("sprint");
     expect(state?.mode).toBeDefined();
 
     await clearRun(cwd, "run-1");
@@ -75,11 +75,11 @@ describe("runs safety and context compilation", () => {
       steps: ["triage", "hotfix", "postmortem"],
     });
 
-    await lockCombo(cwd, "incident", {
+    await lockPerformer(cwd, "incident", {
       tal: "tal/@acme/system-architect",
       dance: "dance/@acme/json-structure",
       act: "act/@acme/incident-response",
-    });
+    } as any);
 
     await initRun(cwd, "run-incident", "incident");
     const compiled = await startRunContext(cwd, "run-incident", "Handle P0 outage");
