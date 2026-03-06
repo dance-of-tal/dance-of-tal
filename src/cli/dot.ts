@@ -4,9 +4,7 @@ import { ui } from "./utils/ui.js";
 
 import { runInit } from "./commands/init.js";
 import { runInstall } from "./commands/install.js";
-import { lockCmd } from "./commands/lock.js";
-import { compileCmd } from "./commands/compile.js";
-import { runCmd } from "./commands/run.js";
+
 import { publishCmd } from "./commands/publish.js";
 import { loginCmd } from "./commands/login.js";
 import { agentsCmd } from "./commands/agents.js";
@@ -14,14 +12,14 @@ import { searchCmd } from "./commands/search.js";
 import { listCmd } from "./commands/list.js";
 import { createCmd } from "./commands/create.js";
 import { checkForUpdates } from "./utils/update-check.js";
-import { launchCmd } from "./commands/launch.js";
+
 
 const program = new Command();
 
 program
   .name("dot")
   .description("Dance of Tal — Agent Manager for Agentic AI")
-  .version("3.0.0")
+  .version("3.1.0")
   .hook("postAction", async () => {
     await checkForUpdates();
   });
@@ -42,6 +40,7 @@ program
   .command("install <package>")
   .description("Install a Tal, Dance, Act, or Performer (e.g. dot install performer/@acme/pr-review)")
   .option("--no-lock", "Skip auto-locking when installing a performer")
+  .option("-g, --global", "Install to global ~/.dance-of-tal instead of project-local")
   .action(async (pkg: string, options) => {
     try {
       await runInstall(pkg, options);
@@ -51,15 +50,13 @@ program
     }
   });
 
-program.addCommand(lockCmd);
-program.addCommand(compileCmd);
-program.addCommand(runCmd);
+
 program.addCommand(publishCmd);
 program.addCommand(loginCmd);
 program.addCommand(agentsCmd);
 program.addCommand(searchCmd);
 program.addCommand(listCmd);
 program.addCommand(createCmd);
-program.addCommand(launchCmd);
+
 
 program.parse(process.argv);

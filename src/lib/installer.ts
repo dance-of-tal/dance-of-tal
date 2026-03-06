@@ -7,7 +7,7 @@
  */
 import fs from "fs";
 import path from "path";
-import { getDotDir, assetFilePath, lockPerformer } from "./registry.js";
+import { getDotDir, assetFilePath, lockPerformer, ensureDotDir } from "./registry.js";
 import { Performer } from "../data/types.js";
 import { isAssetKind } from "./kinds.js";
 
@@ -53,12 +53,8 @@ export async function installAsset(
         throw new Error(`Invalid kind: '${kind}'. Allowed: tal, dance, act, performer`);
     }
 
-    const dotDir = getDotDir(cwd);
-    if (!fs.existsSync(dotDir)) {
-        throw new Error(
-            "Workspace not initialised. Run 'dot init' or use the setup_workspace MCP tool first."
-        );
-    }
+    // Auto-init workspace if missing (supports both local and global installs)
+    await ensureDotDir(cwd);
 
     const filePath = assetFilePath(cwd, urn);
 
@@ -153,25 +149,28 @@ export async function installPerformerAndLock(
     return { performerUrn, localName: name, lockfilePath, installedAssets: installed };
 }
 
-// ── Search ─────────────────────────────────────────────────────────────────
+// ── Registry API ──────────────────────────────────────────────────────────
 
-export interface RegistrySearchResult {
+export interface RegistryPackageMeta {
+    urn: string;
     kind: string;
     name: string;
     author: string;
     slug: string;
+    version: string;
     description: string;
     tags: string[];
     downloads?: number;
+    updatedAt?: string;
 }
 
 /**
- * Searches the registry. Returns matching assets.
+ * Searches the registry with a keyword query. Returns matching assets.
  */
 export async function searchRegistry(
     query: string,
     options?: { kind?: string; limit?: number }
-): Promise<RegistrySearchResult[]> {
+): Promise<RegistryPackageMeta[]> {
     const params = new URLSearchParams();
     if (query) params.set("q", query);
     if (options?.kind) params.set("kind", options.kind);
@@ -184,13 +183,45 @@ export async function searchRegistry(
     const data = (await res.json()) as any;
     const packages = data.packages ?? data.results ?? [];
 
-    return packages.map((pkg: any) => ({
+    return normalisePackages(packages);
+}
+
+/**
+ * Lists all packages from the registry, optionally filtered by kind.
+ * Returns all packages for the given kinds.
+ */
+export async function listRegistryPackages(
+    options?: { kinds?: string[]; }
+): Promise<RegistryPackageMeta[]> {
+    const kinds = options?.kinds ?? ["tal", "dance", "act", "performer"];
+    const allPackages: RegistryPackageMeta[] = [];
+
+    await Promise.all(
+        kinds.map(async (kind) => {
+            const url = `${REGISTRY_URL}/registry?kind=${kind}`;
+            const res = await fetch(url);
+            if (!res.ok) throw new Error(`Registry error for kind '${kind}': ${res.statusText}`);
+            const data = (await res.json()) as any;
+            const packages = data.packages ?? data.results ?? [];
+            allPackages.push(...normalisePackages(packages));
+        })
+    );
+
+    return allPackages;
+}
+
+function normalisePackages(packages: any[]): RegistryPackageMeta[] {
+    return packages.filter(Boolean).map((pkg: any) => ({
+        urn: pkg.urn ?? `${pkg.kind ?? pkg.type ?? ""}/@${pkg.author ?? ""}/${pkg.slug ?? pkg.name ?? ""}`,
         kind: pkg.kind ?? pkg.type ?? "",
         name: pkg.name ?? "",
         author: pkg.author ?? "",
         slug: pkg.slug ?? pkg.name ?? "",
+        version: pkg.version ?? "",
         description: pkg.description ?? "",
         tags: pkg.tags ?? [],
         downloads: pkg.downloads,
+        updatedAt: pkg.updatedAt,
     }));
 }
+

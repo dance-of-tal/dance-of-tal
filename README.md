@@ -30,10 +30,10 @@ Modern AI-powered development relies on system prompts that have quietly grown i
 
 Picture a newly onboarded senior engineer at your company.
 
-- Their **Tal** is their _professional mindset_ — the thinking framework your company expects. Do they prioritise correctness or delivery speed? Do they design for GDPR compliance by default? This is the **who** of the AI.
-- Their **Dance** is their _working methodology_ — the rules they follow on every task. Always write tests first. Always output structured JSON. Always flag security implications. This is the **how** of the AI.
+- Their **Tal** is their _professional identity and core rules_ — the thinking framework, role, tone, and non-negotiable rules your company expects. Do they prioritise correctness or delivery speed? Do they design for GDPR compliance by default? This is the **who + always-on rules** of the AI — always applied as the system prompt.
+- Their **Dance** is their _skill repertoire_ — techniques they can invoke when needed. Run a security audit. Generate a test suite. Produce structured JSON output. This is the **what the AI can do on-demand**. Only the Dance `description` is included in the prompt; the full `content` is loaded via MCP tool when the Performer needs it.
 - A **Performer** locks a Tal + one or more Dances together — a frozen, versioned snapshot that everyone on the team installs.
-- An **Act** _(advanced, experimental)_ is a _context router_ — a DAG that switches AI persona and rules based on runtime conditions (e.g. normal sprint → incident response mode). Most workflows are handled by Dance Skills; Act is for multi-phase orchestration where the AI's entire identity changes.
+- An **Act** _(advanced, experimental)_ is a _context router_ — a DAG that switches AI persona and rules based on runtime conditions (e.g. normal sprint → incident response mode). Act is for multi-phase orchestration where the AI's entire identity changes.
 
 ---
 
@@ -43,9 +43,9 @@ All assets use strict **URN notation**: `<kind>/@<author>/<name>`
 
 > **Note:** Host environment integration (Cursor, Windsurf, Claude, Codex, etc.) is configuration-level behavior, not a registry asset type.
 
-### 1. `Tal` — Intelligence Persona
+### 1. `Tal` — Persona & Rules
 
-Encodes the _thinking layer_: how the AI reasons, what it prioritises, and its professional identity.
+Encodes the AI's _identity and core rules_: role, tone, mental model, and non-negotiable rules that are always applied as the system prompt.
 
 ```jsonc
 // tal/@acme-platform/senior-backend-engineer
@@ -58,9 +58,9 @@ Encodes the _thinking layer_: how the AI reasons, what it prioritises, and its p
 }
 ```
 
-### 2. `Dance` — Rules & Skills
+### 2. `Dance` — Skills
 
-Encodes the _behavior and capability layer_: structural rules, formatting discipline, JSON Schema enforcement, and executable skills.
+Encodes on-demand _skills and techniques_ the Performer can invoke when needed. Only the `description` is included in the prompt for discoverability; the full `content` is loaded via MCP tool (`get_dance`) when the Performer decides to use it.
 
 ```jsonc
 // dance/@acme-platform/pr-review-standard
@@ -98,16 +98,16 @@ Pins a Tal and/or Dances. Multiple Dances are layered in order — rules concate
   ],
 }
 
-// Tal-only: persona without rules
+// Tal-only: persona & rules without additional skills
 { "tal": "tal/@acme-platform/senior-backend-engineer" }
 
-// Dance-only: rules without persona
+// Dance-only: skills without persona
 { "dance": "dance/@acme-platform/pr-review-standard" }
 ```
 
 ### 4. `Act` — Context Router _(Advanced / Experimental)_
 
-Routes between different Tal+Dance pairs conditionally. Use this when the AI's entire persona or ruleset needs to switch mid-task. For most workflows, Dance Skills are sufficient.
+Routes between different Tal+Dance pairs conditionally. Use this when the AI's entire persona or ruleset needs to switch mid-task.
 
 ```jsonc
 // act/@acme-platform/incident-response
@@ -164,9 +164,9 @@ Routes between different Tal+Dance pairs conditionally. Use this when the AI's e
                      │
            ┌─────────┴─────────┐
       CLI Mode             MCP Mode
-   (dot run sprint)   (AI tool calls MCP tools)
-   Prints compiled     Returns compiled
-   system prompt       context on demand
+   (dot install)      (AI tool calls MCP tools)
+   Installs assets    Returns compiled
+   + auto-locks       context on demand
 ```
 
 ---
@@ -206,50 +206,17 @@ dot install dance/@acme-security/gdpr-awareness
 dot install dance/@acme-platform/pr-review-standard
 ```
 
-### 5. Lock a Performer
+### 5. Install a Performer
 
 ```bash
 # Daily sprint profile: backend persona + company style + security layer
-dot lock \
-  --tal   tal/@acme-platform/senior-backend-engineer \
-  --dance dance/@acme-platform/kotlin-style-guide,dance/@acme-security/gdpr-awareness \
-  --name  sprint
+dot install performer/@acme-platform/sprint
 
 # PR review profile: same persona + review output format
-dot lock \
-  --tal   tal/@acme-platform/senior-backend-engineer \
-  --dance dance/@acme-platform/pr-review-standard \
-  --name  pr-review
+dot install performer/@acme-platform/pr-review
 ```
 
-### 6. Compile & validate
-
-```bash
-dot compile sprint
-# ✔ Compilation sequence completed without errors.
-```
-
-### 7. Run
-
-```bash
-dot run sprint --task "Implement the /payments/refund endpoint"
-```
-
-```
-[BEHAVIOR MODE: tal/@acme-platform/senior-backend-engineer]
-You are a senior backend engineer at ACME. You build for correctness,
-observability, and horizontal scale...
-
-[OUTPUT FORMATTING]
-[dance/@acme-platform/kotlin-style-guide]
-Use Kotlin idioms. All functions must have explicit return types...
-
-[dance/@acme-security/gdpr-awareness]
-Flag any code that stores or transmits PII. Default to data minimisation...
-
-[CURRENT TASK]
-Implement the /payments/refund endpoint
-```
+Performer install auto-locks and cascading-installs all Tal/Dance dependencies.
 
 ---
 
@@ -258,14 +225,9 @@ Implement the /payments/refund endpoint
 ### Scenario A: Onboarding a new engineer
 
 ```bash
-# New engineer runs these 3 commands and gets the exact same AI context as the team
+# New engineer runs these 2 commands and gets the exact same AI context as the team
 dot init
-dot install tal/@acme-platform/senior-backend-engineer
-dot install dance/@acme-platform/kotlin-style-guide
-dot install dance/@acme-security/gdpr-awareness
-dot lock --tal @acme-platform/senior-backend-engineer \
-         --dance @acme-platform/kotlin-style-guide,@acme-security/gdpr-awareness \
-         --name sprint
+dot install performer/@acme-platform/sprint
 ```
 
 Instead of sending a Confluence doc with "our AI prompting standards," you send one command.
@@ -275,16 +237,6 @@ Instead of sending a Confluence doc with "our AI prompting standards," you send 
 ```bash
 # Install the P0 ACT workflow
 dot install act/@acme-platform/incident-response
-
-# Lock a performer that includes the incident routing workflow
-dot lock \
-  --tal   @acme-platform/senior-backend-engineer \
-  --dance @acme-platform/kotlin-style-guide \
-  --act   act/@acme-platform/incident-response \
-  --name  incident
-
-# During a P0 outage, the compiled context includes incident workflow guidance
-dot run incident --task "Payment service returning 500 on all POST /charge requests since 03:12 UTC"
 ```
 
 ### Scenario C: Parallel agents in CI
@@ -311,11 +263,7 @@ Each runs under its own Performer, isolated in .dance-of-tal/runs/{uuid}/
 | `dot search <keyword>`                                        | Search global registry by keyword                                                                 |
 | `dot list [--mine] [--kind <kind>]`                           | List registry packages                                                                            |
 | `dot create --kind <kind> --name <slug>`                      | Scaffold a new asset locally                                                                      |
-| `dot lock --tal <urn> --dance <urn>[,<urn>...] --name <name>` | Lock Performer (tal and/or dance — at least one required)                                             |
-| `dot compile <name>`                                          | Validate all locked assets are type-correct                                                       |
-| `dot run <name> --task <string>`                              | Compile and print assembled context                                                               |
 | `dot publish --kind <kind> --name <slug> --tags <tags>`       | Publish local asset to registry (requires `dot login`)                                            |
-| `dot launch <urn> --editor <name>`                            | Install + lock + open IDE                                                                         |
 | `dot agents set --agent <name> --performer <performerName>`           | Assign a performer to an agent name (`.dance-of-tal/agents.json`)                                     |
 | `dot agents list`                                             | List all agent → performer mappings                                                                   |
 | `dot agents remove --agent <name>`                            | Remove an agent from the manifest                                                                 |
@@ -429,7 +377,7 @@ Assets you create with `dot create` live only on your local disk until you run `
 dance-of-tal/
 ├── mcp/                  ← CLI (dot) + MCP Server — this package
 │   └── src/
-│       ├── cli/          ← thin CLI adapters (init, install, lock, compile, run, publish, login, agents, launch)
+│       ├── cli/          ← thin CLI adapters (init, install, create, publish, search, list, agents, login)
 │       │   ├── commands/ ← individual CLI commands
 │       │   └── utils/    ← shared CLI utilities
 │       ├── lib/          ← shared core (MCP + CLI both call these)

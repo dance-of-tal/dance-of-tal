@@ -9,6 +9,45 @@ const REGISTRY_URL = process.env.DOT_REGISTRY_URL || "https://registry.dance-of-
 const ASSET_KIND_HELP = ASSET_KINDS.join(", ");
 
 /**
+ * Extracts all tal/dance URNs from a performer or act payload,
+ * returns those that belong to a different author.
+ */
+function findForeignAuthorUrns(
+    payload: Record<string, unknown>,
+    myAuthor: string,
+    kind: string
+): string[] {
+    const urns: string[] = [];
+
+    const collectUrns = (obj: Record<string, unknown>) => {
+        if (typeof obj.tal === "string") urns.push(obj.tal);
+        const dance = obj.dance;
+        if (typeof dance === "string") {
+            urns.push(dance);
+        } else if (Array.isArray(dance)) {
+            for (const d of dance) {
+                if (typeof d === "string") urns.push(d);
+            }
+        }
+    };
+
+    if (kind === "performer") {
+        collectUrns(payload);
+    } else if (kind === "act" && typeof payload.performers === "object" && payload.performers !== null) {
+        for (const node of Object.values(payload.performers as Record<string, any>)) {
+            if (typeof node === "object" && node !== null) collectUrns(node);
+        }
+    }
+
+    return urns.filter(urn => {
+        const parts = urn.split("/");
+        if (parts.length !== 3 || !parts[1].startsWith("@")) return false;
+        const author = parts[1].slice(1); // remove leading @
+        return author.toLowerCase() !== myAuthor.toLowerCase();
+    });
+}
+
+/**
  * Loads a locally installed asset using the logged-in author's namespace.
  *
  * --name accepts either:
@@ -77,14 +116,28 @@ export const publishCmd = new Command("publish")
                 const slug = options.name.includes("/") ? options.name.split("/").pop()! : options.name;
                 const performer = await getPerformer(cwd, slug);
                 if (!performer) {
-                    throw new Error(`Performer '${slug}' not found locally. Did you run 'dot lock'?`);
+                    throw new Error(`Performer '${slug}' not found locally. Did you run 'dot install performer/@<author>/${slug}'?`);
                 }
                 payload = performer as unknown as Record<string, unknown>;
             } else {
                 payload = await loadLocalAsset(cwd, options.kind, options.name, auth.username);
             }
 
-            // 3. Parse tags
+            // 3. Cross-author validation — block referencing other authors' assets
+            if (options.kind === "performer" || options.kind === "act") {
+                const foreignUrns = findForeignAuthorUrns(payload, auth.username, options.kind);
+                if (foreignUrns.length > 0) {
+                    throw new Error(
+                        `Cannot publish: payload references assets from other authors.\n` +
+                        `  Your namespace: @${auth.username}\n` +
+                        `  Foreign references:\n` +
+                        foreignUrns.map(u => `    - ${u}`).join("\n") +
+                        `\n\n  You can only reference your own assets (@${auth.username}) in published performers/acts.`
+                    );
+                }
+            }
+
+            // 4. Parse tags
             const tagsArray = options.tags
                 ? options.tags.split(",").map((t: string) => t.trim()).filter(Boolean)
                 : [];

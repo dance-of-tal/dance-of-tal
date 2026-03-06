@@ -1,14 +1,24 @@
 import { ui } from "../utils/ui.js";
 import { installAsset, installPerformerAndLock } from "../../lib/installer.js";
 import { isAssetKind } from "../../lib/kinds.js";
-import { assetFilePath, getDotDir } from "../../lib/registry.js";
+import { assetFilePath, getGlobalCwd, getGlobalDotDir } from "../../lib/registry.js";
 import fs from "fs";
+
+/**
+ * Resolves the target cwd based on --global flag.
+ *   -g / --global → DANCE_OF_TAL_HOME or os.homedir()
+ *   default       → process.cwd() (project-local)
+ */
+function resolveCwd(global?: boolean): string {
+    if (global) return getGlobalCwd();
+    return process.cwd();
+}
 
 /**
  * CLI adapter for install.
  * Delegates to shared core (lib/installer), adds console.log UX.
  */
-export async function runInstall(pkg: string, options?: { lock?: boolean }) {
+export async function runInstall(pkg: string, options?: { lock?: boolean; global?: boolean }) {
     const parts = pkg.split("/");
     if (parts.length !== 3 || !parts[1].startsWith("@")) {
         throw new Error(
@@ -23,10 +33,13 @@ export async function runInstall(pkg: string, options?: { lock?: boolean }) {
         throw new Error(`Invalid kind: '${kind}'. Allowed: tal, dance, act, performer`);
     }
 
-
-    const cwd = process.cwd();
+    const cwd = resolveCwd(options?.global);
+    const scopeLabel = options?.global ? "global" : "local";
 
     console.log(ui.title(`Installing package: ${pkg}`));
+    if (options?.global) {
+        console.log(ui.dim(`  Scope: global (${getGlobalDotDir()})`));
+    }
 
     if (kind === "performer") {
         // Performer: cascading install + auto-lock (unless --no-lock)
@@ -39,7 +52,7 @@ export async function runInstall(pkg: string, options?: { lock?: boolean }) {
             const newCount = result.installedAssets.filter(a => !a.skipped).length;
             const skipCount = result.installedAssets.filter(a => a.skipped).length;
 
-            console.log(ui.success(`\n✔ Installed ${newCount} asset(s), skipped ${skipCount}.`));
+            console.log(ui.success(`\n✔ Installed ${newCount} asset(s), skipped ${skipCount}. [${scopeLabel}]`));
             console.log(ui.success(`✔ Lockfile created: .dance-of-tal/performer/${result.localName}.json`));
 
             console.log(
@@ -79,7 +92,7 @@ export async function runInstall(pkg: string, options?: { lock?: boolean }) {
                 console.log(ui.dim(`  ↳ Model identified: ${content.model} (no file installation required)`));
             }
 
-            console.log(ui.success(`\n✔ All dependencies installed. Use 'dot lock' to create a lockfile.`));
+            console.log(ui.success(`\n✔ All dependencies installed. [${scopeLabel}]`));
         }
     } else if (kind === "act") {
         // Act: install + cascade (node deps)
@@ -111,7 +124,7 @@ export async function runInstall(pkg: string, options?: { lock?: boolean }) {
                     }
                 }
             }
-            console.log(ui.success(`\n✔ Installed ${depCount} unique dependencies for act.`));
+            console.log(ui.success(`\n✔ Installed ${depCount} unique dependencies for act. [${scopeLabel}]`));
         }
     } else {
         // Single asset (tal, dance)
@@ -119,7 +132,7 @@ export async function runInstall(pkg: string, options?: { lock?: boolean }) {
         if (result.skipped) {
             console.log(ui.dim(`  Already installed: ${pkg}`));
         } else {
-            console.log(ui.success(`\n✔ Installed ${pkg}`));
+            console.log(ui.success(`\n✔ Installed ${pkg} [${scopeLabel}]`));
             console.log(ui.dim(`  Saved to: ${result.filePath}`));
         }
     }

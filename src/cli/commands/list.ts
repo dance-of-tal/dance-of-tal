@@ -2,20 +2,9 @@ import { Command } from "commander";
 import { ui } from "../utils/ui.js";
 import { getAuthUser } from "./login.js";
 import { ASSET_KINDS, isAssetKind } from "../../lib/kinds.js";
+import { listRegistryPackages, RegistryPackageMeta } from "../../lib/installer.js";
 
-const REGISTRY_URL = process.env.DOT_REGISTRY_URL || "https://registry.dance-of-tal.workers.dev";
 const ASSET_KIND_HELP = ASSET_KINDS.join(" | ");
-
-interface PackageMeta {
-    urn: string;
-    kind: string;
-    name: string;
-    author: string;
-    version: string;
-    description: string;
-    tags: string[];
-    updatedAt: string;
-}
 
 export const listCmd = new Command("list")
     .description("List packages from the registry")
@@ -23,15 +12,12 @@ export const listCmd = new Command("list")
     .option("--kind <kind>", `Filter by kind: ${ASSET_KIND_HELP}`)
     .action(async (options) => {
         try {
-            const kinds = options.kind
-                ? [options.kind as string]
-                : [...ASSET_KINDS];
-
             if (options.kind && !isAssetKind(options.kind)) {
                 console.error(ui.error(`Invalid kind. Must be one of: ${ASSET_KINDS.join(", ")}`));
                 process.exit(1);
             }
 
+            const kinds = options.kind ? [options.kind as string] : [...ASSET_KINDS];
             let username: string | null = null;
 
             if (options.mine) {
@@ -46,17 +32,7 @@ export const listCmd = new Command("list")
                 console.log(ui.title("Registry Packages"));
             }
 
-            const allPackages: PackageMeta[] = [];
-
-            await Promise.all(
-                kinds.map(async (kind) => {
-                    const res = await fetch(`${REGISTRY_URL}/registry?kind=${kind}`);
-                    if (!res.ok) throw new Error(`Registry error for '${kind}': ${res.statusText}`);
-                    const data: any = await res.json();
-                    const packages: PackageMeta[] = (data.packages || []).filter(Boolean);
-                    allPackages.push(...packages);
-                })
-            );
+            const allPackages = await listRegistryPackages({ kinds });
 
             // Filter by author if --mine
             const filtered = username
@@ -74,7 +50,7 @@ export const listCmd = new Command("list")
             }
 
             // Group by asset kind
-            const byKind: Record<string, PackageMeta[]> = {};
+            const byKind: Record<string, RegistryPackageMeta[]> = {};
             for (const pkg of filtered) {
                 if (!byKind[pkg.kind]) byKind[pkg.kind] = [];
                 byKind[pkg.kind].push(pkg);

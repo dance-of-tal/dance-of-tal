@@ -1,5 +1,7 @@
 import fs from "fs/promises";
+import fss from "fs";
 import path from "path";
+import os from "os";
 import {
     assertPathInside,
     assertSafeAssetUrn,
@@ -13,6 +15,34 @@ import { Performer } from "../data/types.js";
  */
 export function getDotDir(cwd: string = process.cwd()): string {
     return path.join(cwd, ".dance-of-tal");
+}
+
+/**
+ * Returns the parent directory for global assets.
+ * Respects DANCE_OF_TAL_HOME env var, falls back to os.homedir().
+ * Use getDotDir(getGlobalCwd()) to get the full .dance-of-tal path.
+ */
+export function getGlobalCwd(): string {
+    return process.env.DANCE_OF_TAL_HOME || os.homedir();
+}
+
+/**
+ * Returns the global `.dance-of-tal` directory (full path).
+ * Convenience wrapper: getDotDir(getGlobalCwd()).
+ */
+export function getGlobalDotDir(): string {
+    return getDotDir(getGlobalCwd());
+}
+
+/**
+ * Ensures the .dance-of-tal workspace exists at the given cwd.
+ * Auto-initializes if missing (like npm auto-creating node_modules).
+ */
+export async function ensureDotDir(cwd: string): Promise<void> {
+    const dotDir = getDotDir(cwd);
+    if (!fss.existsSync(dotDir)) {
+        await initRegistry(cwd);
+    }
 }
 
 /**
@@ -36,16 +66,20 @@ export function assetFilePath(cwd: string, urn: string): string {
 
 /**
  * Ensures the workspace filesystem layout exists.
- * Only creates folders that are actively used.
+ * Creates all asset-kind directories + runs.
  */
 export async function initRegistry(cwd: string = process.cwd()): Promise<void> {
     const dotDir = getDotDir(cwd);
-    const performersDir = path.join(dotDir, "performer");
-    const runsDir = path.join(dotDir, "runs");
 
     await fs.mkdir(dotDir, { recursive: true });
-    await fs.mkdir(performersDir, { recursive: true });
-    await fs.mkdir(runsDir, { recursive: true });
+
+    // Create directories for every asset kind
+    for (const kind of ["tal", "dance", "act", "performer"]) {
+        await fs.mkdir(path.join(dotDir, kind), { recursive: true });
+    }
+
+    // Runs directory — execution contexts
+    await fs.mkdir(path.join(dotDir, "runs"), { recursive: true });
 }
 
 export type LockedPerformerNameList = {
