@@ -15,7 +15,7 @@ import os from "os";
 import path from "path";
 import { fileURLToPath } from "url";
 
-const SERVER_VERSION = "3.1.0";
+const SERVER_VERSION = "3.2.0";
 const INSTALLABLE_KINDS = ["tal", "dance"] as const;
 type InstallableKind = (typeof INSTALLABLE_KINDS)[number];
 

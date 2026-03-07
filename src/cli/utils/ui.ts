@@ -18,7 +18,7 @@ export const printUsage = () => {
     const commandRows: Array<[string, string]> = [
         ["dot init", "Initialize .dance-of-tal workspace"],
         ["dot install <urn>", "Install tal|dance|act|performer asset from registry"],
-        ["dot create --kind tal|dance|act --name <slug>", "Create local asset template"],
+        ["dot create --kind tal|dance|performer|act --name <slug>", "Create local asset template"],
         ["dot publish --kind ... --name ...", "Publish local asset/performer to registry"],
         ["dot search <keyword>", "Search registry packages"],
         ["dot list [--kind ...] [--mine]", "List registry packages"],

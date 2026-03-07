@@ -157,7 +157,6 @@ export interface RegistryPackageMeta {
     name: string;
     author: string;
     slug: string;
-    version: string;
     description: string;
     tags: string[];
     downloads?: number;
@@ -217,7 +216,6 @@ function normalisePackages(packages: any[]): RegistryPackageMeta[] {
         name: pkg.name ?? "",
         author: pkg.author ?? "",
         slug: pkg.slug ?? pkg.name ?? "",
-        version: pkg.version ?? "",
         description: pkg.description ?? "",
         tags: pkg.tags ?? [],
         downloads: pkg.downloads,

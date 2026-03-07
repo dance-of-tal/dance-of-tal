@@ -2,19 +2,18 @@ import { Command } from "commander";
 import { ui } from "../utils/ui.js";
 import fs from "fs/promises";
 import path from "path";
-import os from "os";
 import open from "open";
 import http from "http";
 import crypto from "crypto";
-import readline from "readline";
 
 const SUPABASE_URL = process.env.DOT_SUPABASE_URL || "https://qbildcrfjencoqkngyfw.supabase.co";
 // The ANON key is intentionally public to allow client-side Supabase communication
 const SUPABASE_ANON_KEY = process.env.DOT_SUPABASE_ANON_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFiaWxkY3JmamVuY29xa25neWZ3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIyNjE5MzYsImV4cCI6MjA4NzgzNzkzNn0.9aI9FU-j20w3UIG7BuVtmpAPh3qClz7xTNXjcq7ofNQ";
 
+import { getGlobalDotDir } from "../../lib/registry.js";
+
 function getAuthFilePath() {
-    const dotGlobalDir = path.join(os.homedir(), ".dance-of-tal");
-    return path.join(dotGlobalDir, "auth.json");
+    return path.join(getGlobalDotDir(), "auth.json");
 }
 
 export async function saveAuthToken(token: string, username: string) {
@@ -54,44 +53,10 @@ function generateCodeChallenge(verifier: string) {
 }
 
 export const loginCmd = new Command("login")
-    .description("Login to Dance of Tal Registry using Supabase OAuth")
-    .option("-p, --provider <provider>", "OAuth provider to use: 'google' or 'github'")
-    .action(async (options) => {
+    .description("Login to Dance of Tal Registry via GitHub")
+    .action(async () => {
         console.log(ui.title("Authenticating with Dance of Tal Registry"));
-
-        let provider = options.provider?.toLowerCase();
-
-        if (!provider || !["google", "github"].includes(provider)) {
-            provider = await new Promise<string>((resolve) => {
-                const rl = readline.createInterface({
-                    input: process.stdin,
-                    output: process.stdout
-                });
-
-                console.log(ui.dim("Please select your authentication provider:"));
-                console.log("  1. Google (Recommended for Vibe Coders)");
-                console.log("  2. GitHub (Classic for Developers)");
-
-                const promptOption = () => {
-                    rl.question(ui.highlight("\nEnter choice (1 or 2): "), (answer) => {
-                        const choice = answer.trim();
-                        if (choice === "1" || choice.toLowerCase() === "google") {
-                            rl.close();
-                            resolve("google");
-                        } else if (choice === "2" || choice.toLowerCase() === "github") {
-                            rl.close();
-                            resolve("github");
-                        } else {
-                            console.log(ui.error("Invalid choice. Please enter 1 or 2."));
-                            promptOption();
-                        }
-                    });
-                };
-                promptOption();
-            });
-        }
-
-        console.log(ui.dim(`\nSelected provider: ${provider}...`));
+        console.log(ui.dim("Using GitHub OAuth...\n"));
 
         const codeVerifier = generateCodeVerifier();
         const codeChallenge = generateCodeChallenge(codeVerifier);
@@ -138,7 +103,11 @@ export const loginCmd = new Command("login")
 
                             const accessToken = data.access_token;
                             const user = data.user;
-                            const username = user?.user_metadata?.preferred_username || user?.user_metadata?.user_name || "developer";
+                            const username = user?.user_metadata?.preferred_username || user?.user_metadata?.user_name;
+
+                            if (!username) {
+                                throw new Error("Could not determine GitHub username from token. Please try again.");
+                            }
 
                             await saveAuthToken(accessToken, username);
 
@@ -179,9 +148,9 @@ export const loginCmd = new Command("login")
 
             server.listen(4242, async () => {
                 const REDIRECT_URI = "http://localhost:4242/callback";
-                const authUrl = `${SUPABASE_URL}/auth/v1/authorize?provider=${provider}&redirect_to=${encodeURIComponent(REDIRECT_URI)}&code_challenge=${codeChallenge}&code_challenge_method=s256`;
+                const authUrl = `${SUPABASE_URL}/auth/v1/authorize?provider=github&redirect_to=${encodeURIComponent(REDIRECT_URI)}&code_challenge=${codeChallenge}&code_challenge_method=s256`;
 
-                console.log(ui.dim(`Opening browser to authenticate...`));
+                console.log(ui.dim(`Opening browser to authenticate with GitHub...`));
                 console.log(ui.dim(`If your browser doesn't open automatically, navigate to:`));
                 console.log(ui.highlight(authUrl));
                 console.log(ui.dim(`\nWaiting for authorization...`));

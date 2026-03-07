@@ -19,7 +19,7 @@ const program = new Command();
 program
   .name("dot")
   .description("Dance of Tal — Agent Manager for Agentic AI")
-  .version("3.1.0")
+  .version("3.2.0")
   .hook("postAction", async () => {
     await checkForUpdates();
   });
@@ -39,7 +39,6 @@ program
 program
   .command("install <package>")
   .description("Install a Tal, Dance, Act, or Performer (e.g. dot install performer/@acme/pr-review)")
-  .option("--no-lock", "Skip auto-locking when installing a performer")
   .option("-g, --global", "Install to global ~/.dance-of-tal instead of project-local")
   .action(async (pkg: string, options) => {
     try {

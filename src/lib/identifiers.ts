@@ -2,7 +2,6 @@ import path from "path";
 import { isAssetKind } from "./kinds.js";
 
 const PERFORMER_NAME_RE = /^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$/;
-const RUN_ID_RE = /^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$/;
 const ASSET_NAME_RE = /^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$/;
 const AUTHOR_RE = /^@[A-Za-z0-9_-]{1,64}$/;
 
@@ -14,13 +13,7 @@ export function assertSafePerformerName(name: string): void {
   }
 }
 
-export function assertSafeRunId(runId: string): void {
-  if (!RUN_ID_RE.test(runId)) {
-    throw new Error(
-      `Invalid runId '${runId}'. Allowed pattern: ${RUN_ID_RE.toString()}`
-    );
-  }
-}
+
 
 export function assertSafeAssetUrn(urn: string): void {
   const parts = urn.split("/");

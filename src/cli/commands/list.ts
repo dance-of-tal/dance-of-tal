@@ -61,8 +61,7 @@ export const listCmd = new Command("list")
             for (const [kind, pkgs] of Object.entries(byKind)) {
                 console.log(ui.section(`  [${kind.toUpperCase()}]  (${pkgs.length})`));
                 for (const pkg of pkgs) {
-                    const versionStr = pkg.version ? ui.dim(` v${pkg.version}`) : "";
-                    console.log(`    ${ui.highlight(pkg.urn)}${versionStr}`);
+                    console.log(`    ${ui.highlight(pkg.urn)}`);
                     if (pkg.description) console.log(`      ${ui.dim(pkg.description)}`);
                     if (pkg.tags?.length) console.log(`      ${ui.dim("tags: " + pkg.tags.join(", "))}`);
                     console.log("");

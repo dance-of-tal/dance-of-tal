@@ -38,13 +38,32 @@ function buildActTemplate(slug: string, name: string, description: string, autho
         slug,
         name,
         description,
+        tags: [],
+        entryNode: "orchestrate",
         nodes: {
-            "step-1": {
-                tal: `tal/@${author}/your-tal`,
-                dance: `dance/@${author}/your-dance`
+            "orchestrate": {
+                type: "orchestrator",
+                performer: `performer/@${author}/your-orchestrator`,
+                routes: ["worker-1"],
+                maxDelegations: 10
+            },
+            "worker-1": {
+                type: "worker",
+                performer: `performer/@${author}/your-worker`
             }
         },
-        edges: []
+        edges: [],
+        maxIterations: 50
+    };
+}
+
+function buildPerformerTemplate(author: string, slug: string): Record<string, unknown> {
+    return {
+        type: `performer/@${author}/${slug}`,
+        tags: [],
+        tal: `tal/@${author}/your-tal`,
+        dance: [`dance/@${author}/your-dance`],
+        model: "claude-sonnet-4-20250514"
     };
 }
 
@@ -108,6 +127,7 @@ export const createCmd = new Command("create")
             let template: Record<string, unknown>;
             if (typedKind === "tal") template = buildTalTemplate(author, slug, displayName, description);
             else if (typedKind === "dance") template = buildDanceTemplate(author, slug, displayName, description);
+            else if (typedKind === "performer") template = buildPerformerTemplate(author, slug);
             else template = buildActTemplate(slug, displayName, description, author);
 
             fs.mkdirSync(path.dirname(filePath), { recursive: true });

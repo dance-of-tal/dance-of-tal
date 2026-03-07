@@ -1,6 +1,6 @@
 {
   "name": "dance-of-tal",
-  "version": "3.1.0",
+  "version": "3.2.0",
   "description": "Dance of Tal — Agent Manager for Agentic AI. MCP server and CLI for managing AI agent personas, rules, and workflows.",
   "license": "MIT",
   "author": "monarchjuno",
@@ -28,11 +28,9 @@
   "type": "module",
   "exports": {
     ".": "./dist/server/index.js",
-    "./lib/engine": "./dist/lib/engine.js",
     "./lib/registry": "./dist/lib/registry.js",
     "./lib/agents": "./dist/lib/agents.js",
     "./lib/installer": "./dist/lib/installer.js",
-    "./lib/runs": "./dist/lib/runs.js",
     "./lib/kinds": "./dist/lib/kinds.js",
     "./data/types": "./dist/data/types.js"
   },
@@ -42,7 +40,7 @@
   },
   "scripts": {
     "dev": "tsx src/server/index.ts",
-    "build": "tsup src/server/index.ts src/cli/dot.ts src/lib/engine.ts src/lib/registry.ts src/lib/agents.ts src/lib/installer.ts src/lib/runs.ts src/lib/kinds.ts src/data/types.ts --format esm --out-dir dist --dts --clean",
+    "build": "tsup src/server/index.ts src/cli/dot.ts src/lib/registry.ts src/lib/agents.ts src/lib/installer.ts src/lib/kinds.ts src/data/types.ts --format esm --out-dir dist --dts --clean",
     "release": "npm run build && npm publish",
     "test": "vitest run",
     "lint": "eslint 'src/**/*.{ts,tsx}'",
@@ -53,13 +51,10 @@
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.17.5",
     "commander": "^14.0.3",
-    "open": "^11.0.0",
-    "proper-lockfile": "^4.1.2",
-    "zod": "3.24.1"
+    "open": "^11.0.0"
   },
   "devDependencies": {
     "@types/node": "^22.10.5",
-    "@types/proper-lockfile": "^4.1.4",
     "@typescript-eslint/eslint-plugin": "^7.18.0",
     "@typescript-eslint/parser": "^7.18.0",
     "@vitest/coverage-v8": "^4.0.18",

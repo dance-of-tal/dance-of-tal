@@ -1,6 +1,6 @@
 # Dance of Tal (DOT)
 
-> **Agent Manager for Agentic AI.** — Modular, versioned, type-safe AI context management for the Agentic AI era.
+> **Agent Manager for Agentic AI.** — Modular, type-safe AI context management for the Agentic AI era.
 
 [![npm version](https://img.shields.io/npm/v/dance-of-tal)](https://www.npmjs.com/package/dance-of-tal)
 [![License: MIT](https://img.shields.io/badge/License-MIT-white.svg)](LICENSE)
@@ -19,7 +19,7 @@ Modern AI-powered development relies on system prompts that have quietly grown i
 | Software principle                   | DOT equivalent                                                     |
 | ------------------------------------ | ------------------------------------------------------------------ |
 | Dependency Injection                 | Context assembled from discrete, typed components                  |
-| `package.json` → `package-lock.json` | Performer locks exact Tal + Dance versions                             |
+| `package.json` → `package-lock.json` | Performer locks exact Tal + Dance references                           |
 | npm registry                         | Global Cloudflare KV registry                                      |
 | Multiple CSS classes on one element  | Multiple Dances layered in one Performer                               |
 | CI/CD pipeline                       | Every engineer on every machine runs the **exact** same AI persona |
@@ -33,7 +33,7 @@ Picture a newly onboarded senior engineer at your company.
 - Their **Tal** is their _professional identity and core rules_ — the thinking framework, role, tone, and non-negotiable rules your company expects. Do they prioritise correctness or delivery speed? Do they design for GDPR compliance by default? This is the **who + always-on rules** of the AI — always applied as the system prompt.
 - Their **Dance** is their _skill repertoire_ — techniques they can invoke when needed. Run a security audit. Generate a test suite. Produce structured JSON output. This is the **what the AI can do on-demand**. Only the Dance `description` is included in the prompt; the full `content` is loaded via MCP tool when the Performer needs it.
 - A **Performer** locks a Tal + one or more Dances together — a frozen, versioned snapshot that everyone on the team installs.
-- An **Act** _(advanced, experimental)_ is a _context router_ — a DAG that switches AI persona and rules based on runtime conditions (e.g. normal sprint → incident response mode). Act is for multi-phase orchestration where the AI's entire identity changes.
+- An **Act** is an _orchestration workflow_ — a multi-performer topology with dynamic routing, parallel execution, and conditional edges. Use it when the AI's identity or strategy changes mid-task (e.g. normal sprint → incident response mode).
 
 ---
 
@@ -51,7 +51,6 @@ Encodes the AI's _identity and core rules_: role, tone, mental model, and non-ne
 // tal/@acme-platform/senior-backend-engineer
 {
   "type": "tal/@acme-platform/senior-backend-engineer",
-  "version": "3.1.0",
   "description": "Backend engineer mindset for ACME's platform team.",
   "content": "You are a senior backend engineer at ACME. You build for correctness, observability, and horizontal scale. You always consider failure modes before writing implementation. You default to Kotlin/Spring Boot, PostgreSQL, and Kafka. You never suggest solutions that don't have a rollback path.",
   "tags": ["backend", "kotlin", "spring", "platform"],
@@ -60,26 +59,15 @@ Encodes the AI's _identity and core rules_: role, tone, mental model, and non-ne
 
 ### 2. `Dance` — Skills
 
-Encodes on-demand _skills and techniques_ the Performer can invoke when needed. Only the `description` is included in the prompt for discoverability; the full `content` is loaded via MCP tool (`get_dance`) when the Performer decides to use it.
+Encodes on-demand _skills and techniques_ the Performer can invoke when needed. Only the `description` is included in the prompt for discoverability; the full `content` is loaded when the Performer decides to use it.
 
 ```jsonc
 // dance/@acme-platform/pr-review-standard
 {
   "type": "dance/@acme-platform/pr-review-standard",
-  "version": "1.0.0",
   "description": "ACME standard for AI-assisted PR reviews.",
   "tags": ["review", "backend", "security"],
   "content": "Structure every review as: SUMMARY, RISKS (severity: low|medium|high|critical), REQUIRED CHANGES, OPTIONAL SUGGESTIONS. Flag any code touching payment flows with PAYMENT RISK. Never approve a PR that lacks unit tests on business logic paths.",
-  "schema": {
-    "type": "object",
-    "required": ["summary", "risks", "requiredChanges"],
-    "properties": {
-      "risks": {
-        "type": "array",
-        "items": { "enum": ["low", "medium", "high", "critical"] },
-      },
-    },
-  },
 }
 ```
 
@@ -105,34 +93,46 @@ Pins a Tal and/or Dances. Multiple Dances are layered in order — rules concate
 { "dance": "dance/@acme-platform/pr-review-standard" }
 ```
 
-### 4. `Act` — Context Router _(Advanced / Experimental)_
+### 4. `Act` — Orchestration Workflow
 
-Routes between different Tal+Dance pairs conditionally. Use this when the AI's entire persona or ruleset needs to switch mid-task.
+Defines multi-performer workflows using a `nodes` topology. Each node has a `type` that controls execution behavior.
+
+**Node types:**
+
+| Type | Role |
+|------|------|
+| `worker` | Single performer execution |
+| `orchestrator` | LLM dynamically selects next node from `routes` at runtime |
+| `parallel` | Fan-out: runs `branches` concurrently, `join` strategy controls when to proceed |
 
 ```jsonc
 // act/@acme-platform/incident-response
-// Switches from cautious "architect" persona to fast "fixer" persona on P0
 {
   "type": "act/@acme-platform/incident-response",
   "nodes": {
-    "triage": {
-      "tal": "tal/@acme-platform/senior-backend-engineer",
-      "dance": "dance/@acme-platform/incident-triage-format",
+    "orchestrate": {
+      "type": "orchestrator",
+      "performer": "performer/@acme-platform/sisyphus",
+      "routes": ["plan", "implement", "review"],
+      "maxDelegations": 20
     },
-    "hotfix": {
-      "tal": "tal/@acme-platform/hotfix-specialist",
-      "dance": "dance/@acme-platform/minimal-change-only",
+    "plan":      { "type": "worker", "performer": "performer/@acme-platform/planner" },
+    "implement": { "type": "worker", "performer": "performer/@acme-platform/implementer" },
+    "review":    { "type": "worker", "performer": "performer/@acme-platform/reviewer" },
+
+    "research-all": {
+      "type": "parallel",
+      "branches": ["res-a", "res-b"],
+      "join": "all"
     },
-    "postmortem": {
-      "tal": "tal/@acme-platform/senior-backend-engineer",
-      "dance": "dance/@acme-platform/postmortem-format",
-    },
+    "res-a": { "type": "worker", "performer": "performer/@acme-platform/librarian" },
+    "res-b": { "type": "worker", "performer": "performer/@acme-platform/explorer" }
   },
   "edges": [
-    { "from": "triage", "to": "hotfix", "condition": "SEVERITY=P0" },
-    { "from": "triage", "to": "postmortem", "condition": "SEVERITY=P1" },
-    { "from": "hotfix", "to": "postmortem" },
+    { "from": "review", "to": "$exit", "condition": "on_success" }
   ],
+  "entryNode": "orchestrate",
+  "maxIterations": 50
 }
 ```
 
@@ -158,8 +158,7 @@ Routes between different Tal+Dance pairs conditionally. Use this when the AI's e
 │  ├── tal/@acme-platform/senior-backend-engineer.json     │
 │  ├── dance/@acme-platform/kotlin-style-guide.json        │
 │  ├── dance/@acme-security/gdpr-awareness.json            │
-│  ├── performer/sprint.json           ← locked Performer          │
-│  └── runs/{uuid}/                ← per-agent sandboxes   │
+│  └── performer/sprint.json           ← locked Performer          │
 └────────────────────┬─────────────────────────────────────┘
                      │
            ┌─────────┴─────────┐
@@ -184,7 +183,7 @@ npm install -g dance-of-tal
 ```bash
 cd your-repo
 dot init
-# Creates .dance-of-tal/performer/, .dance-of-tal/runs/
+# Creates .dance-of-tal/performer/
 ```
 
 ### 3. Login with GitHub
@@ -239,17 +238,7 @@ Instead of sending a Confluence doc with "our AI prompting standards," you send 
 dot install act/@acme-platform/incident-response
 ```
 
-### Scenario C: Parallel agents in CI
 
-Using MCP mode, your CI pipeline spawns multiple isolated agents:
-
-```
-Agent A (run-uuid-001): reviews security implications
-Agent B (run-uuid-002): generates test cases
-Agent C (run-uuid-003): writes the implementation
-
-Each runs under its own Performer, isolated in .dance-of-tal/runs/{uuid}/
-```
 
 ---
 
@@ -259,7 +248,7 @@ Each runs under its own Performer, isolated in .dance-of-tal/runs/{uuid}/
 | ------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
 | `dot init`                                                    | Scaffold `.dance-of-tal/` workspace                                                               |
 | `dot login`                                                   | GitHub OAuth → `~/.dance-of-tal/auth.json`                                                        |
-| `dot install <urn>`                                           | Download asset by URN. Performer → cascading install + auto-lock (`--no-lock` to skip) |
+| `dot install <urn>`                                           | Download asset by URN. Performer → cascading install + auto-lock |
 | `dot search <keyword>`                                        | Search global registry by keyword                                                                 |
 | `dot list [--mine] [--kind <kind>]`                           | List registry packages                                                                            |
 | `dot create --kind <kind> --name <slug>`                      | Scaffold a new asset locally                                                                      |
@@ -305,20 +294,15 @@ DOT implements the **Model Context Protocol (MCP)**, so AI IDEs can pull the exa
 }
 ```
 
-By default, DOT auto-discovers the nearest parent containing `.dance-of-tal/performer` from the MCP process working directory. If no workspace is found, tools like `setup_workspace` and `install_performer` will auto-initialize one at `process.cwd()`. Set `DANCE_OF_TAL_PROJECT_DIR` only when the IDE's working directory differs from your project root.
+By default, DOT auto-discovers the nearest parent containing `.dance-of-tal/performer` from the MCP process working directory. If no workspace is found, tools like `setup_workspace` and `install_asset` will auto-initialize one at `process.cwd()`. Set `DANCE_OF_TAL_PROJECT_DIR` only when the IDE's working directory differs from your project root.
 
-### MCP Tools (8 tools)
+### MCP Tools (3 tools)
 
 | Tool              | Description                                    |
 | ----------------- | ---------------------------------------------- |
-| `get_project_status` | Check workspace init status, performers, agent mappings |
 | `setup_workspace`    | Initialize `.dance-of-tal/` directory (MCP-driven, no CLI needed) |
-| `search_registry`    | Search the DOT registry for packages |
-| `install_performer`      | Install a performer + all deps + auto-lock (MCP-driven) |
-| `list_performers`     | List local performers with mode (tal-only/dance-only/performer/act) |
-| `init_run`        | Create an isolated run (performerName OR agentName) |
-| `get_run_context` | Return the compiled system prompt for that run |
-| `clear_run`       | Clean up the sandbox after the run completes   |
+| `install_asset`      | Install a Tal or Dance asset from registry into `.dance-of-tal/` |
+| `list_assets`        | List locally installed Tal and Dance assets |
 
 ---
 
@@ -345,7 +329,8 @@ No `--author` needed — your GitHub login is the namespace. The create → edit
 
 - **Namespace protection** — Your URN namespace is your GitHub username. Nobody can publish under `@yourusername`.
 - **Schema enforcement** — Registry validates payload shape per asset kind.
-- **Semver** — `version` field must follow `MAJOR.MINOR.PATCH`.
+- **Immutability** — Once published, a URN cannot be re-published. Payload and description are permanent. Only `tags` can be updated.
+- **Cascading publish** — Publishing a Performer or Act auto-publishes missing dependencies (your namespace only).
 
 ---
 
@@ -383,12 +368,10 @@ dance-of-tal/
 │       ├── lib/          ← shared core (MCP + CLI both call these)
 │       │   ├── registry.ts  ← local file I/O + Performer type
 │       │   ├── installer.ts ← registry fetch + install + auto-lock
-│       │   ├── engine.ts    ← Tal? + Dance?[] → compiled system prompt
-│       │   ├── runs.ts      ← multi-agent run isolation + resolvePerformerName
 │       │   ├── agents.ts    ← agents.json read/write
 │       │   ├── identifiers.ts ← URN parsing and validation
 │       │   └── kinds.ts     ← type definitions for asset kinds
-│       └── server/index.ts  ← MCP server (8 tools)
+│       └── server/index.ts  ← MCP server (3 tools)
 │
 ├── registry/             ← Cloudflare Worker (Hono + KV) — private
 └── front/                ← Next.js registry browser — private

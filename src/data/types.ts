@@ -25,9 +25,29 @@ export type Performer = {
 
 export type ActEdge = {
   from: string;
-  to: string; // $next, $exit, or performerId
+  to: string; // node ID or '$exit'
   condition?: 'always' | 'on_success' | 'on_fail';
 };
+
+export type ActNodeWorker = {
+  type: 'worker';
+  performer: string; // performer URN
+};
+
+export type ActNodeOrchestrator = {
+  type: 'orchestrator';
+  performer: string; // performer URN
+  routes: string[];  // node IDs or '$exit'
+  maxDelegations?: number;
+};
+
+export type ActNodeParallel = {
+  type: 'parallel';
+  branches: string[]; // node IDs
+  join?: 'all' | 'any';
+};
+
+export type ActNode = ActNodeWorker | ActNodeOrchestrator | ActNodeParallel;
 
 export type Act = {
   type: string;
@@ -35,9 +55,8 @@ export type Act = {
   name: string;
   description: string;
   tags: string[];
-  entryPerformerId: string;
-  exitPerformerId: string;
-  performers: Record<string, Performer>;
+  entryNode: string;
+  nodes: Record<string, ActNode>;
   edges: ActEdge[];
   maxIterations?: number;
 };

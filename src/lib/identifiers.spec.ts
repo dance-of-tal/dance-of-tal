@@ -4,18 +4,15 @@ import {
   assertPathInside,
   assertSafeAssetUrn,
   assertSafePerformerName,
-  assertSafeRunId,
 } from "./identifiers.js";
 
 describe("identifiers safety", () => {
-  it("accepts valid performer and run identifiers", () => {
+  it("accepts valid performer identifiers", () => {
     expect(() => assertSafePerformerName("pr-review_v2")).not.toThrow();
-    expect(() => assertSafeRunId("run-20260301:agent-a")).not.toThrow();
   });
 
-  it("rejects unsafe performer and run identifiers", () => {
+  it("rejects unsafe performer identifiers", () => {
     expect(() => assertSafePerformerName("../escape")).toThrow("Invalid performer name");
-    expect(() => assertSafeRunId("../../etc")).toThrow("Invalid runId");
   });
 
   it("validates asset urn format", () => {

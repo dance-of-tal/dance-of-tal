@@ -23,7 +23,12 @@ export function getDotDir(cwd: string = process.cwd()): string {
  * Use getDotDir(getGlobalCwd()) to get the full .dance-of-tal path.
  */
 export function getGlobalCwd(): string {
-    return process.env.DANCE_OF_TAL_HOME || os.homedir();
+    const rawInput = process.env.DANCE_OF_TAL_HOME?.trim() || os.homedir();
+    const normalized = path.resolve(rawInput);
+    // Guard against double-nesting: if user sets DANCE_OF_TAL_HOME to the .dance-of-tal dir itself
+    return path.basename(normalized) === ".dance-of-tal"
+        ? path.dirname(normalized)
+        : normalized;
 }
 
 /**
@@ -65,8 +70,52 @@ export function assetFilePath(cwd: string, urn: string): string {
 }
 
 /**
+ * Reads a locally installed asset by URN, returns the parsed JSON.
+ * Checks local (project) first, then falls back to global.
+ * Returns null if not found in either location.
+ */
+export async function readAsset(cwd: string, urn: string): Promise<Record<string, unknown> | null> {
+    // Try local first
+    const localPath = assetFilePath(cwd, urn);
+    try {
+        const raw = await fs.readFile(localPath, "utf-8");
+        return JSON.parse(raw);
+    } catch (err: any) {
+        if (err.code !== "ENOENT") throw err;
+    }
+
+    // Fallback to global
+    const globalCwd = getGlobalCwd();
+    if (globalCwd !== cwd) {
+        const globalPath = assetFilePath(globalCwd, urn);
+        try {
+            const raw = await fs.readFile(globalPath, "utf-8");
+            return JSON.parse(raw);
+        } catch (err: any) {
+            if (err.code !== "ENOENT") throw err;
+        }
+    }
+
+    return null;
+}
+
+/**
+ * Extracts just the content (prompt text) from a tal or dance asset.
+ * Returns null if asset not found or has no content field.
+ *
+ * Example:
+ *   await getAssetPayload(cwd, "tal/@acme/system-architect")
+ *   → "You are a senior system architect..."
+ */
+export async function getAssetPayload(cwd: string, urn: string): Promise<string | null> {
+    const asset = await readAsset(cwd, urn);
+    if (!asset) return null;
+    return typeof asset.content === "string" ? asset.content : null;
+}
+
+/**
  * Ensures the workspace filesystem layout exists.
- * Creates all asset-kind directories + runs.
+ * Creates all asset-kind directories.
  */
 export async function initRegistry(cwd: string = process.cwd()): Promise<void> {
     const dotDir = getDotDir(cwd);
@@ -77,9 +126,6 @@ export async function initRegistry(cwd: string = process.cwd()): Promise<void> {
     for (const kind of ["tal", "dance", "act", "performer"]) {
         await fs.mkdir(path.join(dotDir, kind), { recursive: true });
     }
-
-    // Runs directory — execution contexts
-    await fs.mkdir(path.join(dotDir, "runs"), { recursive: true });
 }
 
 export type LockedPerformerNameList = {
