@@ -1,6 +1,6 @@
 {
   "name": "dance-of-tal",
-  "version": "3.2.0",
+  "version": "3.2.1",
   "description": "Dance of Tal — Agent Manager for Agentic AI. MCP server and CLI for managing AI agent personas, rules, and workflows.",
   "license": "MIT",
   "author": "monarchjuno",
@@ -27,12 +27,34 @@
   ],
   "type": "module",
   "exports": {
-    ".": "./dist/server/index.js",
-    "./lib/registry": "./dist/lib/registry.js",
-    "./lib/agents": "./dist/lib/agents.js",
-    "./lib/installer": "./dist/lib/installer.js",
-    "./lib/kinds": "./dist/lib/kinds.js",
-    "./data/types": "./dist/data/types.js"
+    ".": {
+      "types": "./dist/server/index.d.ts",
+      "default": "./dist/server/index.js"
+    },
+    "./lib/registry": {
+      "types": "./dist/lib/registry.d.ts",
+      "default": "./dist/lib/registry.js"
+    },
+    "./lib/agents": {
+      "types": "./dist/lib/agents.d.ts",
+      "default": "./dist/lib/agents.js"
+    },
+    "./lib/installer": {
+      "types": "./dist/lib/installer.d.ts",
+      "default": "./dist/lib/installer.js"
+    },
+    "./lib/publishing": {
+      "types": "./dist/lib/publishing.d.ts",
+      "default": "./dist/lib/publishing.js"
+    },
+    "./lib/kinds": {
+      "types": "./dist/lib/kinds.d.ts",
+      "default": "./dist/lib/kinds.js"
+    },
+    "./data/types": {
+      "types": "./dist/data/types.d.ts",
+      "default": "./dist/data/types.js"
+    }
   },
   "bin": {
     "dance-of-tal": "dist/server/index.js",
@@ -40,7 +62,7 @@
   },
   "scripts": {
     "dev": "tsx src/server/index.ts",
-    "build": "tsup src/server/index.ts src/cli/dot.ts src/lib/registry.ts src/lib/agents.ts src/lib/installer.ts src/lib/kinds.ts src/data/types.ts --format esm --out-dir dist --dts --clean",
+    "build": "tsup src/server/index.ts src/cli/dot.ts src/lib/registry.ts src/lib/agents.ts src/lib/installer.ts src/lib/publishing.ts src/lib/kinds.ts src/data/types.ts --format esm --out-dir dist --dts --clean",
     "release": "npm run build && npm publish",
     "test": "vitest run",
     "lint": "eslint 'src/**/*.{ts,tsx}'",

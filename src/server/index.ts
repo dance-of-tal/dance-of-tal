@@ -7,7 +7,7 @@ import {
   Tool,
 } from "@modelcontextprotocol/sdk/types.js";
 import { installAsset } from "../lib/installer.js";
-import { getDotDir, initRegistry } from "../lib/registry.js";
+import { getAssetPayload, getDotDir, initRegistry, readAsset } from "../lib/registry.js";
 import { assertSafeAssetUrn } from "../lib/identifiers.js";
 import { existsSync, statSync, realpathSync, type Dirent } from "fs";
 import fs from "fs/promises";
@@ -84,6 +84,29 @@ const LIST_ASSETS_TOOL: Tool = {
       },
     },
     required: [],
+  },
+};
+
+const LOAD_CAPABILITY_CONTEXT_TOOL: Tool = {
+  name: "load_capability_context",
+  description:
+    "Load the description and full text for an installed capability asset by URN. " +
+    "Use this when you need optional capability context on demand without inlining everything up front.",
+  inputSchema: {
+    type: "object",
+    properties: {
+      urn: {
+        type: "string",
+        description: "Capability URN: tal/@<author>/<name> or dance/@<author>/<name>",
+      },
+      projectDir: {
+        type: "string",
+        description:
+          "Optional absolute path to the project root directory. " +
+          "Provide this when auto-detection is incorrect.",
+      },
+    },
+    required: ["urn"],
   },
 };
 
@@ -238,7 +261,12 @@ export function createServer(): Server {
 
   server.setRequestHandler(ListToolsRequestSchema, async () => {
     return {
-      tools: [SETUP_WORKSPACE_TOOL, INSTALL_ASSET_TOOL, LIST_ASSETS_TOOL],
+      tools: [
+        SETUP_WORKSPACE_TOOL,
+        INSTALL_ASSET_TOOL,
+        LIST_ASSETS_TOOL,
+        LOAD_CAPABILITY_CONTEXT_TOOL,
+      ],
     };
   });
 
@@ -375,6 +403,41 @@ export function createServer(): Server {
         };
       }
 
+      if (
+        request.params.name === "load_capability_context" ||
+        request.params.name === "read_asset_content"
+      ) {
+        const urn = typeof args.urn === "string" ? args.urn : "";
+        const kind = parseInstallableKind(urn);
+        const asset = await readAsset(cwd, urn);
+        const content = await getAssetPayload(cwd, urn);
+
+        if (!asset || !content) {
+          throw new Error(`Installed asset '${urn}' was not found or has no content.`);
+        }
+
+        return {
+          content: [
+            {
+              type: "text",
+              text: JSON.stringify(
+                {
+                  success: true,
+                  kind,
+                  urn,
+                  description:
+                    typeof asset.description === "string" ? asset.description : "",
+                  content,
+                  resolvedProjectDir: cwd,
+                },
+                null,
+                2
+              ),
+            },
+          ],
+        };
+      }
+
       throw new Error(`Unknown tool: ${request.params.name}`);
     } catch (error: any) {
       return {
@@ -391,7 +454,7 @@ async function runServer(): Promise<void> {
   const server = createServer();
   const transport = new StdioServerTransport();
   await server.connect(transport);
-  console.error(`Dance of Tal MCP Server v${SERVER_VERSION} (tools: ${3})`);
+  console.error(`Dance of Tal MCP Server v${SERVER_VERSION} (tools: ${4})`);
 }
 
 function isMainModule(): boolean {

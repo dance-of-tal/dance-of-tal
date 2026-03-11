@@ -29,6 +29,52 @@ export interface InstallPerformerResult {
     installedAssets: InstalledAsset[];
 }
 
+export interface InstallActResult {
+    actUrn: string;
+    actAsset: InstalledAsset;
+    installedAssets: InstalledAsset[];
+}
+
+export interface RegistryPackageDetail extends RegistryPackageMeta {
+    payload: Record<string, unknown>;
+    stars?: number;
+    tier?: string;
+}
+
+function splitRegistryUrn(urn: string) {
+    const parts = urn.split("/");
+    if (parts.length !== 3 || !parts[1].startsWith("@")) {
+        throw new Error(
+            `Invalid URN format: '${urn}'. Expected: <kind>/@<author>/<name>`
+        );
+    }
+
+    const [kind, author, slug] = parts;
+    if (!isAssetKind(kind)) {
+        throw new Error(`Invalid kind: '${kind}'. Allowed: tal, dance, act, performer`);
+    }
+
+    return { kind, author, slug };
+}
+
+async function fetchRegistryPackageRaw(kind: string, author: string, slug: string) {
+    const url = `${REGISTRY_URL}/registry/${kind}/${author}/${slug}`;
+    const res = await fetch(url);
+    if (!res.ok) {
+        if (res.status === 404) {
+            throw new Error(`Package '${kind}/@${author}/${slug}' not found in registry.`);
+        }
+        throw new Error(`Registry error: ${res.statusText}`);
+    }
+
+    const { success, package: pkgData } = (await res.json()) as any;
+    if (!success || !pkgData) {
+        throw new Error("Invalid response from registry.");
+    }
+
+    return pkgData;
+}
+
 // ── Single asset ───────────────────────────────────────────────────────────
 
 /**
@@ -41,17 +87,7 @@ export async function installAsset(
     urn: string,
     force = false
 ): Promise<InstalledAsset> {
-    const parts = urn.split("/");
-    if (parts.length !== 3 || !parts[1].startsWith("@")) {
-        throw new Error(
-            `Invalid URN format: '${urn}'. Expected: <kind>/@<author>/<name>`
-        );
-    }
-
-    const [kind] = parts;
-    if (!isAssetKind(kind)) {
-        throw new Error(`Invalid kind: '${kind}'. Allowed: tal, dance, act, performer`);
-    }
+    const { kind, author, slug } = splitRegistryUrn(urn);
 
     // Auto-init workspace if missing (supports both local and global installs)
     await ensureDotDir(cwd);
@@ -63,15 +99,7 @@ export async function installAsset(
         return { urn, filePath, skipped: true };
     }
 
-    const url = `${REGISTRY_URL}/registry/${parts[0]}/${parts[1]}/${parts[2]}`;
-    const res = await fetch(url);
-    if (!res.ok) {
-        if (res.status === 404) throw new Error(`Package '${urn}' not found in registry.`);
-        throw new Error(`Registry error: ${res.statusText}`);
-    }
-
-    const { success, package: pkgData } = (await res.json()) as any;
-    if (!success || !pkgData) throw new Error("Invalid response from registry.");
+    const pkgData = await fetchRegistryPackageRaw(kind, author.replace(/^@/, ""), slug);
 
     fs.mkdirSync(path.dirname(filePath), { recursive: true });
     fs.writeFileSync(filePath, JSON.stringify(pkgData.payload, null, 2));
@@ -149,6 +177,82 @@ export async function installPerformerAndLock(
     return { performerUrn, localName: name, lockfilePath, installedAssets: installed };
 }
 
+/**
+ * Installs an act and recursively installs all referenced performer/tal/dance
+ * dependencies. This mirrors the richer CLI install behavior so other hosts can
+ * share the same semantics without duplicating command-layer logic.
+ */
+export async function installActWithDependencies(
+    cwd: string,
+    actUrn: string,
+    force = false
+): Promise<InstallActResult> {
+    const parts = actUrn.split("/");
+    if (parts.length !== 3 || parts[0] !== "act" || !parts[1].startsWith("@")) {
+        throw new Error(
+            `Invalid act URN: '${actUrn}'. Expected: act/@<author>/<name>`
+        );
+    }
+
+    const installed: InstalledAsset[] = [];
+    const seen = new Set<string>();
+
+    const markInstalled = (asset: InstalledAsset) => {
+        if (seen.has(asset.urn)) {
+            return;
+        }
+        seen.add(asset.urn);
+        installed.push(asset);
+    };
+
+    const actAsset = await installAsset(cwd, actUrn, force);
+    markInstalled(actAsset);
+
+    const filePath = assetFilePath(cwd, actUrn);
+    const content = JSON.parse(fs.readFileSync(filePath, "utf-8")) as Record<string, unknown>;
+    const nodes = content.nodes as Record<string, unknown> | undefined;
+    if (!nodes) {
+        return { actUrn, actAsset, installedAssets: installed };
+    }
+
+    for (const node of Object.values(nodes)) {
+        if (typeof node !== "object" || node === null) {
+            continue;
+        }
+
+        const performerUrn = (node as Record<string, unknown>).performer;
+        if (typeof performerUrn !== "string" || seen.has(performerUrn)) {
+            continue;
+        }
+
+        const performerAsset = await installAsset(cwd, performerUrn, force);
+        markInstalled(performerAsset);
+
+        const performerPath = assetFilePath(cwd, performerUrn);
+        const performerContent = JSON.parse(fs.readFileSync(performerPath, "utf-8")) as Record<string, unknown>;
+
+        const talUrn = typeof performerContent.tal === "string" ? performerContent.tal : null;
+        if (talUrn && !seen.has(talUrn)) {
+            markInstalled(await installAsset(cwd, talUrn, force));
+        }
+
+        const danceRaw = performerContent.dance;
+        const danceUrns: string[] = Array.isArray(danceRaw)
+            ? (danceRaw as unknown[]).filter((value): value is string => typeof value === "string")
+            : typeof danceRaw === "string"
+                ? [danceRaw]
+                : [];
+
+        for (const danceUrn of danceUrns) {
+            if (!seen.has(danceUrn)) {
+                markInstalled(await installAsset(cwd, danceUrn, force));
+            }
+        }
+    }
+
+    return { actUrn, actAsset, installedAssets: installed };
+}
+
 // ── Registry API ──────────────────────────────────────────────────────────
 
 export interface RegistryPackageMeta {
@@ -161,6 +265,34 @@ export interface RegistryPackageMeta {
     tags: string[];
     downloads?: number;
     updatedAt?: string;
+}
+
+export async function getRegistryPackage(
+    kind: string,
+    author: string,
+    slug: string
+): Promise<RegistryPackageDetail> {
+    if (!isAssetKind(kind)) {
+        throw new Error(`Invalid kind: '${kind}'. Allowed: tal, dance, act, performer`);
+    }
+
+    const normalizedAuthor = author.replace(/^@/, "");
+    const pkgData = await fetchRegistryPackageRaw(kind, normalizedAuthor, slug);
+
+    return {
+        urn: pkgData.urn ?? `${kind}/@${normalizedAuthor}/${slug}`,
+        kind: pkgData.kind ?? kind,
+        name: pkgData.name ?? slug,
+        author: pkgData.author ?? normalizedAuthor,
+        slug: pkgData.slug ?? slug,
+        description: pkgData.description ?? "",
+        tags: pkgData.tags ?? [],
+        downloads: pkgData.downloads,
+        updatedAt: pkgData.updatedAt,
+        stars: pkgData.stars,
+        tier: pkgData.tier,
+        payload: typeof pkgData.payload === "object" && pkgData.payload ? pkgData.payload : {},
+    };
 }
 
 /**
@@ -222,4 +354,3 @@ function normalisePackages(packages: any[]): RegistryPackageMeta[] {
         updatedAt: pkg.updatedAt,
     }));
 }
-

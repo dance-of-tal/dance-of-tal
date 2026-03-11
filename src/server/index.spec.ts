@@ -37,7 +37,7 @@ describe.sequential("MCP server minimal tool flow", () => {
     await fs.rm(projectDir, { recursive: true, force: true });
   });
 
-  it("exposes only setup/install/list MCP tools", async () => {
+  it("exposes setup/install/list/read MCP tools", async () => {
     const server = createServer();
     const client = new Client({ name: "dot-test-client", version: "1.0.0" });
     const [serverTransport, clientTransport] = InMemoryTransport.createLinkedPair();
@@ -46,7 +46,12 @@ describe.sequential("MCP server minimal tool flow", () => {
     try {
       const tools = await client.listTools();
       const toolNames = tools.tools.map((tool) => tool.name);
-      expect(toolNames).toEqual(["setup_workspace", "install_asset", "list_assets"]);
+      expect(toolNames).toEqual([
+        "setup_workspace",
+        "install_asset",
+        "list_assets",
+        "load_capability_context",
+      ]);
     } finally {
       await Promise.allSettled([client.close(), server.close()]);
     }
@@ -108,6 +113,54 @@ describe.sequential("MCP server minimal tool flow", () => {
       expect(listPayload.count).toBe(1);
       expect(listPayload.assets[0].urn).toBe(urn);
       expect(listPayload.assets[0].kind).toBe("tal");
+    } finally {
+      await Promise.allSettled([client.close(), server.close()]);
+    }
+  });
+
+  it("reads installed asset content on demand", async () => {
+    process.env.DANCE_OF_TAL_PROJECT_DIR = projectDir;
+
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          success: true,
+          package: {
+            payload: {
+              type: "dance/@acme/pr-review",
+              slug: "pr-review",
+              name: "PR Review",
+              description: "Review pull requests carefully.",
+              tags: ["review"],
+              content: "Check correctness, tests, and regressions.",
+            },
+          },
+        }),
+        { status: 200, headers: { "Content-Type": "application/json" } }
+      )
+    );
+
+    const server = createServer();
+    const client = new Client({ name: "dot-test-client", version: "1.0.0" });
+    const [serverTransport, clientTransport] = InMemoryTransport.createLinkedPair();
+
+    await Promise.all([server.connect(serverTransport), client.connect(clientTransport)]);
+    try {
+      await client.callTool({ name: "setup_workspace", arguments: {} });
+      await client.callTool({
+        name: "install_asset",
+        arguments: { urn: "dance/@acme/pr-review" },
+      });
+
+      const result = await client.callTool({
+        name: "load_capability_context",
+        arguments: { urn: "dance/@acme/pr-review" },
+      });
+      const payload = JSON.parse(extractTextContent(result));
+      expect(payload.success).toBe(true);
+      expect(payload.kind).toBe("dance");
+      expect(payload.description).toBe("Review pull requests carefully.");
+      expect(payload.content).toBe("Check correctness, tests, and regressions.");
     } finally {
       await Promise.allSettled([client.close(), server.close()]);
     }
