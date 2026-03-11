@@ -56,7 +56,11 @@ export const loginCmd = new Command("login")
     .description("Login to Dance of Tal Registry via GitHub")
     .action(async () => {
         console.log(ui.title("Authenticating with Dance of Tal Registry"));
-        console.log(ui.dim("Using GitHub OAuth...\n"));
+        console.log(ui.dim("Using GitHub OAuth..."));
+        console.log(
+            ui.dim("\n  By logging in, you agree to the Dance of Tal Terms of Service:") +
+            "\n  " + ui.highlight("https://danceoftal.com/tos") + "\n"
+        );
 
         const codeVerifier = generateCodeVerifier();
         const codeChallenge = generateCodeChallenge(codeVerifier);
@@ -112,6 +116,7 @@ export const loginCmd = new Command("login")
                             await saveAuthToken(accessToken, username);
 
                             console.log(ui.success(`\n✔ Authentication successful! You are logged in as @${username}.`));
+                            console.log(ui.dim(`  You have agreed to the Terms of Service: https://danceoftal.com/tos`));
 
                             res.end(`
                                 <script>
