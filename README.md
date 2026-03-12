@@ -102,8 +102,8 @@ Defines multi-performer workflows using a `nodes` topology. Each node has a `typ
 | Type | Role |
 |------|------|
 | `worker` | Single performer execution |
-| `orchestrator` | LLM dynamically selects next node from `routes` at runtime |
-| `parallel` | Fan-out: runs `branches` concurrently, `join` strategy controls when to proceed |
+| `orchestrator` | LLM dynamically selects one of its outgoing edges at runtime |
+| `parallel` | Fan-out via `edges[].role = "branch"`; `join` controls when to proceed |
 
 ```jsonc
 // act/@acme-platform/incident-response
@@ -113,7 +113,6 @@ Defines multi-performer workflows using a `nodes` topology. Each node has a `typ
     "orchestrate": {
       "type": "orchestrator",
       "performer": "performer/@acme-platform/sisyphus",
-      "routes": ["plan", "implement", "review"],
       "maxDelegations": 20
     },
     "plan":      { "type": "worker", "performer": "performer/@acme-platform/planner" },
@@ -122,13 +121,17 @@ Defines multi-performer workflows using a `nodes` topology. Each node has a `typ
 
     "research-all": {
       "type": "parallel",
-      "branches": ["res-a", "res-b"],
       "join": "all"
     },
     "res-a": { "type": "worker", "performer": "performer/@acme-platform/librarian" },
     "res-b": { "type": "worker", "performer": "performer/@acme-platform/explorer" }
   },
   "edges": [
+    { "from": "orchestrate", "to": "plan" },
+    { "from": "orchestrate", "to": "implement" },
+    { "from": "orchestrate", "to": "review" },
+    { "from": "research-all", "to": "res-a", "role": "branch" },
+    { "from": "research-all", "to": "res-b", "role": "branch" },
     { "from": "review", "to": "$exit", "condition": "on_success" }
   ],
   "entryNode": "orchestrate",

@@ -44,7 +44,6 @@ function buildActTemplate(slug: string, name: string, description: string, autho
             "orchestrate": {
                 type: "orchestrator",
                 performer: `performer/@${author}/your-orchestrator`,
-                routes: ["worker-1"],
                 maxDelegations: 10
             },
             "worker-1": {
@@ -52,7 +51,12 @@ function buildActTemplate(slug: string, name: string, description: string, autho
                 performer: `performer/@${author}/your-worker`
             }
         },
-        edges: [],
+        edges: [
+            {
+                from: "orchestrate",
+                to: "worker-1"
+            }
+        ],
         maxIterations: 50
     };
 }

@@ -26,6 +26,7 @@ export type Performer = {
 export type ActEdge = {
   from: string;
   to: string; // node ID or '$exit'
+  role?: 'branch';
   condition?: 'always' | 'on_success' | 'on_fail';
 };
 
@@ -37,13 +38,11 @@ export type ActNodeWorker = {
 export type ActNodeOrchestrator = {
   type: 'orchestrator';
   performer: string; // performer URN
-  routes: string[];  // node IDs or '$exit'
   maxDelegations?: number;
 };
 
 export type ActNodeParallel = {
   type: 'parallel';
-  branches: string[]; // node IDs
   join?: 'all' | 'any';
 };
 
@@ -88,5 +87,4 @@ export type Dance = {
   schema?: Record<string, any>; // JSON Schema definition for type safety
   exemplarSet?: DanceExemplarSet;
 };
-
 
