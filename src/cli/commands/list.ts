@@ -2,7 +2,8 @@ import { Command } from "commander";
 import { ui } from "../utils/ui.js";
 import { getAuthUser } from "./login.js";
 import { ASSET_KINDS, isAssetKind } from "../../lib/kinds.js";
-import { listRegistryPackages, RegistryPackageMeta } from "../../lib/installer.js";
+import { listRegistryPackages } from "../../lib/installer.js";
+import type { RegistryPackageMeta } from "../../lib/installer.js";
 
 const ASSET_KIND_HELP = ASSET_KINDS.join(" | ");
 

@@ -1,7 +1,8 @@
 import { Command } from "commander";
 import { ui } from "../utils/ui.js";
 import { ASSET_KINDS, isAssetKind } from "../../lib/kinds.js";
-import { searchRegistry, RegistryPackageMeta } from "../../lib/installer.js";
+import { searchRegistry } from "../../lib/installer.js";
+import type { RegistryPackageMeta } from "../../lib/installer.js";
 
 const ASSET_KIND_HELP = ASSET_KINDS.join(" | ");
 

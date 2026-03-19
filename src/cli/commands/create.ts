@@ -4,7 +4,8 @@ import path from "path";
 import { ui } from "../utils/ui.js";
 import { getDotDir, assetFilePath } from "../../lib/registry.js";
 import { getAuthUser } from "./login.js";
-import { CREATABLE_ASSET_KINDS, CreatableAssetKind, isCreatableAssetKind } from "../../lib/kinds.js";
+import { CREATABLE_ASSET_KINDS, isCreatableAssetKind } from "../../lib/kinds.js";
+import type { CreatableAssetKind } from "../../lib/kinds.js";
 import {
     ACT_ASSET_SCHEMA,
     DANCE_ASSET_SCHEMA,

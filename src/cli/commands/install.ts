@@ -1,7 +1,7 @@
 import { ui } from "../utils/ui.js";
 import { installActWithDependencies, installAsset, installPerformerAndLock } from "../../lib/installer.js";
 import { isAssetKind } from "../../lib/kinds.js";
-import { getGlobalDotDir } from "../../lib/registry.js";
+import { getGlobalCwd, getGlobalDotDir } from "../../lib/registry.js";
 
 /**
  * Resolves the target cwd based on --global flag.

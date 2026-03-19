@@ -4,8 +4,8 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import {
   CallToolRequestSchema,
   ListToolsRequestSchema,
-  Tool,
 } from "@modelcontextprotocol/sdk/types.js";
+import type { Tool } from "@modelcontextprotocol/sdk/types.js";
 import { installAsset } from "../lib/installer.js";
 import { getAssetPayload, getDotDir, initRegistry, readAsset } from "../lib/registry.js";
 import { assertSafeAssetUrn } from "../lib/identifiers.js";
