@@ -1,10 +1,9 @@
 import {
   assertBaseAssetShape,
-  DotAssetBase,
-  ParseResult,
   safeParse,
   isNonEmptyString,
 } from "./asset-base.js";
+import type { DotAssetBase, ParseResult } from "./asset-base.js";
 
 export const DANCE_ASSET_SCHEMA =
   "https://schemas.danceoftal.com/assets/dance.v1.json" as const;

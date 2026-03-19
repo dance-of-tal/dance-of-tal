@@ -8,15 +8,15 @@
 import fs from "fs";
 import path from "path";
 import { getDotDir, assetFilePath, lockPerformer, ensureDotDir } from "./registry.js";
-import { LockedPerformer } from "../data/types.js";
+import type { LockedPerformer } from "../data/types.js";
 import { isAssetKind } from "./kinds.js";
 import {
-    AnyDotAssetV1,
     parseActAsset,
     parseDotAsset,
     parsePerformerAsset,
     slugFromUrn,
 } from "../contracts/index.js";
+import type { AnyDotAssetV1 } from "../contracts/index.js";
 
 const REGISTRY_URL =
     process.env.DOT_REGISTRY_URL || "https://registry.dance-of-tal.workers.dev";

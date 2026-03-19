@@ -7,7 +7,7 @@ import {
     assertSafeAssetUrn,
     assertSafePerformerName,
 } from "./identifiers.js";
-import { LockedPerformer } from "../data/types.js";
+import type { LockedPerformer } from "../data/types.js";
 
 /**
  * Returns the root `.dance-of-tal` directory for the active project.

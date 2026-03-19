@@ -2,7 +2,7 @@ import fs from "fs/promises";
 import { assetFilePath } from "./registry.js";
 import { getRegistryPackage } from "./installer.js";
 import { isAssetKind } from "./kinds.js";
-import { parseActAsset, parseDotAsset, parsePerformerAsset } from "../contracts/index.js";
+import { parseActAsset, parsePerformerAsset } from "../contracts/index.js";
 
 const REGISTRY_URL =
     process.env.DOT_REGISTRY_URL || "https://registry.dance-of-tal.workers.dev";

@@ -1,11 +1,9 @@
 import {
   assertBaseAssetShape,
-  DotAssetBase,
-  ParseResult,
   safeParse,
-  asOptionalStringArray,
   isNonEmptyString,
 } from "./asset-base.js";
+import type { DotAssetBase, ParseResult } from "./asset-base.js";
 
 export const TAL_ASSET_SCHEMA =
   "https://schemas.danceoftal.com/assets/tal.v1.json" as const;

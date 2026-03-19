@@ -1,15 +1,17 @@
 import {
   authorFromUrn,
-  DotAssetKind,
-  parseDotAssetUrn,
-  ParseResult,
   safeParse,
   slugFromUrn,
 } from "./asset-base.js";
-import { ActAssetV1, parseActAsset } from "./act.js";
-import { DanceAssetV1, parseDanceAsset } from "./dance.js";
-import { PerformerAssetV1, parsePerformerAsset } from "./performer.js";
-import { TalAssetV1, parseTalAsset } from "./tal.js";
+import type { DotAssetKind, ParseResult } from "./asset-base.js";
+import { parseActAsset } from "./act.js";
+import type { ActAssetV1 } from "./act.js";
+import { parseDanceAsset } from "./dance.js";
+import type { DanceAssetV1 } from "./dance.js";
+import { parsePerformerAsset } from "./performer.js";
+import type { PerformerAssetV1 } from "./performer.js";
+import { parseTalAsset } from "./tal.js";
+import type { TalAssetV1 } from "./tal.js";
 
 export * from "./asset-base.js";
 export * from "./tal.js";
