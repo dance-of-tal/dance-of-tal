@@ -9,11 +9,9 @@ export type {
   DanceAssetV1 as DanceAsset,
   DotAssetBase,
   DotAssetKind,
-  McpRequirementV1,
   ModelConfigV1,
   PerformerAssetPayloadV1,
   PerformerAssetV1 as PerformerAsset,
-  PerformerMcpV1,
   TalAssetPayloadV1,
   TalAssetV1 as TalAsset,
 } from "../contracts/index.js";

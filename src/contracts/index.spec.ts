@@ -42,19 +42,18 @@ describe("dot contracts", () => {
           modelId: "claude-sonnet-4",
         },
         modelVariant: "normal",
-        mcp: {
-          requirements: [
-            {
-              key: "repo",
-              preferred: ["github"],
-              required: true,
+        mcp_config: {
+          servers: {
+            github: {
+              command: "npx",
+              args: ["-y", "@modelcontextprotocol/server-github"],
             },
-          ],
+          },
         },
       },
     });
 
-    expect(asset.payload.mcp?.requirements[0]?.key).toBe("repo");
+    expect((asset.payload.mcp_config as any)?.servers?.github?.command).toBe("npx");
   });
 
   it("rejects performer assets without tal or dances", () => {

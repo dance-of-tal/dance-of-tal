@@ -124,14 +124,13 @@ function buildPerformerTemplate(author: string, slug: string, description: strin
                 modelId: "claude-sonnet-4",
             },
             modelVariant: "normal",
-            mcp: {
-                requirements: [
-                    {
-                        key: "repo",
-                        preferred: ["github"],
-                        required: false,
+            mcp_config: {
+                servers: {
+                    github: {
+                        command: "npx",
+                        args: ["-y", "@modelcontextprotocol/server-github"],
                     },
-                ],
+                },
             },
         },
     };

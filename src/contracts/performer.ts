@@ -16,22 +16,12 @@ export type ModelConfigV1 = {
   modelId: string;
 };
 
-export type McpRequirementV1 = {
-  key: string;
-  preferred?: string[];
-  required?: boolean;
-};
-
-export type PerformerMcpV1 = {
-  requirements: McpRequirementV1[];
-};
-
 export type PerformerAssetPayloadV1 = {
   tal?: string;
   dances?: string[];
   model?: ModelConfigV1;
   modelVariant?: string;
-  mcp?: PerformerMcpV1;
+  mcp_config?: Record<string, unknown>;
 };
 
 export type PerformerAssetV1 = DotAssetBase<"performer", PerformerAssetPayloadV1>;
@@ -50,63 +40,6 @@ function parseModelConfig(input: unknown): ModelConfigV1 {
     provider: input.provider,
     modelId: input.modelId,
   };
-}
-
-function parseMcpRequirement(input: unknown, index: number): McpRequirementV1 {
-  if (!isRecord(input)) {
-    throw new Error(`payload.mcp.requirements[${index}] must be an object`);
-  }
-  if (!isNonEmptyString(input.key)) {
-    throw new Error(`payload.mcp.requirements[${index}].key must be a non-empty string`);
-  }
-
-  let preferred: string[] | undefined;
-  if (input.preferred !== undefined) {
-    if (!Array.isArray(input.preferred)) {
-      throw new Error(`payload.mcp.requirements[${index}].preferred must be an array of strings`);
-    }
-    preferred = Array.from(
-      new Set(
-        input.preferred.map((entry, prefIndex) => {
-          if (!isNonEmptyString(entry)) {
-            throw new Error(
-              `payload.mcp.requirements[${index}].preferred[${prefIndex}] must be a non-empty string`,
-            );
-          }
-          return entry;
-        }),
-      ),
-    );
-  }
-
-  if (input.required !== undefined && typeof input.required !== "boolean") {
-    throw new Error(`payload.mcp.requirements[${index}].required must be a boolean when provided`);
-  }
-
-  return {
-    key: input.key,
-    ...(preferred ? { preferred } : {}),
-    ...(typeof input.required === "boolean" ? { required: input.required } : {}),
-  };
-}
-
-function parseMcpConfig(input: unknown): PerformerMcpV1 {
-  if (!isRecord(input)) {
-    throw new Error("payload.mcp must be an object when provided");
-  }
-  if (!Array.isArray(input.requirements)) {
-    throw new Error("payload.mcp.requirements must be an array");
-  }
-
-  const requirements = input.requirements.map((entry, index) =>
-    parseMcpRequirement(entry, index),
-  );
-
-  if (requirements.length === 0) {
-    throw new Error("payload.mcp.requirements must contain at least one entry");
-  }
-
-  return { requirements };
 }
 
 export function parsePerformerAsset(input: unknown): PerformerAssetV1 {
@@ -157,9 +90,12 @@ export function parsePerformerAsset(input: unknown): PerformerAssetV1 {
     throw new Error("payload.modelVariant must be a non-empty string when provided");
   }
 
-  let mcp: PerformerMcpV1 | undefined;
-  if (base.payload.mcp !== undefined) {
-    mcp = parseMcpConfig(base.payload.mcp);
+  let mcpConfig: Record<string, unknown> | undefined;
+  if (base.payload.mcp_config !== undefined) {
+    if (!isRecord(base.payload.mcp_config)) {
+      throw new Error("payload.mcp_config must be an object when provided");
+    }
+    mcpConfig = base.payload.mcp_config;
   }
 
   return {
@@ -171,7 +107,7 @@ export function parsePerformerAsset(input: unknown): PerformerAssetV1 {
       ...(typeof base.payload.modelVariant === "string"
         ? { modelVariant: base.payload.modelVariant }
         : {}),
-      ...(mcp ? { mcp } : {}),
+      ...(mcpConfig ? { mcp_config: mcpConfig } : {}),
     },
   };
 }

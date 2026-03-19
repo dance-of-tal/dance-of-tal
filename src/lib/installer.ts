@@ -174,7 +174,10 @@ export async function installPerformerAndLock(
     const modelValue = content.payload.model !== undefined && content.payload.model !== null ? content.payload.model : null;
 
     // 6. MCP Config (no file to install, just preserved)
-    const mcpConfig = content.payload.mcp ? { requirements: content.payload.mcp.requirements } : null;
+    const mcpConfig =
+        content.payload.mcp_config && typeof content.payload.mcp_config === "object"
+            ? content.payload.mcp_config
+            : null;
 
     // 7. Auto-lock the performer
     const performer: LockedPerformer = {
