@@ -4,7 +4,7 @@
 
 [![npm version](https://img.shields.io/npm/v/dance-of-tal)](https://www.npmjs.com/package/dance-of-tal)
 [![License: MIT](https://img.shields.io/badge/License-MIT-white.svg)](LICENSE)
-[![Registry](https://img.shields.io/badge/Registry-Live-emerald)](https://registry.dance-of-tal-v2.workers.dev)
+[![Registry](https://img.shields.io/badge/Registry-Live-emerald)](https://registry.dance-of-tal.workers.dev)
 
 ---
 
@@ -19,7 +19,7 @@ Modern AI-powered development relies on system prompts that have quietly grown i
 | Software principle                   | DOT equivalent                                                     |
 | ------------------------------------ | ------------------------------------------------------------------ |
 | Dependency Injection                 | Context assembled from discrete, typed components                  |
-| `package.json` → `package-lock.json` | Performer locks exact Tal + Dance references                           |
+| `package.json` + `node_modules`      | Performer bundles exact Tal + Dance references                     |
 | npm registry                         | Global Cloudflare KV registry                                      |
 | Multiple CSS classes on one element  | Multiple Dances layered in one Performer                               |
 | CI/CD pipeline                       | Every engineer on every machine runs the **exact** same AI persona |
@@ -32,12 +32,12 @@ Picture a newly onboarded senior engineer at your company.
 
 - Their **Tal** is their _professional identity and core rules_ — the thinking framework, role, tone, and non-negotiable rules your company expects. Do they prioritise correctness or delivery speed? Do they design for GDPR compliance by default? This is the **who + always-on rules** of the AI — always applied as the system prompt.
 - Their **Dance** is their _skill repertoire_ — techniques they can invoke when needed. Run a security audit. Generate a test suite. Produce structured JSON output. This is the **what the AI can do on-demand**. Only the Dance `description` is included in the prompt; the full `content` is loaded via MCP tool when the Performer needs it.
-- A **Performer** locks a Tal + one or more Dances together — a frozen, versioned snapshot that everyone on the team installs.
+- A **Performer** bundles a Tal + one or more Dances together — a versioned composition that everyone on the team installs.
 - An **Act** is a _participant choreography_ — a shared work scene where multiple performers enter as participants with explicit relations, subscriptions, and shared context. Use it when the AI's identity or collaboration pattern changes mid-task (e.g. normal sprint → incident response mode).
 
 ---
 
-## V2 Architecture: The Four Asset Types
+## The Four Asset Types
 
 All assets use strict **URN notation**: `<kind>/@<author>/<name>`
 
@@ -79,9 +79,9 @@ Encodes on-demand _skills and techniques_ the Performer can invoke when needed. 
 }
 ```
 
-### 3. `Performer` — The Lockfile
+### 3. `Performer` — The Composition
 
-Pins a Tal and/or Dances. Multiple Dances are layered in order — rules concatenate, schemas deep-merge — like CSS classes. **Both tal and dance are optional** (at least one required), enabling tal-only, dance-only, or full performer compositions.
+Bundles a Tal and/or Dances into a versioned composition. Multiple Dances are layered in order — rules concatenate, schemas deep-merge — like CSS classes. **Both tal and dance are optional** (at least one required), enabling tal-only, dance-only, or full performer compositions. Optionally includes model preference and MCP tool configuration.
 
 ```jsonc
 // performer/@acme-platform/sprint
@@ -109,7 +109,7 @@ Pins a Tal and/or Dances. Multiple Dances are layered in order — rules concate
 ### 4. `Act` — Participant Choreography
 
 Defines a shared work scene built from participants and their relations.
-Each participant can reference a locked performer and optionally override
+Each participant references a performer and optionally overrides
 active dances or subscriptions for that act.
 
 ```jsonc
@@ -156,7 +156,7 @@ active dances or subscriptions for that act.
 ```
 ┌──────────────────────────────────────────────────────────┐
 │                    Global DOT Registry                    │
-│    registry.dance-of-tal-v2.workers.dev (Cloudflare KV)  │
+│    registry.dance-of-tal.workers.dev (Cloudflare KV)     │
 │                                                          │
 │  tal/@acme-platform/senior-backend-engineer              │
 │  dance/@acme-platform/kotlin-style-guide                 │
@@ -168,17 +168,19 @@ active dances or subscriptions for that act.
 ┌──────────────────────────────────────────────────────────┐
 │                  Your Project Workspace                   │
 │  .dance-of-tal/                                          │
-│  ├── tal/@acme-platform/senior-backend-engineer.json     │
-│  ├── dance/@acme-platform/kotlin-style-guide.json        │
-│  ├── dance/@acme-security/gdpr-awareness.json            │
-│  └── performer/@acme-platform/sprint.json                │
+│  ├── assets/                                             │
+│  │   ├── tal/@acme-platform/senior-backend-engineer.json │
+│  │   ├── dance/@acme-platform/kotlin-style-guide.json    │
+│  │   ├── dance/@acme-security/gdpr-awareness.json        │
+│  │   └── performer/@acme-platform/sprint.json            │
+│  └── registry.json                                       │
 └────────────────────┬─────────────────────────────────────┘
                      │
            ┌─────────┴─────────┐
       CLI Mode             MCP Mode
    (dot install)      (AI tool calls MCP tools)
    Installs assets    Returns compiled
-   + auto-locks       context on demand
+   + dependencies     context on demand
 ```
 
 ---
@@ -196,7 +198,7 @@ npm install -g dance-of-tal
 ```bash
 cd your-repo
 dot init
-# Creates .dance-of-tal/performer/
+# Creates .dance-of-tal/ with registry.json
 ```
 
 ### 3. Login with GitHub
@@ -261,7 +263,7 @@ dot install act/@acme-platform/incident-response
 | ------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
 | `dot init`                                                    | Scaffold `.dance-of-tal/` workspace                                                               |
 | `dot login`                                                   | GitHub OAuth → `~/.dance-of-tal/auth.json`                                                        |
-| `dot install <urn>`                                           | Download asset by URN. Performer → cascading install + auto-lock |
+| `dot install <urn>`                                           | Download asset by URN. Performer → cascading install of dependencies                              |
 | `dot search <keyword>`                                        | Search global registry by keyword                                                                 |
 | `dot list [--mine] [--kind <kind>]`                           | List registry packages                                                                            |
 | `dot create --kind <kind> --name <slug>`                      | Scaffold a new asset locally                                                                      |
@@ -275,9 +277,6 @@ dot install act/@acme-platform/incident-response
 tal/@acme-platform/senior-backend-engineer
 dance/@acme-security/gdpr-awareness
 act/@acme-platform/incident-response
-
-# Shorthand (kind inferred from flag):
-@acme-platform/senior-backend-engineer
 ```
 
 ---
@@ -304,15 +303,16 @@ DOT implements the **Model Context Protocol (MCP)**, so AI IDEs can pull the exa
 }
 ```
 
-By default, DOT auto-discovers the nearest parent containing `.dance-of-tal/performer` from the MCP process working directory. If no workspace is found, tools like `setup_workspace` and `install_asset` will auto-initialize one at `process.cwd()`. Set `DANCE_OF_TAL_PROJECT_DIR` only when the IDE's working directory differs from your project root.
+By default, DOT auto-discovers the nearest parent containing `.dance-of-tal/` from the MCP process working directory. If no workspace is found, tools like `setup_workspace` and `install_asset` will auto-initialize one at `process.cwd()`. Set `DANCE_OF_TAL_PROJECT_DIR` only when the IDE's working directory differs from your project root.
 
-### MCP Tools (3 tools)
+### MCP Tools (4 tools)
 
 | Tool              | Description                                    |
 | ----------------- | ---------------------------------------------- |
 | `setup_workspace`    | Initialize `.dance-of-tal/` directory (MCP-driven, no CLI needed) |
 | `install_asset`      | Install a Tal or Dance asset from registry into `.dance-of-tal/` |
 | `list_assets`        | List locally installed Tal and Dance assets |
+| `load_capability_context` | Load full content of an installed capability (Tal or Dance) by URN |
 
 ---
 
@@ -323,8 +323,8 @@ dot login
 # Your GitHub username becomes your protected namespace
 
 # Create a new asset locally
-dot create --kind tal --name my-persona --display-name "My Persona"
-# → .dance-of-tal/tal/@yourusername/my-persona.json  (local file, not yet in registry)
+dot create --kind tal --name my-persona
+# → .dance-of-tal/assets/tal/@yourusername/my-persona.json  (local file, not yet in registry)
 
 # Edit the generated template, then publish
 dot publish --kind tal --name my-persona --tags "backend,kotlin,platform"
@@ -346,45 +346,33 @@ No `--author` needed — your GitHub login is the namespace. The create → edit
 
 ## The Registry
 
-**Base URL:** `https://registry.dance-of-tal-v2.workers.dev`
+**Base URL:** `https://registry.dance-of-tal.workers.dev`
 
 | Endpoint                                   | Description                               |
 | ------------------------------------------ | ----------------------------------------- |
 | `GET /registry?kind=tal`                   | List all assets for an asset kind         |
-| `GET /registry?kind=tal&tier=verified`     | List only verified (official) assets      |
 | `GET /registry/:kind/:username/:name`      | Fetch asset by URN                        |
 | `POST /publish`                            | Publish (`Authorization: Bearer <token>`) |
-
-### Registry Tiers
-
-| Tier        | Namespace                       | Who can publish         | Description                        |
-| ----------- | ------------------------------- | ----------------------- | ---------------------------------- |
-| `verified`  | `@dot-official`                  | System (admin token)    | Curated official assets            |
-| `community` | `@yourusername`                 | Anyone with `dot login` | GitHub-namespaced community assets |
-
-Assets you create with `dot create` live only on your local disk until you run `dot publish`. There is no separate "local tier" — unpublished assets are just local files, identical to how npm treats packages before `npm publish`.
 
 ---
 
 ## Repository Structure
 
 ```
-dance-of-tal/
-├── mcp/                  ← CLI (dot) + MCP Server — this package
-│   └── src/
-│       ├── cli/          ← thin CLI adapters (init, install, create, publish, search, list, agents, login)
-│       │   ├── commands/ ← individual CLI commands
-│       │   └── utils/    ← shared CLI utilities
-│       ├── lib/          ← shared core (MCP + CLI both call these)
-│       │   ├── registry.ts  ← local file I/O + Performer type
-│       │   ├── installer.ts ← registry fetch + install + auto-lock
-│       │   ├── agents.ts    ← agents.json read/write
-│       │   ├── identifiers.ts ← URN parsing and validation
-│       │   └── kinds.ts     ← type definitions for asset kinds
-│       └── server/index.ts  ← MCP server (3 tools)
-│
-├── registry/             ← Cloudflare Worker (Hono + KV) — private
-└── front/                ← Next.js registry browser — private
+dot/
+└── src/
+    ├── cli/              ← thin CLI adapters (init, install, create, publish, search, list, login)
+    │   ├── commands/     ← individual CLI commands
+    │   └── utils/        ← shared CLI utilities (ui, update checker)
+    ├── contracts/        ← canonical asset schemas (tal, dance, performer, act)
+    ├── data/             ← shared type re-exports
+    ├── lib/              ← shared core (MCP + CLI both call these)
+    │   ├── registry.ts   ← local file I/O (dot dir, asset read/write)
+    │   ├── installer.ts  ← registry fetch + install + dependency cascading
+    │   ├── publishing.ts ← publish to registry + dependency resolution
+    │   ├── identifiers.ts ← URN parsing and validation
+    │   └── kinds.ts      ← type definitions for asset kinds
+    └── server/index.ts   ← MCP server (3 tools)
 ```
 
 ---
