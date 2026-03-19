@@ -22,7 +22,6 @@ export const printUsage = () => {
         ["dot publish --kind ... --name ...", "Publish local asset/performer to registry"],
         ["dot search <keyword>", "Search registry packages"],
         ["dot list [--kind ...] [--mine]", "List registry packages"],
-        ["dot agents set|list|remove", "Manage role -> performer mappings in agents.json"],
         ["dot login", "Authenticate with GitHub for publish operations"]
     ];
 
@@ -36,7 +35,7 @@ export const printUsage = () => {
             ui.dim("================"),
             "",
             ui.section("Purpose"),
-            "  Build and activate reproducible Tal + Dance performers for MCP/CLI workflows.",
+            "  Build reproducible Tal + Dance performers and participant-based Acts for MCP/CLI workflows.",
             "",
             ui.section("Quick Start"),
             `  1) ${ui.command("dot init")}`,
@@ -48,9 +47,11 @@ export const printUsage = () => {
             ui.section("Examples"),
             `  ${ui.command("dot install performer/@acme/sprint")}`,
             `  ${ui.command("dot install tal/@acme/system-architect")}`,
+            `  ${ui.command("dot install act/@acme/incident-response")}`,
             "",
             ui.section("Project Config"),
-            "  Performers:       .dance-of-tal/performer/<name>.json",
+            "  Performers:       .dance-of-tal/assets/performer/@<author>/<name>.json",
+            "  Acts:             .dance-of-tal/assets/act/@<author>/<name>.json",
             ""
         ].join("\n")
     );

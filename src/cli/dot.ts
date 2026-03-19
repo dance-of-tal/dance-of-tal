@@ -7,7 +7,6 @@ import { runInstall } from "./commands/install.js";
 
 import { publishCmd } from "./commands/publish.js";
 import { loginCmd } from "./commands/login.js";
-import { agentsCmd } from "./commands/agents.js";
 import { searchCmd } from "./commands/search.js";
 import { listCmd } from "./commands/list.js";
 import { createCmd } from "./commands/create.js";
@@ -19,7 +18,7 @@ const program = new Command();
 program
   .name("dot")
   .description("Dance of Tal — Agent Manager for Agentic AI")
-  .version("3.2.0")
+  .version("3.3.0")
   .hook("postAction", async () => {
     await checkForUpdates();
   });
@@ -52,7 +51,6 @@ program
 
 program.addCommand(publishCmd);
 program.addCommand(loginCmd);
-program.addCommand(agentsCmd);
 program.addCommand(searchCmd);
 program.addCommand(listCmd);
 program.addCommand(createCmd);

@@ -1,55 +1,50 @@
-import fs from "fs/promises";
+import { describe, expect, it, beforeEach, afterEach } from "vitest";
+import fs from "fs";
 import os from "os";
 import path from "path";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { getPerformer, listLockedPerformerNames, lockPerformer } from "./registry.js";
+import { assetFilePath, readAsset } from "./registry.js";
 
-describe("registry performer safety", () => {
-  let cwd: string;
+describe("registry asset safety", () => {
+    let cwd: string;
 
-  beforeEach(async () => {
-    cwd = await fs.mkdtemp(path.join(os.tmpdir(), "dot-registry-"));
-  });
+    beforeEach(() => {
+        cwd = fs.mkdtempSync(path.join(os.tmpdir(), "dot-test-"));
+        fs.mkdirSync(path.join(cwd, ".dance-of-tal", "assets", "performer", "@acme"), { recursive: true });
+    });
 
-  afterEach(async () => {
-    await fs.rm(cwd, { recursive: true, force: true });
-  });
+    afterEach(() => {
+        fs.rmSync(cwd, { recursive: true, force: true });
+    });
 
-  it("locks and reads a valid performer", async () => {
-    await lockPerformer(cwd, "sprint", {
-      tal: "tal/@acme/system-architect",
-      dance: "dance/@acme/json-structure",
-    } as any);
+    it("resolves asset file path for performer URN", () => {
+        const filePath = assetFilePath(cwd, "performer/@acme/sprint");
+        expect(filePath).toContain(path.join(".dance-of-tal", "assets", "performer", "@acme", "sprint.json"));
+    });
 
-    const performer = await getPerformer(cwd, "sprint");
-    expect(performer).not.toBeNull();
-    expect(performer?.tal).toBe("tal/@acme/system-architect");
-  });
+    it("reads installed performer asset from assets directory", async () => {
+        const performerAsset = {
+            $schema: "https://schemas.danceoftal.com/assets/performer.v1.json",
+            kind: "performer",
+            urn: "performer/@acme/sprint",
+            description: "Sprint performer",
+            tags: ["sprint"],
+            payload: {
+                tal: "tal/@acme/system-architect",
+                dances: ["dance/@acme/json-structure"],
+            },
+        };
+        const filePath = assetFilePath(cwd, "performer/@acme/sprint");
+        fs.mkdirSync(path.dirname(filePath), { recursive: true });
+        fs.writeFileSync(filePath, JSON.stringify(performerAsset, null, 2));
 
-  it("rejects unsafe performer names", async () => {
-    await expect(
-      lockPerformer(cwd, "../escape", {
-        tal: "tal/@acme/system-architect",
-        dance: "dance/@acme/json-structure",
-      } as any)
-    ).rejects.toThrow("Invalid performer name");
+        const result = await readAsset(cwd, "performer/@acme/sprint");
+        expect(result).toBeTruthy();
+        expect((result as any).kind).toBe("performer");
+        expect((result as any).payload.tal).toBe("tal/@acme/system-architect");
+    });
 
-    await expect(getPerformer(cwd, "../../leak")).rejects.toThrow("Invalid performer name");
-  });
-
-  it("lists valid locked performers and skips malformed filenames", async () => {
-    await lockPerformer(cwd, "incident", {
-      tal: "tal/@acme/system-architect",
-      dance: "dance/@acme/json-structure",
-    } as any);
-
-    const performersDir = path.join(cwd, ".dance-of-tal", "performer");
-    await fs.mkdir(performersDir, { recursive: true });
-    await fs.writeFile(path.join(performersDir, "bad name.json"), "{}", "utf-8");
-
-    const result = await listLockedPerformerNames(cwd);
-    expect(result.names).toEqual(["incident"]);
-    expect(result.skipped.length).toBe(1);
-    expect(result.skipped[0]?.file).toBe("bad name.json");
-  });
+    it("returns null for missing assets", async () => {
+        const result = await readAsset(cwd, "performer/@acme/nonexistent");
+        expect(result).toBeNull();
+    });
 });

@@ -1,5 +1,5 @@
 import { ui } from "../utils/ui.js";
-import { installActWithDependencies, installAsset, installPerformerAndLock } from "../../lib/installer.js";
+import { installActWithDependencies, installAsset, installPerformerWithDeps } from "../../lib/installer.js";
 import { isAssetKind } from "../../lib/kinds.js";
 import { getGlobalCwd, getGlobalDotDir } from "../../lib/registry.js";
 
@@ -41,19 +41,16 @@ export async function runInstall(pkg: string, options?: { global?: boolean }) {
     }
 
     if (kind === "performer") {
-        // Performer: cascading install + auto-lock
         console.log(ui.dim("Installing performer...\n"));
-        const result = await installPerformerAndLock(cwd, pkg);
+        const result = await installPerformerWithDeps(cwd, pkg);
 
         const newCount = result.installedAssets.filter(a => !a.skipped).length;
         const skipCount = result.installedAssets.filter(a => a.skipped).length;
 
         console.log(ui.success(`\n✔ Installed ${newCount} asset(s), skipped ${skipCount}. [${scopeLabel}]`));
-        console.log(ui.success(`✔ Performer locked: .dance-of-tal/performer/${result.localName}.json`));
-
         console.log(
             "\n" +
-            ui.success(`✔ Ready! Performer: ${ui.highlight(result.localName)}`) +
+            ui.success(`✔ Ready! Performer: ${ui.highlight(pkg)}`) +
             "\n"
         );
     } else if (kind === "act") {

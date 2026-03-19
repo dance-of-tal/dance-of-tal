@@ -15,7 +15,7 @@ import os from "os";
 import path from "path";
 import { fileURLToPath } from "url";
 
-const SERVER_VERSION = "3.2.0";
+const SERVER_VERSION = "3.3.0";
 const INSTALLABLE_KINDS = ["tal", "dance"] as const;
 type InstallableKind = (typeof INSTALLABLE_KINDS)[number];
 
@@ -406,10 +406,7 @@ export function createServer(): Server {
         };
       }
 
-      if (
-        request.params.name === "load_capability_context" ||
-        request.params.name === "read_asset_content"
-      ) {
+      if (request.params.name === "load_capability_context") {
         const urn = typeof args.urn === "string" ? args.urn : "";
         const kind = parseInstallableKind(urn);
         const asset = await readAsset(cwd, urn);

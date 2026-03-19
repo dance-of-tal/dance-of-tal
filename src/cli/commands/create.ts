@@ -142,7 +142,6 @@ export const createCmd = new Command("create")
     .requiredOption("--kind <kind>", `Asset type: ${CREATABLE_KIND_HELP}`)
     .requiredOption("--name <slug>", "Asset slug (e.g. my-custom-tal)")
     .option("--author <author>", "Author namespace (defaults to logged-in GitHub username)")
-    .option("--display-name <displayName>", "Human-readable name")
     .option("--description <description>", "Short description")
     .action(async (options) => {
         console.log(ui.title("Creating Asset"));
@@ -191,8 +190,8 @@ export const createCmd = new Command("create")
                 );
             }
 
-            const displayName = options.displayName || slug.replace(/-/g, " ").replace(/\b\w/g, (c: string) => c.toUpperCase());
-            const description = options.description || `Asset for ${displayName}`;
+            const humanName = slug.replace(/-/g, " ").replace(/\b\w/g, (c: string) => c.toUpperCase());
+            const description = options.description || `Asset for ${humanName}`;
 
             let template: Record<string, unknown>;
             if (typedKind === "tal") template = buildTalTemplate(author, slug, description);

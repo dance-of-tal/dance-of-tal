@@ -1,14 +1,6 @@
-/**
- * Shared core installer — used by both MCP tools and CLI commands.
- *
- * Rules:
- *   - NO console.log / process.exit / argparse here.
- *   - Only fs, fetch, and sibling lib imports.
- */
 import fs from "fs";
 import path from "path";
-import { getDotDir, assetFilePath, lockPerformer, ensureDotDir } from "./registry.js";
-import type { LockedPerformer } from "../data/types.js";
+import { getDotDir, assetFilePath, ensureDotDir } from "./registry.js";
 import { isAssetKind } from "./kinds.js";
 import {
     parseActAsset,
@@ -31,8 +23,6 @@ export interface InstalledAsset {
 
 export interface InstallPerformerResult {
     performerUrn: string;
-    localName: string;
-    lockfilePath: string;
     installedAssets: InstalledAsset[];
 }
 
@@ -126,15 +116,14 @@ export async function installAsset(
 // ── Cascading performer install ────────────────────────────────────────────────
 
 /**
- * Installs a performer and ALL its dependencies (tal, dance[], model?),
- * then auto-locks the performer file.
+ * Installs a performer and ALL its dependencies (tal, dances).
+ * No lock file is created — the canonical asset is the source of truth.
  *
- * Returns { performerUrn, localName, lockfilePath, installedAssets }.
+ * Returns { performerUrn, installedAssets }.
  */
-export async function installPerformerAndLock(
+export async function installPerformerWithDeps(
     cwd: string,
     performerUrn: string,
-    localName?: string,
     force = false
 ): Promise<InstallPerformerResult> {
     const parts = performerUrn.split("/");
@@ -144,8 +133,6 @@ export async function installPerformerAndLock(
         );
     }
 
-    const slug = parts[2];
-    const name = localName ?? slug;
     const installed: InstalledAsset[] = [];
 
     // 1. Fetch and save the performer asset itself
@@ -159,42 +146,16 @@ export async function installPerformerAndLock(
     );
 
     // 3. Install tal (if present)
-    const talUrn = typeof content.payload.tal === "string" ? content.payload.tal : null;
-    if (talUrn) {
-        installed.push(await installAsset(cwd, talUrn, force));
+    if (content.payload.tal) {
+        installed.push(await installAsset(cwd, content.payload.tal, force));
     }
 
-    // 4. Install dance(s) (if present)
-    const danceUrns: string[] = content.payload.dances || [];
-    for (const danceUrn of danceUrns) {
+    // 4. Install dances (if present)
+    for (const danceUrn of content.payload.dances || []) {
         installed.push(await installAsset(cwd, danceUrn, force));
     }
 
-    // 5. Model (no file to install, just preserved — string or object)
-    const modelValue = content.payload.model !== undefined && content.payload.model !== null ? content.payload.model : null;
-
-    // 6. MCP Config (no file to install, just preserved)
-    const mcpConfig =
-        content.payload.mcp_config && typeof content.payload.mcp_config === "object"
-            ? content.payload.mcp_config
-            : null;
-
-    // 7. Auto-lock the performer
-    const performer: LockedPerformer = {
-        name: slug,
-        description: typeof content.description === "string" ? content.description : "",
-        tags: Array.isArray(content.tags) ? content.tags.filter((t: unknown): t is string => typeof t === "string") : [],
-        schema: content.$schema,
-        ...(talUrn ? { tal: talUrn } : {}),
-        ...(danceUrns.length > 0 ? { dance: danceUrns.length === 1 ? danceUrns[0] : danceUrns } : {}),
-        ...(modelValue ? { model: modelValue } : {}),
-        ...(mcpConfig ? { mcp_config: mcpConfig } : {}),
-    };
-    await lockPerformer(cwd, name, performer);
-
-    const lockfilePath = path.resolve(getDotDir(cwd), "performer", `${name}.json`);
-
-    return { performerUrn, localName: name, lockfilePath, installedAssets: installed };
+    return { performerUrn, installedAssets: installed };
 }
 
 /**

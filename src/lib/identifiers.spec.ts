@@ -3,21 +3,16 @@ import { describe, expect, it } from "vitest";
 import {
   assertPathInside,
   assertSafeAssetUrn,
-  assertSafePerformerName,
 } from "./identifiers.js";
 
 describe("identifiers safety", () => {
-  it("accepts valid performer identifiers", () => {
-    expect(() => assertSafePerformerName("pr-review_v2")).not.toThrow();
-  });
-
-  it("rejects unsafe performer identifiers", () => {
-    expect(() => assertSafePerformerName("../escape")).toThrow("Invalid performer name");
-  });
-
   it("validates asset urn format", () => {
     expect(() => assertSafeAssetUrn("tal/@acme/system-architect")).not.toThrow();
+    expect(() => assertSafeAssetUrn("performer/@acme/sprint")).not.toThrow();
+    expect(() => assertSafeAssetUrn("act/@acme/incident")).not.toThrow();
     expect(() => assertSafeAssetUrn("tal/@acme/../bad")).toThrow();
+    expect(() => assertSafeAssetUrn("invalid-kind/@acme/name")).toThrow();
+    expect(() => assertSafeAssetUrn("tal/acme/name")).toThrow(); // missing @
   });
 
   it("blocks path traversal attempts", () => {

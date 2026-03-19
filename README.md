@@ -33,7 +33,7 @@ Picture a newly onboarded senior engineer at your company.
 - Their **Tal** is their _professional identity and core rules_ — the thinking framework, role, tone, and non-negotiable rules your company expects. Do they prioritise correctness or delivery speed? Do they design for GDPR compliance by default? This is the **who + always-on rules** of the AI — always applied as the system prompt.
 - Their **Dance** is their _skill repertoire_ — techniques they can invoke when needed. Run a security audit. Generate a test suite. Produce structured JSON output. This is the **what the AI can do on-demand**. Only the Dance `description` is included in the prompt; the full `content` is loaded via MCP tool when the Performer needs it.
 - A **Performer** locks a Tal + one or more Dances together — a frozen, versioned snapshot that everyone on the team installs.
-- An **Act** is an _orchestration workflow_ — a multi-performer topology with dynamic routing, parallel execution, and conditional edges. Use it when the AI's identity or strategy changes mid-task (e.g. normal sprint → incident response mode).
+- An **Act** is a _participant choreography_ — a shared work scene where multiple performers enter as participants with explicit relations, subscriptions, and shared context. Use it when the AI's identity or collaboration pattern changes mid-task (e.g. normal sprint → incident response mode).
 
 ---
 
@@ -50,10 +50,14 @@ Encodes the AI's _identity and core rules_: role, tone, mental model, and non-ne
 ```jsonc
 // tal/@acme-platform/senior-backend-engineer
 {
-  "type": "tal/@acme-platform/senior-backend-engineer",
+  "$schema": "https://schemas.danceoftal.com/assets/tal.v1.json",
+  "kind": "tal",
+  "urn": "tal/@acme-platform/senior-backend-engineer",
   "description": "Backend engineer mindset for ACME's platform team.",
-  "content": "You are a senior backend engineer at ACME. You build for correctness, observability, and horizontal scale. You always consider failure modes before writing implementation. You default to Kotlin/Spring Boot, PostgreSQL, and Kafka. You never suggest solutions that don't have a rollback path.",
   "tags": ["backend", "kotlin", "spring", "platform"],
+  "payload": {
+    "content": "You are a senior backend engineer at ACME. You build for correctness, observability, and horizontal scale. You always consider failure modes before writing implementation. You default to Kotlin/Spring Boot, PostgreSQL, and Kafka. You never suggest solutions that don't have a rollback path."
+  }
 }
 ```
 
@@ -64,10 +68,14 @@ Encodes on-demand _skills and techniques_ the Performer can invoke when needed. 
 ```jsonc
 // dance/@acme-platform/pr-review-standard
 {
-  "type": "dance/@acme-platform/pr-review-standard",
+  "$schema": "https://schemas.danceoftal.com/assets/dance.v1.json",
+  "kind": "dance",
+  "urn": "dance/@acme-platform/pr-review-standard",
   "description": "ACME standard for AI-assisted PR reviews.",
   "tags": ["review", "backend", "security"],
-  "content": "Structure every review as: SUMMARY, RISKS (severity: low|medium|high|critical), REQUIRED CHANGES, OPTIONAL SUGGESTIONS. Flag any code touching payment flows with PAYMENT RISK. Never approve a PR that lacks unit tests on business logic paths.",
+  "payload": {
+    "content": "Structure every review as: SUMMARY, RISKS (severity: low|medium|high|critical), REQUIRED CHANGES, OPTIONAL SUGGESTIONS. Flag any code touching payment flows with PAYMENT RISK. Never approve a PR that lacks unit tests on business logic paths."
+  }
 }
 ```
 
@@ -76,66 +84,68 @@ Encodes on-demand _skills and techniques_ the Performer can invoke when needed. 
 Pins a Tal and/or Dances. Multiple Dances are layered in order — rules concatenate, schemas deep-merge — like CSS classes. **Both tal and dance are optional** (at least one required), enabling tal-only, dance-only, or full performer compositions.
 
 ```jsonc
-// Full performer: tal + layered dances
+// performer/@acme-platform/sprint
 {
-  "tal": "tal/@acme-platform/senior-backend-engineer",
-  "dance": [
-    "dance/@acme-platform/kotlin-style-guide",
-    "dance/@acme-security/gdpr-awareness",
-    "dance/@acme-platform/pr-review-standard",
-  ],
+  "$schema": "https://schemas.danceoftal.com/assets/performer.v1.json",
+  "kind": "performer",
+  "urn": "performer/@acme-platform/sprint",
+  "description": "Daily sprint performer with backend posture and layered skills.",
+  "tags": ["backend", "sprint"],
+  "payload": {
+    "tal": "tal/@acme-platform/senior-backend-engineer",
+    "dances": [
+      "dance/@acme-platform/kotlin-style-guide",
+      "dance/@acme-security/gdpr-awareness",
+      "dance/@acme-platform/pr-review-standard"
+    ],
+    "model": {
+      "provider": "anthropic",
+      "modelId": "claude-sonnet-4"
+    }
+  }
 }
-
-// Tal-only: persona & rules without additional skills
-{ "tal": "tal/@acme-platform/senior-backend-engineer" }
-
-// Dance-only: skills without persona
-{ "dance": "dance/@acme-platform/pr-review-standard" }
 ```
 
-### 4. `Act` — Orchestration Workflow
+### 4. `Act` — Participant Choreography
 
-Defines multi-performer workflows using a `nodes` topology. Each node has a `type` that controls execution behavior.
-
-**Node types:**
-
-| Type | Role |
-|------|------|
-| `worker` | Single performer execution |
-| `orchestrator` | LLM dynamically selects one of its outgoing edges at runtime |
-| `parallel` | Fan-out via `edges[].role = "branch"`; `join` controls when to proceed |
+Defines a shared work scene built from participants and their relations.
+Each participant can reference a locked performer and optionally override
+active dances or subscriptions for that act.
 
 ```jsonc
 // act/@acme-platform/incident-response
 {
-  "type": "act/@acme-platform/incident-response",
-  "nodes": {
-    "orchestrate": {
-      "type": "orchestrator",
-      "performer": "performer/@acme-platform/sisyphus",
-      "maxDelegations": 20
-    },
-    "plan":      { "type": "worker", "performer": "performer/@acme-platform/planner" },
-    "implement": { "type": "worker", "performer": "performer/@acme-platform/implementer" },
-    "review":    { "type": "worker", "performer": "performer/@acme-platform/reviewer" },
-
-    "research-all": {
-      "type": "parallel",
-      "join": "all"
-    },
-    "res-a": { "type": "worker", "performer": "performer/@acme-platform/librarian" },
-    "res-b": { "type": "worker", "performer": "performer/@acme-platform/explorer" }
-  },
-  "edges": [
-    { "from": "orchestrate", "to": "plan" },
-    { "from": "orchestrate", "to": "implement" },
-    { "from": "orchestrate", "to": "review" },
-    { "from": "research-all", "to": "res-a", "role": "branch" },
-    { "from": "research-all", "to": "res-b", "role": "branch" },
-    { "from": "review", "to": "$exit", "condition": "on_success" }
-  ],
-  "entryNode": "orchestrate",
-  "maxIterations": 50
+  "$schema": "https://schemas.danceoftal.com/assets/act.v1.json",
+  "kind": "act",
+  "urn": "act/@acme-platform/incident-response",
+  "description": "Lead-worker incident choreography.",
+  "tags": ["workflow", "incident"],
+  "payload": {
+    "participants": [
+      {
+        "id": "lead",
+        "performer": "performer/@acme-platform/sisyphus",
+        "subscriptions": {
+          "callboardKeys": ["incident/*"]
+        }
+      },
+      {
+        "id": "worker",
+        "performer": "performer/@acme-platform/implementer"
+      }
+    ],
+    "relations": [
+      {
+        "id": "lead-worker-delegate",
+        "between": ["lead", "worker"],
+        "direction": "one-way",
+        "name": "delegate_and_review",
+        "description": "Lead delegates implementation and reviews output.",
+        "maxCalls": 10,
+        "timeout": 300
+      }
+    ]
+  }
 }
 ```
 
@@ -161,7 +171,7 @@ Defines multi-performer workflows using a `nodes` topology. Each node has a `typ
 │  ├── tal/@acme-platform/senior-backend-engineer.json     │
 │  ├── dance/@acme-platform/kotlin-style-guide.json        │
 │  ├── dance/@acme-security/gdpr-awareness.json            │
-│  └── performer/sprint.json           ← locked Performer          │
+│  └── performer/@acme-platform/sprint.json                │
 └────────────────────┬─────────────────────────────────────┘
                      │
            ┌─────────┴─────────┐
@@ -218,7 +228,7 @@ dot install performer/@acme-platform/sprint
 dot install performer/@acme-platform/pr-review
 ```
 
-Performer install auto-locks and cascading-installs all Tal/Dance dependencies.
+Performer install cascading-installs all Tal/Dance dependencies.
 
 ---
 
@@ -237,7 +247,7 @@ Instead of sending a Confluence doc with "our AI prompting standards," you send 
 ### Scenario B: Incident response mode
 
 ```bash
-# Install the P0 ACT workflow
+# Install the P0 incident choreography
 dot install act/@acme-platform/incident-response
 ```
 
@@ -256,9 +266,6 @@ dot install act/@acme-platform/incident-response
 | `dot list [--mine] [--kind <kind>]`                           | List registry packages                                                                            |
 | `dot create --kind <kind> --name <slug>`                      | Scaffold a new asset locally                                                                      |
 | `dot publish --kind <kind> --name <slug> --tags <tags>`       | Publish local asset to registry (requires `dot login`)                                            |
-| `dot agents set --agent <name> --performer <performerName>`           | Assign a performer to an agent name (`.dance-of-tal/agents.json`)                                     |
-| `dot agents list`                                             | List all agent → performer mappings                                                                   |
-| `dot agents remove --agent <name>`                            | Remove an agent from the manifest                                                                 |
 
 ### URN Format
 

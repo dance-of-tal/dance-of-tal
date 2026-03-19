@@ -5,9 +5,7 @@ import os from "os";
 import {
     assertPathInside,
     assertSafeAssetUrn,
-    assertSafePerformerName,
 } from "./identifiers.js";
-import type { LockedPerformer } from "../data/types.js";
 
 /**
  * Returns the root `.dance-of-tal` directory for the active project.
@@ -127,6 +125,7 @@ export async function initRegistry(cwd: string = process.cwd()): Promise<void> {
     const dotDir = getDotDir(cwd);
 
     await fs.mkdir(dotDir, { recursive: true });
+
     await fs.writeFile(
         path.join(dotDir, "dot.json"),
         JSON.stringify({ schema: "dot.workspace/v1", version: 1 }, null, 2),
@@ -142,81 +141,4 @@ export async function initRegistry(cwd: string = process.cwd()): Promise<void> {
     for (const kind of ["tal", "dance", "act", "performer"]) {
         await fs.mkdir(path.join(dotDir, "drafts", kind), { recursive: true });
     }
-}
-
-export type LockedPerformerNameList = {
-    names: string[];
-    skipped: Array<{ file: string; reason: string }>;
-};
-
-/**
- * Locks a Performer to disk.
- * File: .dance-of-tal/performer/<name>.json
- */
-export async function lockPerformer(
-    cwd: string,
-    name: string,
-    performer: LockedPerformer
-): Promise<void> {
-    assertSafePerformerName(name);
-    const performersDir = path.resolve(getDotDir(cwd), "performer");
-    await fs.mkdir(performersDir, { recursive: true });
-    const filepath = path.resolve(performersDir, `${name}.json`);
-    assertPathInside(performersDir, filepath, "performer");
-    await fs.writeFile(filepath, JSON.stringify(performer, null, 2), "utf-8");
-}
-
-/**
- * Loads a locked Performer from disk.
- * Returns null if the performer does not exist.
- */
-export async function getPerformer(
-    cwd: string,
-    name: string
-): Promise<LockedPerformer | null> {
-    assertSafePerformerName(name);
-    const performersDir = path.resolve(getDotDir(cwd), "performer");
-    const filepath = path.resolve(performersDir, `${name}.json`);
-    assertPathInside(performersDir, filepath, "performer");
-    try {
-        const raw = await fs.readFile(filepath, "utf-8");
-        return JSON.parse(raw) as LockedPerformer;
-    } catch (err: any) {
-        if (err.code === "ENOENT") return null;
-        throw err;
-    }
-}
-
-/**
- * Lists top-level locked performer files from `.dance-of-tal/performer/*.json`.
- * Invalid filenames are skipped and returned as warnings.
- */
-export async function listLockedPerformerNames(cwd: string): Promise<LockedPerformerNameList> {
-    const performersDir = path.resolve(getDotDir(cwd), "performer");
-
-    let entries: Array<{ name: string; isFile: () => boolean }>;
-    try {
-        entries = await fs.readdir(performersDir, { withFileTypes: true });
-    } catch (err: any) {
-        if (err.code === "ENOENT") return { names: [], skipped: [] };
-        throw err;
-    }
-
-    const names: string[] = [];
-    const skipped: Array<{ file: string; reason: string }> = [];
-
-    for (const entry of entries) {
-        if (!entry.isFile() || !entry.name.endsWith(".json")) continue;
-
-        const name = entry.name.replace(/\.json$/, "");
-        try {
-            assertSafePerformerName(name);
-            names.push(name);
-        } catch (err: any) {
-            skipped.push({ file: entry.name, reason: err.message });
-        }
-    }
-
-    names.sort((a, b) => a.localeCompare(b));
-    return { names, skipped };
 }
