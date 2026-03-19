@@ -7,8 +7,8 @@ export async function runInit() {
     try {
         await initRegistry(process.cwd());
         console.log(ui.success("Created workspace directory structure:"));
-        console.log(ui.dim("  .dance-of-tal/performer/    ← locked Performer files"));
-        console.log(ui.dim("  (assets saved to tal/@author/name.json on dot install)"));
+        console.log(ui.dim("  .dance-of-tal/assets/<kind>/@author/<slug>.json"));
+        console.log(ui.dim("  .dance-of-tal/drafts/<kind>/"));
     } catch (err: any) {
         console.log(ui.error(`Failed to initialize: ${err.message}`));
     }

@@ -5,69 +5,135 @@ import { ui } from "../utils/ui.js";
 import { getDotDir, assetFilePath } from "../../lib/registry.js";
 import { getAuthUser } from "./login.js";
 import { CREATABLE_ASSET_KINDS, CreatableAssetKind, isCreatableAssetKind } from "../../lib/kinds.js";
+import {
+    ACT_ASSET_SCHEMA,
+    DANCE_ASSET_SCHEMA,
+    PERFORMER_ASSET_SCHEMA,
+    TAL_ASSET_SCHEMA,
+} from "../../contracts/index.js";
 
 const CREATABLE_KIND_HELP = CREATABLE_ASSET_KINDS.join(", ");
 
-function buildTalTemplate(author: string, slug: string, name: string, description: string): Record<string, unknown> {
-    return {
-        type: `tal/@${author}/${slug}`,
-        slug,
-        name,
-        description,
-        tags: [],
-        featuredScore: 0,
-        createdAt: new Date().toISOString().split("T")[0],
-        content: "Add your thinking model here.\n\nCore principles:\n- ...\n\nDo:\n- ...\n\nDo not:\n- ..."
-    };
+function defaultTalMarkdown(): string {
+    return [
+        "# Role",
+        "Describe the agent's identity and posture here.",
+        "",
+        "## Principles",
+        "- ...",
+        "",
+        "## Do",
+        "- ...",
+        "",
+        "## Do Not",
+        "- ...",
+    ].join("\n");
 }
 
-function buildDanceTemplate(author: string, slug: string, name: string, description: string): Record<string, unknown> {
-    return {
-        type: `dance/@${author}/${slug}`,
-        slug,
-        name,
-        description,
-        tags: [],
-        content: "Tone:\n- ...\nStructure:\n- ...\nFormatting:\n- ...\nForbidden:\n- ..."
-    };
+function defaultDanceMarkdown(): string {
+    return [
+        "# Goal",
+        "Describe when and how this skill should be applied.",
+        "",
+        "## Output Style",
+        "- ...",
+        "",
+        "## Constraints",
+        "- ...",
+    ].join("\n");
 }
 
-function buildActTemplate(slug: string, name: string, description: string, author: string): Record<string, unknown> {
+function buildTalTemplate(author: string, slug: string, description: string): Record<string, unknown> {
     return {
-        type: `act/@${author}/${slug}`,
-        slug,
-        name,
+        $schema: TAL_ASSET_SCHEMA,
+        kind: "tal",
+        urn: `tal/@${author}/${slug}`,
         description,
         tags: [],
-        entryNode: "orchestrate",
-        nodes: {
-            "orchestrate": {
-                type: "orchestrator",
-                performer: `performer/@${author}/your-orchestrator`,
-                maxDelegations: 10
-            },
-            "worker-1": {
-                type: "worker",
-                performer: `performer/@${author}/your-worker`
-            }
+        payload: {
+            content: defaultTalMarkdown(),
         },
-        edges: [
-            {
-                from: "orchestrate",
-                to: "worker-1"
-            }
-        ],
-        maxIterations: 50
     };
 }
 
-function buildPerformerTemplate(author: string, slug: string): Record<string, unknown> {
+function buildDanceTemplate(author: string, slug: string, description: string): Record<string, unknown> {
     return {
-        type: `performer/@${author}/${slug}`,
+        $schema: DANCE_ASSET_SCHEMA,
+        kind: "dance",
+        urn: `dance/@${author}/${slug}`,
+        description,
         tags: [],
-        tal: `tal/@${author}/your-tal`,
-        dance: [`dance/@${author}/your-dance`],
-        model: "claude-sonnet-4-20250514"
+        payload: {
+            content: defaultDanceMarkdown(),
+        },
+    };
+}
+
+function buildActTemplate(slug: string, description: string, author: string): Record<string, unknown> {
+    return {
+        $schema: ACT_ASSET_SCHEMA,
+        kind: "act",
+        urn: `act/@${author}/${slug}`,
+        description,
+        tags: [],
+        payload: {
+            actRules: [
+                "Lead owns final approval.",
+            ],
+            participants: [
+                {
+                    id: "lead",
+                    performer: `performer/@${author}/your-lead`,
+                    subscriptions: {
+                        callboardKeys: ["shared/*"]
+                    }
+                },
+                {
+                    id: "worker",
+                    performer: `performer/@${author}/your-worker`
+                }
+            ],
+            relations: [
+                {
+                    id: "lead-worker-review",
+                    between: ["lead", "worker"],
+                    direction: "one-way",
+                    name: "review_request",
+                    description: "Lead coordinates, worker executes.",
+                    maxCalls: 10,
+                    timeout: 300,
+                    sessionPolicy: "reuse",
+                }
+            ],
+        },
+    };
+}
+
+function buildPerformerTemplate(author: string, slug: string, description: string): Record<string, unknown> {
+    return {
+        $schema: PERFORMER_ASSET_SCHEMA,
+        kind: "performer",
+        urn: `performer/@${author}/${slug}`,
+        description,
+        tags: [],
+        payload: {
+            tal: `tal/@${author}/your-tal`,
+            dances: [`dance/@${author}/your-dance`],
+            model: {
+                provider: "anthropic",
+                modelId: "claude-sonnet-4",
+            },
+            modelVariant: "normal",
+            mcp: {
+                requirements: [
+                    {
+                        key: "repo",
+                        preferred: ["github"],
+                        required: false,
+                    },
+                ],
+            },
+        },
     };
 }
 
@@ -126,13 +192,13 @@ export const createCmd = new Command("create")
             }
 
             const displayName = options.displayName || slug.replace(/-/g, " ").replace(/\b\w/g, (c: string) => c.toUpperCase());
-            const description = options.description || `${displayName}`;
+            const description = options.description || `Asset for ${displayName}`;
 
             let template: Record<string, unknown>;
-            if (typedKind === "tal") template = buildTalTemplate(author, slug, displayName, description);
-            else if (typedKind === "dance") template = buildDanceTemplate(author, slug, displayName, description);
-            else if (typedKind === "performer") template = buildPerformerTemplate(author, slug);
-            else template = buildActTemplate(slug, displayName, description, author);
+            if (typedKind === "tal") template = buildTalTemplate(author, slug, description);
+            else if (typedKind === "dance") template = buildDanceTemplate(author, slug, description);
+            else if (typedKind === "performer") template = buildPerformerTemplate(author, slug, description);
+            else template = buildActTemplate(slug, description, author);
 
             fs.mkdirSync(path.dirname(filePath), { recursive: true });
             fs.writeFileSync(filePath, JSON.stringify(template, null, 2), "utf-8");

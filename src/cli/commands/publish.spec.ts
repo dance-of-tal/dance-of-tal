@@ -26,13 +26,18 @@ describe("publish helpers", () => {
 
   it("loads performer assets from the authored namespace path", async () => {
     await writeAsset(cwd, "performer/@monarchjuno/smoke-performer", {
-      type: "performer/@monarchjuno/smoke-performer",
+      $schema: "https://schemas.danceoftal.com/assets/performer.v1.json",
+      kind: "performer",
+      urn: "performer/@monarchjuno/smoke-performer",
+      description: "Smoke performer",
       tags: ["review"],
-      tal: "tal/@monarchjuno/reviewer",
+      payload: {
+        tal: "tal/@monarchjuno/reviewer",
+      },
     });
 
     const payload = await loadPublishPayload(cwd, "performer", "smoke-performer", "monarchjuno");
-    expect(payload.type).toBe("performer/@monarchjuno/smoke-performer");
+    expect(payload.urn).toBe("performer/@monarchjuno/smoke-performer");
     expect(payload.tags).toEqual(["review"]);
   });
 
@@ -42,35 +47,53 @@ describe("publish helpers", () => {
     );
 
     await writeAsset(cwd, "tal/@monarchjuno/reviewer-tal", {
-      type: "tal/@monarchjuno/reviewer-tal",
+      $schema: "https://schemas.danceoftal.com/assets/tal.v1.json",
+      kind: "tal",
+      urn: "tal/@monarchjuno/reviewer-tal",
       tags: ["tal"],
-      content: "tal content",
+      payload: {
+        content: "tal content",
+      },
     });
     await writeAsset(cwd, "dance/@monarchjuno/reviewer-dance", {
-      type: "dance/@monarchjuno/reviewer-dance",
+      $schema: "https://schemas.danceoftal.com/assets/dance.v1.json",
+      kind: "dance",
+      urn: "dance/@monarchjuno/reviewer-dance",
       tags: ["dance"],
-      content: "dance content",
+      payload: {
+        content: "dance content",
+      },
     });
     await writeAsset(cwd, "performer/@monarchjuno/reviewer", {
-      type: "performer/@monarchjuno/reviewer",
+      $schema: "https://schemas.danceoftal.com/assets/performer.v1.json",
+      kind: "performer",
+      urn: "performer/@monarchjuno/reviewer",
       tags: ["performer"],
-      tal: "tal/@monarchjuno/reviewer-tal",
-      dance: ["dance/@monarchjuno/reviewer-dance"],
+      payload: {
+        tal: "tal/@monarchjuno/reviewer-tal",
+        dances: ["dance/@monarchjuno/reviewer-dance"],
+      },
     });
 
     const deps = await resolveDependencies(
       cwd,
       "act",
       {
-        type: "act/@monarchjuno/smoke-act",
-        entryNode: "worker",
-        nodes: {
-          worker: {
-            type: "worker",
-            performer: "performer/@monarchjuno/reviewer",
-          },
+        $schema: "https://schemas.danceoftal.com/assets/act.v1.json",
+        kind: "act",
+        urn: "act/@monarchjuno/smoke-act",
+        description: "test act",
+        tags: [],
+        payload: {
+          participants: [
+            {
+              id: "worker",
+              performer: "performer/@monarchjuno/reviewer",
+              activeDances: ["dance/@monarchjuno/reviewer-dance"],
+            },
+          ],
+          relations: [],
         },
-        edges: [],
       },
       "monarchjuno"
     );

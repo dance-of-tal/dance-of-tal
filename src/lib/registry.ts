@@ -7,7 +7,7 @@ import {
     assertSafeAssetUrn,
     assertSafePerformerName,
 } from "./identifiers.js";
-import { Performer } from "../data/types.js";
+import { LockedPerformer } from "../data/types.js";
 
 /**
  * Returns the root `.dance-of-tal` directory for the active project.
@@ -54,17 +54,17 @@ export async function ensureDotDir(cwd: string): Promise<void> {
  * Resolves the on-disk path for an installed asset from its URN.
  *
  * URN structure:  <kind>/@<author>/<name>
- * File structure: .dance-of-tal/<kind>/@<author>/<name>.json
+ * File structure: .dance-of-tal/assets/<kind>/@<author>/<name>.json
  *
  * Example:
  *   tal/@acme/system-architect
- *   → .dance-of-tal/tal/@acme/system-architect.json
+ *   → .dance-of-tal/assets/tal/@acme/system-architect.json
  */
 export function assetFilePath(cwd: string, urn: string): string {
     assertSafeAssetUrn(urn);
     const [kind, author, name] = urn.split("/");
     const dotDir = path.resolve(getDotDir(cwd));
-    const filePath = path.resolve(dotDir, kind, author, `${name}.json`);
+    const filePath = path.resolve(dotDir, "assets", kind, author, `${name}.json`);
     assertPathInside(dotDir, filePath, "asset");
     return filePath;
 }
@@ -110,7 +110,13 @@ export async function readAsset(cwd: string, urn: string): Promise<Record<string
 export async function getAssetPayload(cwd: string, urn: string): Promise<string | null> {
     const asset = await readAsset(cwd, urn);
     if (!asset) return null;
-    return typeof asset.content === "string" ? asset.content : null;
+    return (
+        typeof asset.payload === "object"
+        && asset.payload !== null
+        && typeof (asset.payload as Record<string, unknown>).content === "string"
+    )
+        ? ((asset.payload as Record<string, unknown>).content as string)
+        : null;
 }
 
 /**
@@ -121,10 +127,20 @@ export async function initRegistry(cwd: string = process.cwd()): Promise<void> {
     const dotDir = getDotDir(cwd);
 
     await fs.mkdir(dotDir, { recursive: true });
+    await fs.writeFile(
+        path.join(dotDir, "dot.json"),
+        JSON.stringify({ schema: "dot.workspace/v1", version: 1 }, null, 2),
+        "utf-8",
+    ).catch(() => undefined);
 
     // Create directories for every asset kind
     for (const kind of ["tal", "dance", "act", "performer"]) {
-        await fs.mkdir(path.join(dotDir, kind), { recursive: true });
+        await fs.mkdir(path.join(dotDir, "assets", kind), { recursive: true });
+    }
+
+    // Create drafts directory with per-kind subdirectories
+    for (const kind of ["tal", "dance", "act", "performer"]) {
+        await fs.mkdir(path.join(dotDir, "drafts", kind), { recursive: true });
     }
 }
 
@@ -140,7 +156,7 @@ export type LockedPerformerNameList = {
 export async function lockPerformer(
     cwd: string,
     name: string,
-    performer: Performer
+    performer: LockedPerformer
 ): Promise<void> {
     assertSafePerformerName(name);
     const performersDir = path.resolve(getDotDir(cwd), "performer");
@@ -157,14 +173,14 @@ export async function lockPerformer(
 export async function getPerformer(
     cwd: string,
     name: string
-): Promise<Performer | null> {
+): Promise<LockedPerformer | null> {
     assertSafePerformerName(name);
     const performersDir = path.resolve(getDotDir(cwd), "performer");
     const filepath = path.resolve(performersDir, `${name}.json`);
     assertPathInside(performersDir, filepath, "performer");
     try {
         const raw = await fs.readFile(filepath, "utf-8");
-        return JSON.parse(raw) as Performer;
+        return JSON.parse(raw) as LockedPerformer;
     } catch (err: any) {
         if (err.code === "ENOENT") return null;
         throw err;

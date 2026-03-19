@@ -66,14 +66,14 @@ describe.sequential("MCP server minimal tool flow", () => {
           success: true,
           package: {
             payload: {
-              type: "tal/@acme/system-architect",
-              slug: "system-architect",
-              name: "System Architect",
+              $schema: "https://schemas.danceoftal.com/assets/tal.v1.json",
+              kind: "tal",
+              urn: "tal/@acme/system-architect",
               description: "Architect profile",
               tags: [],
-              featuredScore: 0,
-              createdAt: "2026-03-06T00:00:00.000Z",
-              content: "Think in systems.",
+              payload: {
+                content: "Think in systems.",
+              },
             },
           },
         }),
@@ -127,12 +127,14 @@ describe.sequential("MCP server minimal tool flow", () => {
           success: true,
           package: {
             payload: {
-              type: "dance/@acme/pr-review",
-              slug: "pr-review",
-              name: "PR Review",
+              $schema: "https://schemas.danceoftal.com/assets/dance.v1.json",
+              kind: "dance",
+              urn: "dance/@acme/pr-review",
               description: "Review pull requests carefully.",
               tags: ["review"],
-              content: "Check correctness, tests, and regressions.",
+              payload: {
+                content: "Check correctness, tests, and regressions.",
+              },
             },
           },
         }),

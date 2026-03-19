@@ -120,12 +120,15 @@ function isDirectory(targetPath: string): boolean {
 
 function hasWorkspaceLayout(cwd: string): boolean {
   const dotDir = path.join(cwd, ".dance-of-tal");
-  const talDir = path.join(dotDir, "tal");
-  const danceDir = path.join(dotDir, "dance");
+  const assetsDir = path.join(dotDir, "assets");
+  const talDir = path.join(assetsDir, "tal");
+  const danceDir = path.join(assetsDir, "dance");
 
   return (
     existsSync(dotDir) &&
     isDirectory(dotDir) &&
+    existsSync(assetsDir) &&
+    isDirectory(assetsDir) &&
     ((existsSync(talDir) && isDirectory(talDir)) ||
       (existsSync(danceDir) && isDirectory(danceDir)))
   );
@@ -175,7 +178,7 @@ async function listInstalledAssets(
   const assets: InstalledAssetInfo[] = [];
 
   for (const kind of kinds) {
-    const kindDir = path.resolve(dotDir, kind);
+    const kindDir = path.resolve(dotDir, "assets", kind);
 
     let authorEntries: Dirent[];
     try {

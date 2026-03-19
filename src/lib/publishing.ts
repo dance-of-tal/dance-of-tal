@@ -2,6 +2,7 @@ import fs from "fs/promises";
 import { assetFilePath } from "./registry.js";
 import { getRegistryPackage } from "./installer.js";
 import { isAssetKind } from "./kinds.js";
+import { parseActAsset, parseDotAsset, parsePerformerAsset } from "../contracts/index.js";
 
 const REGISTRY_URL =
     process.env.DOT_REGISTRY_URL || "https://registry.dance-of-tal.workers.dev";
@@ -67,31 +68,24 @@ export function extractDependencyUrns(kind: string, payload: Record<string, unkn
     const urns: string[] = [];
 
     if (kind === "performer") {
-        if (typeof payload.tal === "string") {
-            urns.push(payload.tal);
+        const performer = parsePerformerAsset(payload);
+        if (typeof performer.payload.tal === "string") {
+            urns.push(performer.payload.tal);
         }
-        const dance = payload.dance;
-        if (typeof dance === "string") {
-            urns.push(dance);
-        } else if (Array.isArray(dance)) {
-            for (const entry of dance) {
-                if (typeof entry === "string") {
-                    urns.push(entry);
-                }
-            }
+        for (const danceUrn of performer.payload.dances || []) {
+            urns.push(danceUrn);
         }
     } else if (kind === "act") {
-        const nodes = payload.nodes;
-        if (typeof nodes === "object" && nodes !== null) {
-            for (const node of Object.values(nodes as Record<string, unknown>)) {
-                if (typeof node === "object" && node !== null && typeof (node as Record<string, unknown>).performer === "string") {
-                    urns.push((node as Record<string, unknown>).performer as string);
-                }
+        const act = parseActAsset(payload);
+        for (const participant of act.payload.participants) {
+            urns.push(participant.performer);
+            for (const danceUrn of participant.activeDances || []) {
+                urns.push(danceUrn);
             }
         }
     }
 
-    return urns;
+    return Array.from(new Set(urns));
 }
 
 export async function resolveDependencies(

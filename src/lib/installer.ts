@@ -8,8 +8,15 @@
 import fs from "fs";
 import path from "path";
 import { getDotDir, assetFilePath, lockPerformer, ensureDotDir } from "./registry.js";
-import { Performer } from "../data/types.js";
+import { LockedPerformer } from "../data/types.js";
 import { isAssetKind } from "./kinds.js";
+import {
+    AnyDotAssetV1,
+    parseActAsset,
+    parseDotAsset,
+    parsePerformerAsset,
+    slugFromUrn,
+} from "../contracts/index.js";
 
 const REGISTRY_URL =
     process.env.DOT_REGISTRY_URL || "https://registry.dance-of-tal.workers.dev";
@@ -75,6 +82,14 @@ async function fetchRegistryPackageRaw(kind: string, author: string, slug: strin
     return pkgData;
 }
 
+function parseRegistryAsset(kind: string, raw: unknown): AnyDotAssetV1 {
+    const parsed = parseDotAsset(raw);
+    if (parsed.kind !== kind) {
+        throw new Error(`Registry payload kind mismatch. Expected '${kind}', received '${parsed.kind}'.`);
+    }
+    return parsed;
+}
+
 // ── Single asset ───────────────────────────────────────────────────────────
 
 /**
@@ -100,9 +115,10 @@ export async function installAsset(
     }
 
     const pkgData = await fetchRegistryPackageRaw(kind, author.replace(/^@/, ""), slug);
+    const asset = parseRegistryAsset(kind, pkgData.payload);
 
     fs.mkdirSync(path.dirname(filePath), { recursive: true });
-    fs.writeFileSync(filePath, JSON.stringify(pkgData.payload, null, 2));
+    fs.writeFileSync(filePath, JSON.stringify(asset, null, 2));
 
     return { urn, filePath, skipped: false };
 }
@@ -138,38 +154,39 @@ export async function installPerformerAndLock(
 
     // 2. Read the performer content to discover dependencies
     const filePath = assetFilePath(cwd, performerUrn);
-    const content = JSON.parse(fs.readFileSync(filePath, "utf-8")) as Record<string, unknown>;
+    const content = parsePerformerAsset(
+        JSON.parse(fs.readFileSync(filePath, "utf-8")) as Record<string, unknown>
+    );
 
     // 3. Install tal (if present)
-    const talUrn = typeof content.tal === "string" ? content.tal : null;
+    const talUrn = typeof content.payload.tal === "string" ? content.payload.tal : null;
     if (talUrn) {
         installed.push(await installAsset(cwd, talUrn, force));
     }
 
     // 4. Install dance(s) (if present)
-    const danceRaw = content.dance;
-    const danceUrns: string[] = Array.isArray(danceRaw)
-        ? (danceRaw as unknown[]).filter((d): d is string => typeof d === "string")
-        : typeof danceRaw === "string"
-            ? [danceRaw]
-            : [];
+    const danceUrns: string[] = content.payload.dances || [];
     for (const danceUrn of danceUrns) {
         installed.push(await installAsset(cwd, danceUrn, force));
     }
 
-    // 5. Model (no file to install, just preserved)
-    const modelStr = typeof content.model === "string" ? content.model : null;
+    // 5. Model (no file to install, just preserved — string or object)
+    const modelValue = content.payload.model !== undefined && content.payload.model !== null ? content.payload.model : null;
 
     // 6. MCP Config (no file to install, just preserved)
-    const mcpConfig = typeof content.mcp_config === "object" && content.mcp_config !== null ? content.mcp_config : null;
+    const mcpConfig = content.payload.mcp ? { requirements: content.payload.mcp.requirements } : null;
 
     // 7. Auto-lock the performer
-    const performer: Performer = {
+    const performer: LockedPerformer = {
+        name: slug,
+        description: typeof content.description === "string" ? content.description : "",
+        tags: Array.isArray(content.tags) ? content.tags.filter((t: unknown): t is string => typeof t === "string") : [],
+        schema: content.$schema,
         ...(talUrn ? { tal: talUrn } : {}),
         ...(danceUrns.length > 0 ? { dance: danceUrns.length === 1 ? danceUrns[0] : danceUrns } : {}),
-        ...(modelStr ? { model: modelStr } : {}),
+        ...(modelValue ? { model: modelValue } : {}),
         ...(mcpConfig ? { mcp_config: mcpConfig } : {}),
-    } as Performer;
+    };
     await lockPerformer(cwd, name, performer);
 
     const lockfilePath = path.resolve(getDotDir(cwd), "performer", `${name}.json`);
@@ -209,41 +226,23 @@ export async function installActWithDependencies(
     markInstalled(actAsset);
 
     const filePath = assetFilePath(cwd, actUrn);
-    const content = JSON.parse(fs.readFileSync(filePath, "utf-8")) as Record<string, unknown>;
-    const nodes = content.nodes as Record<string, unknown> | undefined;
-    if (!nodes) {
+    const content = parseActAsset(
+        JSON.parse(fs.readFileSync(filePath, "utf-8")) as Record<string, unknown>
+    );
+
+    const participants = content.payload.participants;
+    if (!Array.isArray(participants) || participants.length === 0) {
         return { actUrn, actAsset, installedAssets: installed };
     }
 
-    for (const node of Object.values(nodes)) {
-        if (typeof node !== "object" || node === null) {
-            continue;
+    for (const entry of participants) {
+        const performerUrn = entry.performer;
+        if (performerUrn && !seen.has(performerUrn)) {
+            const performerAsset = await installAsset(cwd, performerUrn, force);
+            markInstalled(performerAsset);
         }
 
-        const performerUrn = (node as Record<string, unknown>).performer;
-        if (typeof performerUrn !== "string" || seen.has(performerUrn)) {
-            continue;
-        }
-
-        const performerAsset = await installAsset(cwd, performerUrn, force);
-        markInstalled(performerAsset);
-
-        const performerPath = assetFilePath(cwd, performerUrn);
-        const performerContent = JSON.parse(fs.readFileSync(performerPath, "utf-8")) as Record<string, unknown>;
-
-        const talUrn = typeof performerContent.tal === "string" ? performerContent.tal : null;
-        if (talUrn && !seen.has(talUrn)) {
-            markInstalled(await installAsset(cwd, talUrn, force));
-        }
-
-        const danceRaw = performerContent.dance;
-        const danceUrns: string[] = Array.isArray(danceRaw)
-            ? (danceRaw as unknown[]).filter((value): value is string => typeof value === "string")
-            : typeof danceRaw === "string"
-                ? [danceRaw]
-                : [];
-
-        for (const danceUrn of danceUrns) {
+        for (const danceUrn of entry.activeDances || []) {
             if (!seen.has(danceUrn)) {
                 markInstalled(await installAsset(cwd, danceUrn, force));
             }
@@ -282,7 +281,7 @@ export async function getRegistryPackage(
     return {
         urn: pkgData.urn ?? `${kind}/@${normalizedAuthor}/${slug}`,
         kind: pkgData.kind ?? kind,
-        name: pkgData.name ?? slug,
+        name: pkgData.name ?? slugFromUrn(pkgData.urn ?? `${kind}/@${normalizedAuthor}/${slug}`),
         author: pkgData.author ?? normalizedAuthor,
         slug: pkgData.slug ?? slug,
         description: pkgData.description ?? "",
