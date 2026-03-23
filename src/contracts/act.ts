@@ -7,38 +7,24 @@ import {
 } from "./asset-base.js";
 import type { DotAssetBase, ParseResult } from "./asset-base.js";
 
-export const ACT_ASSET_SCHEMA =
-  "https://schemas.danceoftal.com/assets/act.v1.json" as const;
-
 export type ActParticipantSubscriptionsV1 = {
   messagesFrom?: string[];
   messageTags?: string[];
   callboardKeys?: string[];
-  eventTypes?: string[];
+  eventTypes?: Array<"runtime.idle">;
 };
 
 export type ActParticipantV1 = {
-  id: string;
+  key: string;
   performer: string;
-  activeDances?: string[];
   subscriptions?: ActParticipantSubscriptionsV1;
 };
 
-export type ActRelationPermissionsV1 = {
-  callboardKeys?: string[];
-  messageTags?: string[];
-};
-
 export type ActRelationV1 = {
-  id: string;
   between: [string, string];
-  direction?: "both" | "one-way";
+  direction: "both" | "one-way";
   name: string;
-  description?: string;
-  permissions?: ActRelationPermissionsV1;
-  maxCalls?: number;
-  timeout?: number;
-  sessionPolicy?: "fresh" | "reuse";
+  description: string;
 };
 
 export type ActAssetPayloadV1 = {
@@ -76,19 +62,21 @@ function parseSubscriptions(
   if (!isRecord(input)) {
     throw new Error(`${fieldName} must be an object when provided`);
   }
+
+  const messagesFrom = parseOptionalStringArray(input.messagesFrom, `${fieldName}.messagesFrom`);
+  const messageTags = parseOptionalStringArray(input.messageTags, `${fieldName}.messageTags`);
+  const callboardKeys = parseOptionalStringArray(input.callboardKeys, `${fieldName}.callboardKeys`);
+  const eventTypes = parseOptionalStringArray(input.eventTypes, `${fieldName}.eventTypes`);
+
+  if (eventTypes && eventTypes.some((entry) => entry !== "runtime.idle")) {
+    throw new Error(`${fieldName}.eventTypes only supports 'runtime.idle' in act.v1`);
+  }
+
   return {
-    ...(parseOptionalStringArray(input.messagesFrom, `${fieldName}.messagesFrom`)
-      ? { messagesFrom: parseOptionalStringArray(input.messagesFrom, `${fieldName}.messagesFrom`) }
-      : {}),
-    ...(parseOptionalStringArray(input.messageTags, `${fieldName}.messageTags`)
-      ? { messageTags: parseOptionalStringArray(input.messageTags, `${fieldName}.messageTags`) }
-      : {}),
-    ...(parseOptionalStringArray(input.callboardKeys, `${fieldName}.callboardKeys`)
-      ? { callboardKeys: parseOptionalStringArray(input.callboardKeys, `${fieldName}.callboardKeys`) }
-      : {}),
-    ...(parseOptionalStringArray(input.eventTypes, `${fieldName}.eventTypes`)
-      ? { eventTypes: parseOptionalStringArray(input.eventTypes, `${fieldName}.eventTypes`) }
-      : {}),
+    ...(messagesFrom ? { messagesFrom } : {}),
+    ...(messageTags ? { messageTags } : {}),
+    ...(callboardKeys ? { callboardKeys } : {}),
+    ...(eventTypes ? { eventTypes: eventTypes as Array<"runtime.idle"> } : {}),
   };
 }
 
@@ -96,8 +84,14 @@ function parseParticipant(input: unknown, index: number): ActParticipantV1 {
   if (!isRecord(input)) {
     throw new Error(`payload.participants[${index}] must be an object`);
   }
-  if (!isNonEmptyString(input.id)) {
-    throw new Error(`payload.participants[${index}].id must be a non-empty string`);
+  if ("id" in input) {
+    throw new Error(`payload.participants[${index}].id is not supported; use key`);
+  }
+  if ("activeDances" in input) {
+    throw new Error(`payload.participants[${index}].activeDances is not supported in act.v1`);
+  }
+  if (!isNonEmptyString(input.key)) {
+    throw new Error(`payload.participants[${index}].key must be a non-empty string`);
   }
   if (!isNonEmptyString(input.performer)) {
     throw new Error(`payload.participants[${index}].performer must be a non-empty string`);
@@ -105,48 +99,11 @@ function parseParticipant(input: unknown, index: number): ActParticipantV1 {
 
   parseDotAssetUrn(input.performer, "performer");
 
-  let activeDances: string[] | undefined;
-  if (input.activeDances !== undefined) {
-    if (!Array.isArray(input.activeDances)) {
-      throw new Error(`payload.participants[${index}].activeDances must be an array`);
-    }
-    activeDances = Array.from(
-      new Set(
-        input.activeDances.map((entry, danceIndex) => {
-          try {
-            parseDotAssetUrn(entry, "dance");
-          } catch (error) {
-            const message = error instanceof Error ? error.message : "invalid dance urn";
-            throw new Error(
-              `payload.participants[${index}].activeDances[${danceIndex}] ${message}`,
-            );
-          }
-          return entry;
-        }),
-      ),
-    );
-  }
-
   return {
-    id: input.id,
+    key: input.key,
     performer: input.performer,
-    ...(activeDances ? { activeDances } : {}),
     ...(input.subscriptions !== undefined
       ? { subscriptions: parseSubscriptions(input.subscriptions, `payload.participants[${index}].subscriptions`) }
-      : {}),
-  };
-}
-
-function parsePermissions(input: unknown, fieldName: string): ActRelationPermissionsV1 {
-  if (!isRecord(input)) {
-    throw new Error(`${fieldName} must be an object when provided`);
-  }
-  return {
-    ...(parseOptionalStringArray(input.callboardKeys, `${fieldName}.callboardKeys`)
-      ? { callboardKeys: parseOptionalStringArray(input.callboardKeys, `${fieldName}.callboardKeys`) }
-      : {}),
-    ...(parseOptionalStringArray(input.messageTags, `${fieldName}.messageTags`)
-      ? { messageTags: parseOptionalStringArray(input.messageTags, `${fieldName}.messageTags`) }
       : {}),
   };
 }
@@ -155,8 +112,20 @@ function parseRelation(input: unknown, index: number): ActRelationV1 {
   if (!isRecord(input)) {
     throw new Error(`payload.relations[${index}] must be an object`);
   }
-  if (!isNonEmptyString(input.id)) {
-    throw new Error(`payload.relations[${index}].id must be a non-empty string`);
+  if ("id" in input) {
+    throw new Error(`payload.relations[${index}].id is not supported in act.v1`);
+  }
+  if ("permissions" in input) {
+    throw new Error(`payload.relations[${index}].permissions is not supported in act.v1`);
+  }
+  if ("maxCalls" in input) {
+    throw new Error(`payload.relations[${index}].maxCalls is not supported in act.v1`);
+  }
+  if ("timeout" in input) {
+    throw new Error(`payload.relations[${index}].timeout is not supported in act.v1`);
+  }
+  if ("sessionPolicy" in input) {
+    throw new Error(`payload.relations[${index}].sessionPolicy is not supported in act.v1`);
   }
   if (!Array.isArray(input.between) || input.between.length !== 2) {
     throw new Error(`payload.relations[${index}].between must be a 2-item string tuple`);
@@ -170,56 +139,28 @@ function parseRelation(input: unknown, index: number): ActRelationV1 {
     return entry;
   }) as [string, string];
 
-  if (input.direction !== undefined && input.direction !== "both" && input.direction !== "one-way") {
-    throw new Error(`payload.relations[${index}].direction must be 'both' or 'one-way' when provided`);
+  if (input.direction !== "both" && input.direction !== "one-way") {
+    throw new Error(`payload.relations[${index}].direction must be 'both' or 'one-way'`);
   }
+
   if (!isNonEmptyString(input.name)) {
     throw new Error(`payload.relations[${index}].name must be a non-empty string`);
   }
-  if (input.description !== undefined && typeof input.description !== "string") {
-    throw new Error(`payload.relations[${index}].description must be a string when provided`);
-  }
-  const maxCalls = input.maxCalls;
-  if (
-    maxCalls !== undefined &&
-    (typeof maxCalls !== "number" || !Number.isInteger(maxCalls) || maxCalls < 1)
-  ) {
-    throw new Error(`payload.relations[${index}].maxCalls must be an integer >= 1 when provided`);
-  }
-  const timeout = input.timeout;
-  if (
-    timeout !== undefined &&
-    (typeof timeout !== "number" || !Number.isInteger(timeout) || timeout < 1)
-  ) {
-    throw new Error(`payload.relations[${index}].timeout must be an integer >= 1 when provided`);
-  }
-  if (
-    input.sessionPolicy !== undefined &&
-    input.sessionPolicy !== "fresh" &&
-    input.sessionPolicy !== "reuse"
-  ) {
-    throw new Error(
-      `payload.relations[${index}].sessionPolicy must be 'fresh' or 'reuse' when provided`,
-    );
+
+  if (!isNonEmptyString(input.description)) {
+    throw new Error(`payload.relations[${index}].description must be a non-empty string`);
   }
 
   return {
-    id: input.id,
     between,
+    direction: input.direction,
     name: input.name,
-    ...(input.direction ? { direction: input.direction } : {}),
-    ...(typeof input.description === "string" ? { description: input.description } : {}),
-    ...(input.permissions !== undefined
-      ? { permissions: parsePermissions(input.permissions, `payload.relations[${index}].permissions`) }
-      : {}),
-    ...(typeof maxCalls === "number" ? { maxCalls } : {}),
-    ...(typeof timeout === "number" ? { timeout } : {}),
-    ...(input.sessionPolicy ? { sessionPolicy: input.sessionPolicy } : {}),
+    description: input.description,
   };
 }
 
 export function parseActAsset(input: unknown): ActAssetV1 {
-  const base = assertBaseAssetShape(input, "act", ACT_ASSET_SCHEMA);
+  const base = assertBaseAssetShape(input, "act");
 
   const actRules = parseOptionalStringArray(base.payload.actRules, "payload.actRules");
 
@@ -237,12 +178,12 @@ export function parseActAsset(input: unknown): ActAssetV1 {
     throw new Error("payload.participants must contain at least one participant");
   }
 
-  const participantIds = new Set<string>();
+  const participantKeys = new Set<string>();
   for (const participant of participants) {
-    if (participantIds.has(participant.id)) {
-      throw new Error(`payload.participants contains duplicate id '${participant.id}'`);
+    if (participantKeys.has(participant.key)) {
+      throw new Error(`payload.participants contains duplicate key '${participant.key}'`);
     }
-    participantIds.add(participant.id);
+    participantKeys.add(participant.key);
   }
 
   const relations = base.payload.relations.map((entry, index) =>
@@ -250,11 +191,11 @@ export function parseActAsset(input: unknown): ActAssetV1 {
   );
 
   for (const relation of relations) {
-    if (!participantIds.has(relation.between[0])) {
-      throw new Error(`relation '${relation.id}' references unknown participant '${relation.between[0]}'`);
+    if (!participantKeys.has(relation.between[0])) {
+      throw new Error(`relation references unknown participant '${relation.between[0]}'`);
     }
-    if (!participantIds.has(relation.between[1])) {
-      throw new Error(`relation '${relation.id}' references unknown participant '${relation.between[1]}'`);
+    if (!participantKeys.has(relation.between[1])) {
+      throw new Error(`relation references unknown participant '${relation.between[1]}'`);
     }
   }
 

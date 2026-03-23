@@ -1,7 +1,7 @@
 import {
-  authorFromUrn,
+  ownerFromUrn,
   safeParse,
-  slugFromUrn,
+  nameFromUrn,
 } from "./asset-base.js";
 import type { DotAssetKind, ParseResult } from "./asset-base.js";
 import { parseActAsset } from "./act.js";
@@ -28,8 +28,8 @@ export type AnyDotAssetV1 =
 export type RegistryMetadataProjection = {
   urn: string;
   kind: DotAssetKind;
-  author: string;
-  slug: string;
+  owner: string;
+  name: string;
   tags: string[];
 };
 
@@ -63,8 +63,8 @@ export function projectRegistryMetadata(
   return {
     urn: asset.urn,
     kind: asset.kind,
-    author: authorFromUrn(asset.urn),
-    slug: slugFromUrn(asset.urn),
+    owner: ownerFromUrn(asset.urn),
+    name: nameFromUrn(asset.urn),
     tags: asset.tags || [],
   };
 }

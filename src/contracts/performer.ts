@@ -7,9 +7,6 @@ import {
 } from "./asset-base.js";
 import type { DotAssetBase, ParseResult } from "./asset-base.js";
 
-export const PERFORMER_ASSET_SCHEMA =
-  "https://schemas.danceoftal.com/assets/performer.v1.json" as const;
-
 export type ModelConfigV1 = {
   provider: string;
   modelId: string;
@@ -42,7 +39,7 @@ function parseModelConfig(input: unknown): ModelConfigV1 {
 }
 
 export function parsePerformerAsset(input: unknown): PerformerAssetV1 {
-  const base = assertBaseAssetShape(input, "performer", PERFORMER_ASSET_SCHEMA);
+  const base = assertBaseAssetShape(input, "performer");
 
   let tal: string | undefined;
   if (base.payload.tal !== undefined) {

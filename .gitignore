@@ -8,3 +8,4 @@ dist
 # Internal Strategy
 OPEN_SOURCE_STRATEGY.md
 *.tgz
+.agent/

@@ -5,9 +5,6 @@ import {
 } from "./asset-base.js";
 import type { DotAssetBase, ParseResult } from "./asset-base.js";
 
-export const TAL_ASSET_SCHEMA =
-  "https://schemas.danceoftal.com/assets/tal.v1.json" as const;
-
 export type TalAssetPayloadV1 = {
   content: string;
 };
@@ -15,7 +12,7 @@ export type TalAssetPayloadV1 = {
 export type TalAssetV1 = DotAssetBase<"tal", TalAssetPayloadV1>;
 
 export function parseTalAsset(input: unknown): TalAssetV1 {
-  const base = assertBaseAssetShape(input, "tal", TAL_ASSET_SCHEMA);
+  const base = assertBaseAssetShape(input, "tal");
 
   if (!isNonEmptyString(base.payload.content)) {
     throw new Error("payload.content must be a non-empty markdown string");

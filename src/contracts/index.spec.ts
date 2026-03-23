@@ -1,23 +1,18 @@
 import { describe, expect, it } from "vitest";
 
 import {
-  ACT_ASSET_SCHEMA,
-  DANCE_ASSET_SCHEMA,
   parseActAsset,
   parseDotAsset,
   parsePerformerAsset,
   parseTalAsset,
-  PERFORMER_ASSET_SCHEMA,
   projectRegistryMetadata,
-  TAL_ASSET_SCHEMA,
 } from "./index.js";
 
 describe("dot contracts", () => {
   it("parses a tal asset with raw markdown content", () => {
     const asset = parseTalAsset({
-      $schema: TAL_ASSET_SCHEMA,
       kind: "tal",
-      urn: "tal/@acme/senior-backend",
+      urn: "tal/@acme/agent-presets/senior-backend",
       description: "Backend posture",
       tags: ["backend"],
       payload: {
@@ -30,13 +25,12 @@ describe("dot contracts", () => {
 
   it("parses a performer asset with portable MCP requirements", () => {
     const asset = parsePerformerAsset({
-      $schema: PERFORMER_ASSET_SCHEMA,
       kind: "performer",
-      urn: "performer/@acme/reviewer",
+      urn: "performer/@acme/agent-presets/reviewer",
       tags: ["review"],
       payload: {
-        tal: "tal/@acme/senior-backend",
-        dances: ["dance/@acme/code-review"],
+        tal: "tal/@acme/agent-presets/senior-backend",
+        dances: ["dance/@acme/frontend-skills/code-review"],
         model: {
           provider: "anthropic",
           modelId: "claude-sonnet-4",
@@ -59,67 +53,123 @@ describe("dot contracts", () => {
   it("rejects performer assets without tal or dances", () => {
     expect(() =>
       parsePerformerAsset({
-        $schema: PERFORMER_ASSET_SCHEMA,
         kind: "performer",
-        urn: "performer/@acme/reviewer",
+        urn: "performer/@acme/agent-presets/reviewer",
         payload: {},
       }),
     ).toThrow("payload must include at least one of tal or dances");
   });
 
-  it("parses an act asset with participant subscriptions and relation policy", () => {
+  it("parses an act asset with participant subscriptions and relations", () => {
     const asset = parseActAsset({
-      $schema: ACT_ASSET_SCHEMA,
       kind: "act",
-      urn: "act/@acme/review-pipeline",
+      urn: "act/@acme/workflows/review-pipeline",
       payload: {
         actRules: ["Lead owns final approval."],
         participants: [
           {
-            id: "lead",
-            performer: "performer/@acme/reviewer",
+            key: "lead",
+            performer: "performer/@acme/agent-presets/reviewer",
             subscriptions: {
               callboardKeys: ["shared/*"],
             },
           },
           {
-            id: "worker",
-            performer: "performer/@acme/reviewer",
-            activeDances: ["dance/@acme/code-review"],
+            key: "worker",
+            performer: "performer/@acme/agent-presets/reviewer",
           },
         ],
         relations: [
           {
-            id: "lead-worker",
             between: ["lead", "worker"],
             name: "review_request",
             direction: "one-way",
-            sessionPolicy: "reuse",
+            description: "Lead sends review requests to worker",
           },
         ],
       },
     });
 
     expect(asset.payload.participants).toHaveLength(2);
-    expect(asset.payload.relations[0]?.sessionPolicy).toBe("reuse");
+    expect(asset.payload.relations[0]?.description).toBe("Lead sends review requests to worker");
+  });
+
+  it("rejects legacy act participant and relation fields", () => {
+    expect(() =>
+      parseActAsset({
+        kind: "act",
+        urn: "act/@acme/workflows/review-pipeline",
+        payload: {
+          participants: [
+            {
+              id: "lead",
+              performer: "performer/@acme/agent-presets/reviewer",
+            },
+          ],
+          relations: [],
+        },
+      }),
+    ).toThrow("payload.participants[0].id is not supported");
+
+    expect(() =>
+      parseActAsset({
+        kind: "act",
+        urn: "act/@acme/workflows/review-pipeline",
+        payload: {
+          participants: [
+            {
+              key: "lead",
+              performer: "performer/@acme/agent-presets/reviewer",
+              activeDances: ["dance/@acme/frontend-skills/code-review"],
+            },
+          ],
+          relations: [],
+        },
+      }),
+    ).toThrow("payload.participants[0].activeDances is not supported");
+
+    expect(() =>
+      parseActAsset({
+        kind: "act",
+        urn: "act/@acme/workflows/review-pipeline",
+        payload: {
+          participants: [
+            {
+              key: "lead",
+              performer: "performer/@acme/agent-presets/reviewer",
+            },
+          ],
+          relations: [
+            {
+              between: ["lead", "lead"],
+              direction: "one-way",
+              name: "review_request",
+              description: "Lead self-review",
+              maxCalls: 10,
+            },
+          ],
+        },
+      }),
+    ).toThrow("payload.relations[0].maxCalls is not supported");
   });
 
   it("projects compact registry metadata from an asset", () => {
     const asset = parseDotAsset({
-      $schema: DANCE_ASSET_SCHEMA,
       kind: "dance",
-      urn: "dance/@acme/code-review",
+      urn: "dance/@acme/frontend-skills/code-review",
       tags: ["review", "quality"],
       payload: {
+        name: "code-review",
+        description: "Code review skill",
         content: "# skill.md",
       },
     });
 
     expect(projectRegistryMetadata(asset)).toEqual({
-      urn: "dance/@acme/code-review",
+      urn: "dance/@acme/frontend-skills/code-review",
       kind: "dance",
-      author: "@acme",
-      slug: "code-review",
+      owner: "@acme",
+      name: "code-review",
       tags: ["review", "quality"],
     });
   });

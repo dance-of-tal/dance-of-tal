@@ -1,29 +1,31 @@
 import fs from "fs/promises";
 import { assetFilePath } from "./registry.js";
-import { getRegistryPackage } from "./installer.js";
+import { getRegistryPackage, REGISTRY_URL } from "./registry-api.js";
 import { isAssetKind } from "./kinds.js";
 import { parseActAsset, parsePerformerAsset } from "../contracts/index.js";
 
-const REGISTRY_URL =
-    process.env.DOT_REGISTRY_URL || "https://registry.dance-of-tal.workers.dev";
-
-export type PublishableKind = "tal" | "dance" | "performer" | "act";
+export type PublishableKind = "tal" | "performer" | "act";
 
 export type DependencyInfo = {
     urn: string;
-    status: "exists" | "to_publish" | "foreign_missing";
+    status: "exists" | "to_publish" | "foreign_missing" | "local_missing";
     payload?: Record<string, unknown>;
 };
 
-export function parseUrn(urn: string): { kind: PublishableKind; author: string; name: string } | null {
+export function parseUrn(urn: string): { kind: PublishableKind; owner: string; stage: string; name: string } | null {
     const parts = urn.split("/");
-    if (parts.length !== 3 || !parts[1].startsWith("@") || !isAssetKind(parts[0])) {
+    if (parts.length !== 4 || !parts[1].startsWith("@") || !isAssetKind(parts[0])) {
+        return null;
+    }
+    const kind = parts[0] as string;
+    if (kind !== "tal" && kind !== "performer" && kind !== "act") {
         return null;
     }
     return {
-        kind: parts[0] as PublishableKind,
-        author: parts[1].slice(1),
-        name: parts[2],
+        kind: kind as PublishableKind,
+        owner: parts[1].slice(1),
+        stage: parts[2],
+        name: parts[3],
     };
 }
 
@@ -34,7 +36,7 @@ export async function existsInRegistry(urn: string): Promise<boolean> {
     }
 
     try {
-        await getRegistryPackage(parsed.kind, parsed.author, parsed.name);
+        await getRegistryPackage(parsed.kind, parsed.owner, parsed.stage, parsed.name);
         return true;
     } catch {
         return false;
@@ -79,9 +81,6 @@ export function extractDependencyUrns(kind: string, payload: Record<string, unkn
         const act = parseActAsset(payload);
         for (const participant of act.payload.participants) {
             urns.push(participant.performer);
-            for (const danceUrn of participant.activeDances || []) {
-                urns.push(danceUrn);
-            }
         }
     }
 
@@ -98,22 +97,18 @@ export async function resolveDependencies(
     const visited = new Set<string>();
 
     async function resolve(urn: string): Promise<void> {
-        if (visited.has(urn)) {
-            return;
-        }
+        if (visited.has(urn)) return;
         visited.add(urn);
 
         const parsed = parseUrn(urn);
-        if (!parsed) {
-            return;
-        }
+        if (!parsed) return;
 
         if (await existsInRegistry(urn)) {
             result.push({ urn, status: "exists" });
             return;
         }
 
-        const isMine = parsed.author.toLowerCase() === myUsername.toLowerCase();
+        const isMine = parsed.owner.toLowerCase() === myUsername.toLowerCase();
         if (!isMine) {
             result.push({ urn, status: "foreign_missing" });
             return;
@@ -121,7 +116,7 @@ export async function resolveDependencies(
 
         const depPayload = await loadLocalAssetByUrn(cwd, urn);
         if (!depPayload) {
-            result.push({ urn, status: "foreign_missing" });
+            result.push({ urn, status: "local_missing" });
             return;
         }
 
@@ -143,7 +138,8 @@ export async function resolveDependencies(
 
 export async function publishSingleAsset(
     kind: PublishableKind,
-    slug: string,
+    stage: string,
+    name: string,
     payload: Record<string, unknown>,
     tags: string[],
     token: string
@@ -154,7 +150,7 @@ export async function publishSingleAsset(
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ kind, name: slug, tags, payload }),
+        body: JSON.stringify({ kind, stage, name, tags, payload }),
     });
 
     if (!res.ok) {

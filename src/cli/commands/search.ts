@@ -1,8 +1,8 @@
 import { Command } from "commander";
 import { ui } from "../utils/ui.js";
 import { ASSET_KINDS, isAssetKind } from "../../lib/kinds.js";
-import { searchRegistry } from "../../lib/installer.js";
-import type { RegistryPackageMeta } from "../../lib/installer.js";
+import { searchRegistry } from "../../lib/registry-api.js";
+import type { RegistryPackageMeta } from "../../lib/registry-api.js";
 
 const ASSET_KIND_HELP = ASSET_KINDS.join(" | ");
 
@@ -10,6 +10,7 @@ export const searchCmd = new Command("search")
     .description("Search the global registry for assets by keyword")
     .argument("<keyword>", "Keyword to search for (matches URN, name, author, description, tags)")
     .option("--kind <kind>", `Filter by kind: ${ASSET_KIND_HELP}`)
+    .option("--tag <tag>", "Filter by tag")
     .action(async (keyword: string, options) => {
         console.log(ui.title(`Searching registry for: "${keyword}"`));
 
@@ -21,6 +22,7 @@ export const searchCmd = new Command("search")
         try {
             const results = await searchRegistry(keyword, {
                 kind: options.kind,
+                tag: options.tag,
                 limit: 50,
             });
 

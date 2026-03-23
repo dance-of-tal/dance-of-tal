@@ -1,7 +1,7 @@
 {
   "name": "dance-of-tal",
-  "version": "3.3.0",
-  "description": "Dance of Tal — Agent Manager for Agentic AI. MCP server and CLI for managing AI agent personas, rules, and workflows.",
+  "version": "4.0.0",
+  "description": "Dance of Tal — Agent Manager for Agentic AI. CLI for managing AI agent personas, rules, and workflows.",
   "license": "MIT",
   "author": "monarchjuno",
   "repository": {
@@ -18,22 +18,25 @@
     "LICENSE"
   ],
   "keywords": [
-    "mcp",
-    "model-context-protocol",
     "agent-manager",
     "agentic-ai",
     "persona",
-    "prompt-engineering"
+    "prompt-engineering",
+    "agent-skills"
   ],
   "type": "module",
   "exports": {
-    ".": {
-      "types": "./dist/server/index.d.ts",
-      "default": "./dist/server/index.js"
-    },
     "./lib/registry": {
       "types": "./dist/lib/registry.d.ts",
       "default": "./dist/lib/registry.js"
+    },
+    "./lib/registry-api": {
+      "types": "./dist/lib/registry-api.d.ts",
+      "default": "./dist/lib/registry-api.js"
+    },
+    "./lib/dependency-resolver": {
+      "types": "./dist/lib/dependency-resolver.d.ts",
+      "default": "./dist/lib/dependency-resolver.js"
     },
     "./lib/installer": {
       "types": "./dist/lib/installer.d.ts",
@@ -42,6 +45,10 @@
     "./lib/publishing": {
       "types": "./dist/lib/publishing.d.ts",
       "default": "./dist/lib/publishing.js"
+    },
+    "./lib/auth": {
+      "types": "./dist/lib/auth.d.ts",
+      "default": "./dist/lib/auth.js"
     },
     "./lib/kinds": {
       "types": "./dist/lib/kinds.d.ts",
@@ -57,23 +64,21 @@
     }
   },
   "bin": {
-    "dance-of-tal": "dist/server/index.js",
     "dot": "dist/cli/dot.js"
   },
   "scripts": {
-    "dev": "tsx src/server/index.ts",
-    "build": "tsup src/server/index.ts src/cli/dot.ts src/lib/registry.ts src/lib/installer.ts src/lib/publishing.ts src/lib/kinds.ts src/data/types.ts src/contracts/index.ts --format esm --out-dir dist --dts --clean",
+    "build": "tsup src/cli/dot.ts src/lib/registry.ts src/lib/registry-api.ts src/lib/dependency-resolver.ts src/lib/installer.ts src/lib/publishing.ts src/lib/auth.ts src/lib/kinds.ts src/data/types.ts src/contracts/index.ts --format esm --out-dir dist --dts --clean",
     "release": "npm run build && npm publish",
     "test": "vitest run",
     "lint": "eslint 'src/**/*.{ts,tsx}'",
     "prepublishOnly": "npm run build",
-    "start": "node dist/server/index.js",
     "cli:dot": "tsx src/cli/dot.ts"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.17.5",
     "commander": "^14.0.3",
-    "open": "^11.0.0"
+    "gray-matter": "^4.0.3",
+    "open": "^11.0.0",
+    "simple-git": "^3.27.0"
   },
   "devDependencies": {
     "@types/node": "^22.10.5",

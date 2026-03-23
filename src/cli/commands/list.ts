@@ -2,8 +2,8 @@ import { Command } from "commander";
 import { ui } from "../utils/ui.js";
 import { getAuthUser } from "./login.js";
 import { ASSET_KINDS, isAssetKind } from "../../lib/kinds.js";
-import { listRegistryPackages } from "../../lib/installer.js";
-import type { RegistryPackageMeta } from "../../lib/installer.js";
+import { listRegistryPackages } from "../../lib/registry-api.js";
+import type { RegistryPackageMeta } from "../../lib/registry-api.js";
 
 const ASSET_KIND_HELP = ASSET_KINDS.join(" | ");
 
@@ -11,6 +11,7 @@ export const listCmd = new Command("list")
     .description("List packages from the registry")
     .option("--mine", "Show only packages published by the logged-in user")
     .option("--kind <kind>", `Filter by kind: ${ASSET_KIND_HELP}`)
+    .option("--stage <stage>", "Filter by stage/project group")
     .action(async (options) => {
         try {
             if (options.kind && !isAssetKind(options.kind)) {
@@ -35,15 +36,20 @@ export const listCmd = new Command("list")
 
             const allPackages = await listRegistryPackages({ kinds });
 
-            // Filter by author if --mine
-            const filtered = username
-                ? allPackages.filter((p) => p.author === username)
+            // Filter by owner if --mine
+            let filtered = username
+                ? allPackages.filter((p) => p.owner === username)
                 : allPackages;
+
+            // Filter by stage if --stage
+            if (options.stage) {
+                filtered = filtered.filter((p) => p.stage === options.stage);
+            }
 
             if (filtered.length === 0) {
                 if (username) {
                     console.log(ui.warning(`\nNo packages found for @${username}.`));
-                    console.log(ui.dim("Publish your first asset with: dot publish --kind tal --name <slug>"));
+                    console.log(ui.dim("Publish your first asset with: dot publish --kind tal --stage <stage> --name <name>"));
                 } else {
                     console.log(ui.warning("\nNo packages found in registry."));
                 }

@@ -1,29 +1,22 @@
 import { ui } from "../utils/ui.js";
-import { installActWithDependencies, installAsset, installPerformerWithDeps } from "../../lib/installer.js";
+import { installAsset } from "../../lib/installer.js";
+import { installActWithDependencies, installPerformerWithDeps } from "../../lib/dependency-resolver.js";
+import { reportInstall } from "../../lib/registry-api.js";
 import { isAssetKind } from "../../lib/kinds.js";
 import { getGlobalCwd, getGlobalDotDir } from "../../lib/registry.js";
 
-/**
- * Resolves the target cwd based on --global flag.
- *   -g / --global → DANCE_OF_TAL_HOME or os.homedir()
- *   default       → process.cwd() (project-local)
- */
 function resolveCwd(global?: boolean): string {
     if (global) return getGlobalCwd();
     return process.cwd();
 }
 
-/**
- * CLI adapter for install.
- * Delegates to shared core (lib/installer), adds console.log UX.
- */
 export async function runInstall(pkg: string, options?: { global?: boolean }) {
     const parts = pkg.split("/");
-    if (parts.length !== 3 || !parts[1].startsWith("@")) {
+    if (parts.length !== 4 || !parts[1].startsWith("@")) {
         throw new Error(
             `Invalid URN format: '${pkg}'\n` +
-            `  Expected: <kind>/@<author>/<name>\n` +
-            `  Example:  tal/@acme/system-architect`
+            `  Expected: <kind>/@<owner>/<stage>/<name>\n` +
+            `  Example:  tal/@acme/agent-presets/system-architect`
         );
     }
 
@@ -47,6 +40,11 @@ export async function runInstall(pkg: string, options?: { global?: boolean }) {
         const newCount = result.installedAssets.filter(a => !a.skipped).length;
         const skipCount = result.installedAssets.filter(a => a.skipped).length;
 
+        // Report installs for non-skipped assets
+        for (const asset of result.installedAssets) {
+            if (!asset.skipped) await reportInstall(asset.urn);
+        }
+
         console.log(ui.success(`\n✔ Installed ${newCount} asset(s), skipped ${skipCount}. [${scopeLabel}]`));
         console.log(
             "\n" +
@@ -66,12 +64,18 @@ export async function runInstall(pkg: string, options?: { global?: boolean }) {
             );
         }
         console.log(ui.success(`\n✔ Installed ${dependencyAssets.filter((asset) => !asset.skipped).length} unique dependencies for act. [${scopeLabel}]`));
+
+        // Report installs for non-skipped assets
+        for (const asset of result.installedAssets) {
+            if (!asset.skipped) await reportInstall(asset.urn);
+        }
     } else {
         // Single asset (tal, dance)
         const result = await installAsset(cwd, pkg);
         if (result.skipped) {
             console.log(ui.dim(`  Already installed: ${pkg}`));
         } else {
+            await reportInstall(pkg);
             console.log(ui.success(`\n✔ Installed ${pkg} [${scopeLabel}]`));
             console.log(ui.dim(`  Saved to: ${result.filePath}`));
         }

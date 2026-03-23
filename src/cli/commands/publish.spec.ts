@@ -3,7 +3,8 @@ import os from "os";
 import path from "path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { assetFilePath, initRegistry } from "../../lib/registry.js";
-import { loadPublishPayload, resolveDependencies, resolveTagsOption } from "./publish.js";
+import { loadPublishPayload, resolveTagsOption } from "./publish.js";
+import { resolveDependencies } from "../../lib/publishing.js";
 
 async function writeAsset(cwd: string, urn: string, payload: Record<string, unknown>) {
   const filePath = assetFilePath(cwd, urn);
@@ -25,19 +26,18 @@ describe("publish helpers", () => {
   });
 
   it("loads performer assets from the authored namespace path", async () => {
-    await writeAsset(cwd, "performer/@monarchjuno/smoke-performer", {
-      $schema: "https://schemas.danceoftal.com/assets/performer.v1.json",
+    await writeAsset(cwd, "performer/@monarchjuno/agent-presets/smoke-performer", {
       kind: "performer",
-      urn: "performer/@monarchjuno/smoke-performer",
+      urn: "performer/@monarchjuno/agent-presets/smoke-performer",
       description: "Smoke performer",
       tags: ["review"],
       payload: {
-        tal: "tal/@monarchjuno/reviewer",
+        tal: "tal/@monarchjuno/agent-presets/reviewer",
       },
     });
 
-    const payload = await loadPublishPayload(cwd, "performer", "smoke-performer", "monarchjuno");
-    expect(payload.urn).toBe("performer/@monarchjuno/smoke-performer");
+    const payload = await loadPublishPayload(cwd, "performer", "agent-presets", "smoke-performer", "monarchjuno");
+    expect(payload.urn).toBe("performer/@monarchjuno/agent-presets/smoke-performer");
     expect(payload.tags).toEqual(["review"]);
   });
 
@@ -46,32 +46,20 @@ describe("publish helpers", () => {
       new Response("{}", { status: 404, headers: { "Content-Type": "application/json" } })
     );
 
-    await writeAsset(cwd, "tal/@monarchjuno/reviewer-tal", {
-      $schema: "https://schemas.danceoftal.com/assets/tal.v1.json",
+    await writeAsset(cwd, "tal/@monarchjuno/agent-presets/reviewer-tal", {
       kind: "tal",
-      urn: "tal/@monarchjuno/reviewer-tal",
+      urn: "tal/@monarchjuno/agent-presets/reviewer-tal",
       tags: ["tal"],
       payload: {
         content: "tal content",
       },
     });
-    await writeAsset(cwd, "dance/@monarchjuno/reviewer-dance", {
-      $schema: "https://schemas.danceoftal.com/assets/dance.v1.json",
-      kind: "dance",
-      urn: "dance/@monarchjuno/reviewer-dance",
-      tags: ["dance"],
-      payload: {
-        content: "dance content",
-      },
-    });
-    await writeAsset(cwd, "performer/@monarchjuno/reviewer", {
-      $schema: "https://schemas.danceoftal.com/assets/performer.v1.json",
+    await writeAsset(cwd, "performer/@monarchjuno/agent-presets/reviewer", {
       kind: "performer",
-      urn: "performer/@monarchjuno/reviewer",
+      urn: "performer/@monarchjuno/agent-presets/reviewer",
       tags: ["performer"],
       payload: {
-        tal: "tal/@monarchjuno/reviewer-tal",
-        dances: ["dance/@monarchjuno/reviewer-dance"],
+        tal: "tal/@monarchjuno/agent-presets/reviewer-tal",
       },
     });
 
@@ -79,17 +67,15 @@ describe("publish helpers", () => {
       cwd,
       "act",
       {
-        $schema: "https://schemas.danceoftal.com/assets/act.v1.json",
         kind: "act",
-        urn: "act/@monarchjuno/smoke-act",
+        urn: "act/@monarchjuno/workflows/smoke-act",
         description: "test act",
         tags: [],
         payload: {
           participants: [
             {
-              id: "worker",
-              performer: "performer/@monarchjuno/reviewer",
-              activeDances: ["dance/@monarchjuno/reviewer-dance"],
+              key: "worker",
+              performer: "performer/@monarchjuno/agent-presets/reviewer",
             },
           ],
           relations: [],
@@ -99,9 +85,8 @@ describe("publish helpers", () => {
     );
 
     expect(deps.filter((dep) => dep.status === "to_publish").map((dep) => dep.urn)).toEqual([
-      "tal/@monarchjuno/reviewer-tal",
-      "dance/@monarchjuno/reviewer-dance",
-      "performer/@monarchjuno/reviewer",
+      "tal/@monarchjuno/agent-presets/reviewer-tal",
+      "performer/@monarchjuno/agent-presets/reviewer",
     ]);
   });
 

@@ -3,7 +3,6 @@ export type {
   ActAssetV1 as ActAsset,
   ActParticipantSubscriptionsV1,
   ActParticipantV1,
-  ActRelationPermissionsV1,
   ActRelationV1,
   DanceAssetPayloadV1,
   DanceAssetV1 as DanceAsset,

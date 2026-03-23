@@ -9,7 +9,7 @@ describe("registry asset safety", () => {
 
     beforeEach(() => {
         cwd = fs.mkdtempSync(path.join(os.tmpdir(), "dot-test-"));
-        fs.mkdirSync(path.join(cwd, ".dance-of-tal", "assets", "performer", "@acme"), { recursive: true });
+        fs.mkdirSync(path.join(cwd, ".dance-of-tal", "assets", "performer", "@acme", "workflows"), { recursive: true });
     });
 
     afterEach(() => {
@@ -17,34 +17,38 @@ describe("registry asset safety", () => {
     });
 
     it("resolves asset file path for performer URN", () => {
-        const filePath = assetFilePath(cwd, "performer/@acme/sprint");
-        expect(filePath).toContain(path.join(".dance-of-tal", "assets", "performer", "@acme", "sprint.json"));
+        const filePath = assetFilePath(cwd, "performer/@acme/workflows/sprint");
+        expect(filePath).toContain(path.join(".dance-of-tal", "assets", "performer", "@acme", "workflows", "sprint.json"));
+    });
+
+    it("resolves asset file path for dance URN (SKILL.md directory)", () => {
+        const filePath = assetFilePath(cwd, "dance/@acme/frontend-skills/code-review");
+        expect(filePath).toContain(path.join(".dance-of-tal", "assets", "dance", "@acme", "frontend-skills", "code-review", "SKILL.md"));
     });
 
     it("reads installed performer asset from assets directory", async () => {
         const performerAsset = {
-            $schema: "https://schemas.danceoftal.com/assets/performer.v1.json",
             kind: "performer",
-            urn: "performer/@acme/sprint",
+            urn: "performer/@acme/workflows/sprint",
             description: "Sprint performer",
             tags: ["sprint"],
             payload: {
-                tal: "tal/@acme/system-architect",
-                dances: ["dance/@acme/json-structure"],
+                tal: "tal/@acme/agent-presets/system-architect",
+                dances: ["dance/@acme/frontend-skills/json-structure"],
             },
         };
-        const filePath = assetFilePath(cwd, "performer/@acme/sprint");
+        const filePath = assetFilePath(cwd, "performer/@acme/workflows/sprint");
         fs.mkdirSync(path.dirname(filePath), { recursive: true });
         fs.writeFileSync(filePath, JSON.stringify(performerAsset, null, 2));
 
-        const result = await readAsset(cwd, "performer/@acme/sprint");
+        const result = await readAsset(cwd, "performer/@acme/workflows/sprint");
         expect(result).toBeTruthy();
         expect((result as any).kind).toBe("performer");
-        expect((result as any).payload.tal).toBe("tal/@acme/system-architect");
+        expect((result as any).payload.tal).toBe("tal/@acme/agent-presets/system-architect");
     });
 
     it("returns null for missing assets", async () => {
-        const result = await readAsset(cwd, "performer/@acme/nonexistent");
+        const result = await readAsset(cwd, "performer/@acme/workflows/nonexistent");
         expect(result).toBeNull();
     });
 });

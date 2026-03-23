@@ -6,12 +6,6 @@ import { getDotDir, assetFilePath } from "../../lib/registry.js";
 import { getAuthUser } from "./login.js";
 import { CREATABLE_ASSET_KINDS, isCreatableAssetKind } from "../../lib/kinds.js";
 import type { CreatableAssetKind } from "../../lib/kinds.js";
-import {
-    ACT_ASSET_SCHEMA,
-    DANCE_ASSET_SCHEMA,
-    PERFORMER_ASSET_SCHEMA,
-    TAL_ASSET_SCHEMA,
-} from "../../contracts/index.js";
 
 const CREATABLE_KIND_HELP = CREATABLE_ASSET_KINDS.join(", ");
 
@@ -31,24 +25,12 @@ function defaultTalMarkdown(): string {
     ].join("\n");
 }
 
-function defaultDanceMarkdown(): string {
-    return [
-        "# Goal",
-        "Describe when and how this skill should be applied.",
-        "",
-        "## Output Style",
-        "- ...",
-        "",
-        "## Constraints",
-        "- ...",
-    ].join("\n");
-}
 
-function buildTalTemplate(author: string, slug: string, description: string): Record<string, unknown> {
+
+function buildTalTemplate(owner: string, stage: string, name: string, description: string): Record<string, unknown> {
     return {
-        $schema: TAL_ASSET_SCHEMA,
         kind: "tal",
-        urn: `tal/@${author}/${slug}`,
+        urn: `tal/@${owner}/${stage}/${name}`,
         description,
         tags: [],
         payload: {
@@ -57,24 +39,10 @@ function buildTalTemplate(author: string, slug: string, description: string): Re
     };
 }
 
-function buildDanceTemplate(author: string, slug: string, description: string): Record<string, unknown> {
+function buildActTemplate(owner: string, stage: string, name: string, description: string): Record<string, unknown> {
     return {
-        $schema: DANCE_ASSET_SCHEMA,
-        kind: "dance",
-        urn: `dance/@${author}/${slug}`,
-        description,
-        tags: [],
-        payload: {
-            content: defaultDanceMarkdown(),
-        },
-    };
-}
-
-function buildActTemplate(slug: string, description: string, author: string): Record<string, unknown> {
-    return {
-        $schema: ACT_ASSET_SCHEMA,
         kind: "act",
-        urn: `act/@${author}/${slug}`,
+        urn: `act/@${owner}/${stage}/${name}`,
         description,
         tags: [],
         payload: {
@@ -83,43 +51,38 @@ function buildActTemplate(slug: string, description: string, author: string): Re
             ],
             participants: [
                 {
-                    id: "lead",
-                    performer: `performer/@${author}/your-lead`,
+                    key: "lead",
+                    performer: `performer/@${owner}/${stage}/your-lead`,
                     subscriptions: {
                         callboardKeys: ["shared/*"]
                     }
                 },
                 {
-                    id: "worker",
-                    performer: `performer/@${author}/your-worker`
+                    key: "worker",
+                    performer: `performer/@${owner}/${stage}/your-worker`
                 }
             ],
             relations: [
                 {
-                    id: "lead-worker-review",
                     between: ["lead", "worker"],
                     direction: "one-way",
                     name: "review_request",
                     description: "Lead coordinates, worker executes.",
-                    maxCalls: 10,
-                    timeout: 300,
-                    sessionPolicy: "reuse",
                 }
             ],
         },
     };
 }
 
-function buildPerformerTemplate(author: string, slug: string, description: string): Record<string, unknown> {
+function buildPerformerTemplate(owner: string, stage: string, name: string, description: string): Record<string, unknown> {
     return {
-        $schema: PERFORMER_ASSET_SCHEMA,
         kind: "performer",
-        urn: `performer/@${author}/${slug}`,
+        urn: `performer/@${owner}/${stage}/${name}`,
         description,
         tags: [],
         payload: {
-            tal: `tal/@${author}/your-tal`,
-            dances: [`dance/@${author}/your-dance`],
+            tal: `tal/@${owner}/${stage}/your-tal`,
+            dances: [`dance/@${owner}/${stage}/your-dance`],
             model: {
                 provider: "anthropic",
                 modelId: "claude-sonnet-4",
@@ -140,8 +103,9 @@ function buildPerformerTemplate(author: string, slug: string, description: strin
 export const createCmd = new Command("create")
     .description("Create a new asset locally (publish later with: dot publish)")
     .requiredOption("--kind <kind>", `Asset type: ${CREATABLE_KIND_HELP}`)
-    .requiredOption("--name <slug>", "Asset slug (e.g. my-custom-tal)")
-    .option("--author <author>", "Author namespace (defaults to logged-in GitHub username)")
+    .requiredOption("--name <slug>", "Asset name (e.g. my-custom-tal)")
+    .requiredOption("--stage <stage>", "Stage/project group (e.g. agent-presets)")
+    .option("--author <author>", "Owner namespace (defaults to logged-in GitHub username)")
     .option("--description <description>", "Short description")
     .action(async (options) => {
         console.log(ui.title("Creating Asset"));
@@ -153,24 +117,36 @@ export const createCmd = new Command("create")
             }
             const typedKind: CreatableAssetKind = kind;
 
-            const slug = options.name as string;
-            if (!/^[a-z0-9][a-z0-9._-]{1,98}[a-z0-9]$/.test(slug)) {
+            // Dance creates a SKILL.md directory, not a JSON file
+            if (typedKind === "dance") {
                 throw new Error(
-                    `Invalid slug '${slug}'. Use lowercase letters, numbers, hyphens, dots only (2-100 chars).`
+                    "Dance assets use SKILL.md format. Use 'dot init dance' to scaffold a new Dance skill."
                 );
             }
 
-            // Resolve author: --author flag > logged-in GitHub username
-            let author = options.author as string | undefined;
-            if (!author) {
+            const name = options.name as string;
+            if (!/^[a-z0-9][a-z0-9._-]{1,98}[a-z0-9]$/.test(name)) {
+                throw new Error(
+                    `Invalid name '${name}'. Use lowercase letters, numbers, hyphens, dots only (2-100 chars).`
+                );
+            }
+
+            const stage = options.stage as string;
+            if (!/^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$/.test(stage)) {
+                throw new Error(`Invalid stage '${stage}'.`);
+            }
+
+            // Resolve owner: --author flag > logged-in GitHub username
+            let owner = options.author as string | undefined;
+            if (!owner) {
                 const auth = await getAuthUser();
                 if (auth) {
-                    author = auth.username;
+                    owner = auth.username;
                 } else {
                     throw new Error(
                         `No author specified.\n` +
                         `  Option 1: dot login  (uses your GitHub username automatically)\n` +
-                        `  Option 2: dot create --author <name> --kind ${typedKind} --name ${slug}`
+                        `  Option 2: dot create --author <name> --kind ${typedKind} --stage ${stage} --name ${name}`
                     );
                 }
             }
@@ -181,7 +157,7 @@ export const createCmd = new Command("create")
                 throw new Error("Workspace not initialised. Run 'dot init' first.");
             }
 
-            const urn = `${typedKind}/@${author}/${slug}`;
+            const urn = `${typedKind}/@${owner}/${stage}/${name}`;
             const filePath = assetFilePath(cwd, urn);
             if (fs.existsSync(filePath)) {
                 throw new Error(
@@ -190,14 +166,13 @@ export const createCmd = new Command("create")
                 );
             }
 
-            const humanName = slug.replace(/-/g, " ").replace(/\b\w/g, (c: string) => c.toUpperCase());
+            const humanName = name.replace(/-/g, " ").replace(/\b\w/g, (c: string) => c.toUpperCase());
             const description = options.description || `Asset for ${humanName}`;
 
             let template: Record<string, unknown>;
-            if (typedKind === "tal") template = buildTalTemplate(author, slug, description);
-            else if (typedKind === "dance") template = buildDanceTemplate(author, slug, description);
-            else if (typedKind === "performer") template = buildPerformerTemplate(author, slug, description);
-            else template = buildActTemplate(slug, description, author);
+            if (typedKind === "tal") template = buildTalTemplate(owner, stage, name, description);
+            else if (typedKind === "performer") template = buildPerformerTemplate(owner, stage, name, description);
+            else template = buildActTemplate(owner, stage, name, description);
 
             fs.mkdirSync(path.dirname(filePath), { recursive: true });
             fs.writeFileSync(filePath, JSON.stringify(template, null, 2), "utf-8");
@@ -205,7 +180,7 @@ export const createCmd = new Command("create")
             console.log(ui.success(`\n✔ Created ${urn}`));
             console.log(ui.dim(`  Saved to: ${filePath}`));
             console.log(ui.dim(`\n  Edit the file to customise, then publish:`));
-            console.log(ui.dim(`    dot publish --kind ${typedKind} --name ${slug}`));
+            console.log(ui.dim(`    dot publish --kind ${typedKind} --stage ${stage} --name ${name}`));
 
 
         } catch (err: any) {
