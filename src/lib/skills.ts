@@ -66,11 +66,10 @@ export async function discoverSkills(rootDir: string): Promise<DiscoveredSkill[]
         skills.push(...found);
     }
 
-    // 3. Recursive fallback (maxDepth=5)
-    if (skills.length === 0) {
-        const found = await discoverRecursive(rootDir, rootDir, seen, 0, 5);
-        skills.push(...found);
-    }
+    // 3. Always recurse into subdirs to find additional skills (maxDepth=5)
+    // The `seen` set prevents duplicates from root / priority-dir discoveries.
+    const found = await discoverRecursive(rootDir, rootDir, seen, 0, 5);
+    skills.push(...found);
 
     return skills;
 }
@@ -179,7 +178,11 @@ async function tryParseSkillMd(
             ...(typeof data.metadata === "object" && data.metadata !== null
                 ? { metadata: data.metadata as Record<string, string> }
                 : {}),
-            ...(typeof data["allowed-tools"] === "string" ? { allowedTools: data["allowed-tools"] } : {}),
+            ...(typeof data["allowed-tools"] === "string"
+                ? { allowedTools: data["allowed-tools"] }
+                : Array.isArray(data["allowed-tools"])
+                    ? { allowedTools: (data["allowed-tools"] as unknown[]).filter((v): v is string => typeof v === "string").join(", ") || undefined }
+                    : {}),
         };
     } catch {
         return null;

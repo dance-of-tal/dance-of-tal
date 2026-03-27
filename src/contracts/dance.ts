@@ -55,11 +55,16 @@ export type DanceAssetPayloadV1 = {
 
 export type DanceAssetV1 = DotAssetBase<"dance", DanceAssetPayloadV1>;
 
-const SKILL_NAME_RE = /^[a-z0-9](?:[a-z0-9-]{0,62}[a-z0-9])?$/;
+
 
 /**
  * Parses SKILL.md raw content into DanceSkillMeta.
  * Uses gray-matter for YAML frontmatter extraction.
+ *
+ * Follows agentskills.io lenient validation:
+ * - Only `name` and `description` are required (throw if missing)
+ * - All other fields: extract if valid type, silently ignore otherwise
+ * - Custom/unknown frontmatter fields are tolerated
  */
 export function parseDanceFromSkillMd(raw: string): DanceSkillMeta {
   const { data, content } = matter(raw);
@@ -67,20 +72,8 @@ export function parseDanceFromSkillMd(raw: string): DanceSkillMeta {
   if (!isNonEmptyString(data.name)) {
     throw new Error("SKILL.md frontmatter must include a non-empty 'name' field");
   }
-  if (!SKILL_NAME_RE.test(data.name)) {
-    throw new Error(
-      `SKILL.md name '${data.name}' is invalid. Must be 1-64 lowercase chars, hyphens only, no leading/trailing/consecutive hyphens.`
-    );
-  }
-  if (data.name.length > 64) {
-    throw new Error("SKILL.md name must be at most 64 characters");
-  }
-
   if (!isNonEmptyString(data.description)) {
     throw new Error("SKILL.md frontmatter must include a non-empty 'description' field");
-  }
-  if ((data.description as string).length > 1024) {
-    throw new Error("SKILL.md description must be at most 1024 characters");
   }
 
   const result: DanceSkillMeta = {
@@ -90,38 +83,28 @@ export function parseDanceFromSkillMd(raw: string): DanceSkillMeta {
     tags: [],
   };
 
-  if (data.license !== undefined) {
-    if (typeof data.license !== "string") {
-      throw new Error("SKILL.md license must be a string when provided");
-    }
+  // Optional fields — extract if valid, ignore otherwise (never throw)
+  if (typeof data.license === "string") {
     result.license = data.license;
   }
-
-  if (data.compatibility !== undefined) {
-    if (typeof data.compatibility !== "string") {
-      throw new Error("SKILL.md compatibility must be a string when provided");
-    }
-    if (data.compatibility.length > 500) {
-      throw new Error("SKILL.md compatibility must be at most 500 characters");
-    }
+  if (typeof data.compatibility === "string") {
     result.compatibility = data.compatibility;
   }
-
-  if (data.metadata !== undefined) {
-    if (typeof data.metadata !== "object" || data.metadata === null || Array.isArray(data.metadata)) {
-      throw new Error("SKILL.md metadata must be a key-value object when provided");
-    }
+  if (typeof data.metadata === "object" && data.metadata !== null && !Array.isArray(data.metadata)) {
     result.metadata = data.metadata as Record<string, string>;
   }
 
-  // Extract tags from metadata: tags, tag, keywords, keyword, category
+  // Extract tags from metadata
   result.tags = extractTags(data.metadata as Record<string, unknown> | undefined);
 
-  if (data["allowed-tools"] !== undefined) {
-    if (typeof data["allowed-tools"] !== "string") {
-      throw new Error("SKILL.md allowed-tools must be a string when provided");
-    }
+  // allowed-tools: accept string (spec) or array (common in practice)
+  if (typeof data["allowed-tools"] === "string") {
     result.allowedTools = data["allowed-tools"];
+  } else if (Array.isArray(data["allowed-tools"])) {
+    const items = (data["allowed-tools"] as unknown[]).filter(
+      (v): v is string => typeof v === "string",
+    );
+    if (items.length > 0) result.allowedTools = items.join(", ");
   }
 
   return result;

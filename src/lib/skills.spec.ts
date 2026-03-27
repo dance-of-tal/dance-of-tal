@@ -48,6 +48,17 @@ describe("root SKILL.md", () => {
         expect(skills[0].description).toBe("A root-level skill");
         expect(skills[0].relativePath).toBe("");
     });
+
+    it("discovers root AND subdirectory skills together", async () => {
+        writeSkillMd(tempDir, "root-skill", "Root");
+        writeSkillMd(path.join(tempDir, "canary"), "canary", "Canary skill");
+        writeSkillMd(path.join(tempDir, "guard"), "guard", "Guard skill");
+
+        const skills = await discoverSkills(tempDir);
+        expect(skills).toHaveLength(3);
+        const names = skills.map(s => s.name).sort();
+        expect(names).toEqual(["canary", "guard", "root-skill"]);
+    });
 });
 
 // -----------------------------------------------------------------------
@@ -154,6 +165,31 @@ describe("frontmatter parsing", () => {
         expect(skills[0].license).toBe("MIT");
         expect(skills[0].compatibility).toBe("Requires Node 18+");
         expect(skills[0].allowedTools).toBe("read_file, write_file");
+    });
+
+    it("accepts array-style allowed-tools (YAML list)", async () => {
+        const dir = path.join(tempDir, "skills", "arr-tools");
+        fs.mkdirSync(dir, { recursive: true });
+        fs.writeFileSync(
+            path.join(dir, "SKILL.md"),
+            [
+                "---",
+                "name: arr-tools",
+                "description: Skill with array allowed-tools",
+                "allowed-tools:",
+                "  - Bash",
+                "  - Read",
+                "  - AskUserQuestion",
+                "---",
+                "",
+                "# Instructions",
+                "Do something.",
+            ].join("\n"),
+        );
+
+        const skills = await discoverSkills(tempDir);
+        expect(skills).toHaveLength(1);
+        expect(skills[0].allowedTools).toBe("Bash, Read, AskUserQuestion");
     });
 
     it("extracts tags from metadata", async () => {
