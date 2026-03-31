@@ -6,11 +6,10 @@ import fs from "fs/promises";
 import { isAssetKind } from "../../lib/kinds.js";
 import readline from "readline";
 import {
+    buildPublishPlan,
+    executePublishPlan,
     getPayloadTags,
     loadLocalAssetByUrn,
-    parseUrn,
-    publishSingleAsset,
-    resolveDependencies,
 } from "../../lib/publishing.js";
 import { parseDotAsset } from "../../contracts/index.js";
 
@@ -131,15 +130,23 @@ export const publishCmd = new Command("publish")
 
             const tagsArray = resolveTagsOption(options.tags, payload);
             const mainUrn = `${options.kind}/@${auth.username}/${stage}/${name}`;
+            const plan = await buildPublishPlan({
+                cwd,
+                username: auth.username,
+                root: {
+                    kind: options.kind,
+                    urn: mainUrn,
+                    payload,
+                    tags: tagsArray,
+                },
+            });
 
             if (options.kind === "performer" || options.kind === "act") {
                 console.log(ui.dim("\nResolving dependencies..."));
-                const deps = await resolveDependencies(cwd, options.kind, payload, auth.username);
-
-                const toPublish = deps.filter((dep) => dep.status === "to_publish");
-                const foreignMissing = deps.filter((dep) => dep.status === "foreign_missing");
-                const localMissing = deps.filter((dep) => dep.status === "local_missing");
-                const existing = deps.filter((dep) => dep.status === "exists");
+                const toPublish = plan.dependencies.filter((dep) => dep.status === "to_publish");
+                const foreignMissing = plan.dependencies.filter((dep) => dep.status === "foreign_missing");
+                const localMissing = plan.dependencies.filter((dep) => dep.status === "local_missing");
+                const existing = plan.dependencies.filter((dep) => dep.status === "exists");
 
                 if (existing.length > 0) {
                     console.log(ui.dim(`  Already in registry: ${existing.map((dep) => dep.urn).join(", ")}`));
@@ -173,22 +180,26 @@ export const publishCmd = new Command("publish")
                         console.log(ui.dim("  Cancelled."));
                         return;
                     }
-
-                    for (const dep of toPublish) {
-                        const parsed = parseUrn(dep.urn);
-                        if (!parsed || !dep.payload) continue;
-                        parseDotAsset(dep.payload);
-                        console.log(ui.dim(`  Publishing ${dep.urn}...`));
-                        const depTags = getPayloadTags(dep.payload);
-                        const published = await publishSingleAsset(parsed.kind, parsed.stage, parsed.name, dep.payload, depTags, auth.token);
-                        console.log(published ? ui.success(`  ✔ ${dep.urn}`) : ui.dim(`  ⏭ ${dep.urn} already exists, skipped`));
-                    }
                 }
             }
 
-            console.log(ui.dim(`\nPublishing ${mainUrn}...`));
-            const published = await publishSingleAsset(options.kind, stage, name, payload, tagsArray, auth.token);
-            if (published) {
+            const result = await executePublishPlan(plan, auth.token, {
+                onPublishStart(entry) {
+                    console.log(ui.dim(`\nPublishing ${entry.urn}...`));
+                },
+                onPublishComplete(entry, status) {
+                    if (entry.urn === plan.root.urn) {
+                        return;
+                    }
+                    console.log(
+                        status === "published"
+                            ? ui.success(`  ✔ ${entry.urn}`)
+                            : ui.dim(`  ⏭ ${entry.urn} already exists, skipped`),
+                    );
+                },
+            });
+
+            if (result.rootPublished) {
                 console.log(ui.success(`\n✔ Published ${mainUrn}`));
             } else {
                 console.log(ui.warning(`\n⏭ ${mainUrn} already exists in the registry. Skipped.`));

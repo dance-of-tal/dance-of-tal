@@ -34,6 +34,10 @@ export interface AuthUser {
     username: string;
 }
 
+type StoredAuthUser = AuthUser & {
+    expiresAt?: number;
+};
+
 export type LoginResult =
     | { started: true; alreadyRunning: false; alreadyAuthenticated: false; authUrl: string; browserOpened: boolean }
     | { started: false; alreadyRunning: true; alreadyAuthenticated: false; authUrl: string; browserOpened: false }
@@ -45,6 +49,32 @@ function getAuthFilePath(): string {
     return path.join(getGlobalDotDir(), "auth.json");
 }
 
+function decodeJwtPayload(token: string): Record<string, unknown> | null {
+    const parts = token.split(".");
+    if (parts.length !== 3) {
+        return null;
+    }
+
+    try {
+        const payload = Buffer.from(parts[1], "base64url").toString("utf-8");
+        const parsed = JSON.parse(payload);
+        return parsed && typeof parsed === "object" ? parsed as Record<string, unknown> : null;
+    } catch {
+        return null;
+    }
+}
+
+function resolveTokenExpiry(payload: Record<string, unknown>): number | null {
+    if (typeof payload.exp !== "number" || !Number.isFinite(payload.exp)) {
+        return null;
+    }
+    return payload.exp;
+}
+
+function isExpiredEpochSeconds(expiresAt: number): boolean {
+    return expiresAt <= Math.floor(Date.now() / 1000);
+}
+
 /**
  * Read the current auth user from disk.
  * Returns null if not logged in or the token is invalid.
@@ -52,9 +82,22 @@ function getAuthFilePath(): string {
 export async function readAuthUser(): Promise<AuthUser | null> {
     try {
         const raw = await fs.readFile(getAuthFilePath(), "utf-8");
-        const parsed = JSON.parse(raw);
+        const parsed = JSON.parse(raw) as Partial<StoredAuthUser>;
         if (!parsed?.token || !parsed?.username) return null;
-        return { token: String(parsed.token), username: String(parsed.username) };
+
+        const token = String(parsed.token);
+        const username = String(parsed.username);
+        const expiresAt =
+            typeof parsed.expiresAt === "number" && Number.isFinite(parsed.expiresAt)
+                ? parsed.expiresAt
+                : resolveTokenExpiry(decodeJwtPayload(token) || {});
+
+        if (typeof expiresAt === "number" && isExpiredEpochSeconds(expiresAt)) {
+            await clearAuthUser();
+            return null;
+        }
+
+        return { token, username };
     } catch {
         return null;
     }
@@ -63,10 +106,15 @@ export async function readAuthUser(): Promise<AuthUser | null> {
 /**
  * Persist a token + username to `~/.dance-of-tal/auth.json`.
  */
-export async function saveAuthToken(token: string, username: string): Promise<void> {
+export async function saveAuthToken(token: string, username: string, expiresAt?: number): Promise<void> {
     const authFile = getAuthFilePath();
     await fs.mkdir(path.dirname(authFile), { recursive: true });
-    await fs.writeFile(authFile, JSON.stringify({ token, username }, null, 2), "utf-8");
+    const payload: StoredAuthUser = {
+        token,
+        username,
+        ...(typeof expiresAt === "number" && Number.isFinite(expiresAt) ? { expiresAt } : {}),
+    };
+    await fs.writeFile(authFile, JSON.stringify(payload, null, 2), "utf-8");
 }
 
 /**
@@ -239,7 +287,11 @@ export async function startLogin(): Promise<LoginResult> {
                     throw new Error("Could not determine GitHub username from token.");
                 }
 
-                await saveAuthToken(data.access_token, username);
+                const expiresAt =
+                    typeof data.expires_at === "number" && Number.isFinite(data.expires_at)
+                        ? data.expires_at
+                        : undefined;
+                await saveAuthToken(data.access_token, username, expiresAt);
                 res.end(`<script>
                     document.body.innerHTML="<h2 style='color:green;font-family:sans-serif;text-align:center;margin-top:50px'>Authentication Successful! You can safely close this window.</h2>";
                     setTimeout(()=>window.close(),3000);
