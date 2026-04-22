@@ -99,7 +99,7 @@ export const updateCmd = new Command("update")
                         const destDir = danceAssetDir(cwd, item.urn);
                         const srcDir = path.dirname(skill.skillMdPath);
 
-                        copySkillDir(srcDir, destDir);
+                        copySkillDir(srcDir, destDir, { repoRoot: tempDir });
 
                         // Update tree SHA
                         const skillFolderHash = await getGitHubTreeSha(

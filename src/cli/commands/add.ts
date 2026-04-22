@@ -99,7 +99,8 @@ async function discoverAndFilterSkills(
 async function installSkillsLocally(
     skills: DiscoveredSkill[],
     parsedSource: ReturnType<typeof parseSource>,
-    stage: string
+    stage: string,
+    repoRoot: string,
 ): Promise<void> {
     const cwd = process.cwd();
     await ensureDotDir(cwd);
@@ -111,7 +112,7 @@ async function installSkillsLocally(
         const destDir = danceAssetDir(cwd, urn);
         const srcDir = path.dirname(skill.skillMdPath);
 
-        copySkillDir(srcDir, destDir);
+        copySkillDir(srcDir, destDir, { repoRoot });
 
         const skillFolderHash = await getGitHubTreeSha(
             parsedSource.owner,
@@ -183,7 +184,7 @@ export const addCmd = new Command("add")
                     console.log(ui.dim(`\n  Installing all ${skills.length} skill(s)...\n`));
                 }
 
-                await installSkillsLocally(skills, parsed, stage);
+                await installSkillsLocally(skills, parsed, stage, tempDir);
                 console.log(ui.success(`\n✔ Added ${skills.length} Dance skill(s) from ${source}`));
             } finally {
                 await cleanup();

@@ -125,11 +125,10 @@ async function installDanceAsset(
         }
 
         // Copy entire skill bundle (SKILL.md + any sibling scripts/, references/, assets/ dirs)
-        copySkillDir(srcDir, targetDir);
+        copySkillDir(srcDir, targetDir, { repoRoot: tempDir });
     } finally {
         await cleanup();
     }
 
     return { urn, filePath: skillMdPath, skipped: false };
 }
-

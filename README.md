@@ -47,7 +47,7 @@ dot add monarchjuno/sprint-reviewer
 ```
 
 You're actually manually copying prompts across repositories? Wild.
-`dot add` pulls standard Dance skills straight from GitHub. Prompts, MCPs, and system context—all securely packaged into a URN. You touch nothing.
+`dot add` pulls standard Dance skills straight from GitHub. Prompts, MCPs, and system context—all securely packaged into a URN. Repo-local shared folders, including symlinked `assets/`, `references/`, and `scripts/`, are copied into the installed bundle. You touch nothing.
 
 ## Choreography that actually works
 
