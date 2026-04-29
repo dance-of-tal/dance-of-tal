@@ -1,10 +1,9 @@
 import { Command } from "commander";
-import fs from "fs";
 import path from "path";
 import { ui } from "../utils/ui.js";
 import { parseSource, getOwnerRepo } from "../../lib/source-parser.js";
 import { shallowClone } from "../../lib/git-fetcher.js";
-import { discoverSkills } from "../../lib/skills.js";
+import { discoverSkills, toRepoPath } from "../../lib/skills.js";
 import { readPluginManifest } from "../../lib/plugin-manifest.js";
 import { upsertSkillLockEntry } from "../../lib/skill-lock.js";
 import { getGitHubTreeSha } from "../../lib/sync.js";
@@ -31,6 +30,7 @@ async function autoRegisterInRegistry(
     parsed: ReturnType<typeof parseSource>,
 ): Promise<void> {
     const ownerRepo = getOwnerRepo(parsed.url);
+    const resourcePath = toRepoPath(skill.relativePath);
 
     try {
         const res = await fetch(`${REGISTRY_URL}/assets/dance`, {
@@ -46,7 +46,7 @@ async function autoRegisterInRegistry(
                 resource: {
                     type: "github",
                     repo: ownerRepo,
-                    path: skill.relativePath,
+                    path: resourcePath,
                     ref: parsed.ref || "main",
                 },
             }),

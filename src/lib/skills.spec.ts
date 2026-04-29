@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import fs from "fs";
 import path from "path";
 import os from "os";
-import { discoverSkills } from "./skills.js";
+import { discoverSkills, toRepoPath } from "./skills.js";
 
 let tempDir: string;
 
@@ -98,6 +98,13 @@ describe("priority directories", () => {
         const skills = await discoverSkills(tempDir);
         expect(skills).toHaveLength(1);
         expect(skills[0].description).toBe("First"); // priority dir wins
+    });
+});
+
+describe("repo paths", () => {
+    it("normalizes Windows separators to GitHub repo separators", () => {
+        expect(toRepoPath("skills\\pdf")).toBe("skills/pdf");
+        expect(toRepoPath("skills\\output-formats\\financial-report")).toBe("skills/output-formats/financial-report");
     });
 });
 

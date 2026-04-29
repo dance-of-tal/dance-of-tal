@@ -42,6 +42,10 @@ const PRIORITY_DIRS = [
     "packages/skills",
 ] as const;
 
+export function toRepoPath(value: string): string {
+    return value.replace(/\\/g, "/");
+}
+
 /**
  * Discovers all valid SKILL.md files in a directory.
  * 1. Checks priority directories first
@@ -171,7 +175,7 @@ async function tryParseSkillMd(
             description: data.description,
             tags: extractTags(data.metadata as Record<string, unknown> | undefined),
             skillMdPath,
-            relativePath: path.relative(rootDir, dir),
+            relativePath: toRepoPath(path.relative(rootDir, dir)),
             rawContent,
             ...(typeof data.license === "string" ? { license: data.license } : {}),
             ...(typeof data.compatibility === "string" ? { compatibility: data.compatibility } : {}),
@@ -188,4 +192,3 @@ async function tryParseSkillMd(
         return null;
     }
 }
-
