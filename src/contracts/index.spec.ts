@@ -153,6 +153,60 @@ describe("dot contracts", () => {
     ).toThrow("payload.relations[0].maxCalls is not supported");
   });
 
+  it("rejects legacy top-level $schema fields on canonical assets", () => {
+    expect(() =>
+      parseTalAsset({
+        $schema: "https://schemas.danceoftal.com/assets/tal.v1.json",
+        kind: "tal",
+        urn: "tal/@acme/agent-presets/senior-backend",
+        payload: {
+          content: "# agent.md",
+        },
+      }),
+    ).toThrow("$schema is not supported in canonical assets");
+
+    expect(() =>
+      parsePerformerAsset({
+        $schema: "https://schemas.danceoftal.com/assets/performer.v1.json",
+        kind: "performer",
+        urn: "performer/@acme/agent-presets/reviewer",
+        payload: {
+          tal: "tal/@acme/agent-presets/senior-backend",
+        },
+      }),
+    ).toThrow("$schema is not supported in canonical assets");
+
+    expect(() =>
+      parseActAsset({
+        $schema: "https://schemas.danceoftal.com/assets/act.v1.json",
+        kind: "act",
+        urn: "act/@acme/workflows/review-pipeline",
+        payload: {
+          participants: [
+            {
+              key: "lead",
+              performer: "performer/@acme/agent-presets/reviewer",
+            },
+          ],
+          relations: [],
+        },
+      }),
+    ).toThrow("$schema is not supported in canonical assets");
+
+    expect(() =>
+      parseDotAsset({
+        $schema: "https://schemas.danceoftal.com/assets/dance.v1.json",
+        kind: "dance",
+        urn: "dance/@acme/frontend-skills/code-review",
+        payload: {
+          name: "code-review",
+          description: "Code review skill",
+          content: "# skill.md",
+        },
+      }),
+    ).toThrow("$schema is not supported in canonical assets");
+  });
+
   it("projects compact registry metadata from an asset", () => {
     const asset = parseDotAsset({
       kind: "dance",

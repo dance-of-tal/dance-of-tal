@@ -139,6 +139,9 @@ export function assertBaseAssetShape<K extends DotAssetKind>(
   if (!isRecord(input)) {
     throw new Error("asset must be an object");
   }
+  if ("$schema" in input) {
+    throw new Error("$schema is not supported in canonical assets");
+  }
   if (input.kind !== kind) {
     throw new Error(`kind must be '${kind}'`);
   }

@@ -157,6 +157,9 @@ export function parseDanceAsset(input: unknown): DanceAssetV1 {
     throw new Error("asset must be an object");
   }
   const obj = input as Record<string, unknown>;
+  if ("$schema" in obj) {
+    throw new Error("$schema is not supported in canonical assets");
+  }
   if (obj.kind !== "dance") {
     throw new Error("kind must be 'dance'");
   }
